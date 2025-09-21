@@ -142,20 +142,13 @@ export async function middleware(request: NextRequest) {
       url.searchParams.set("message", "account_restricted")
       return NextResponse.redirect(url)
     }
-
-    if (isRootRoute && profile.status === "approved") {
-      console.log("[v0] Middleware - Redirecting approved user to pricing page")
-      const url = request.nextUrl.clone()
-      url.pathname = "/pricing"
-      return NextResponse.redirect(url)
-    }
   }
 
   // Handle approved users trying to access pending page
   if (request.nextUrl.pathname === "/pending" && profile?.status === "approved") {
     console.log("[v0] Middleware - Redirecting approved user away from pending page")
     const url = request.nextUrl.clone()
-    url.pathname = "/pricing"
+    url.pathname = "/"
     return NextResponse.redirect(url)
   }
 

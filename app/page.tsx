@@ -27,7 +27,7 @@ import GeneratorControls from "@/components/GeneratorControls"
 import { Badge } from "@/components/ui/badge"
 import { useAuth } from "@/hooks/use-auth"
 import { ThemeToggle } from "@/components/theme-toggle"
-import { AccountPending } from "@/components/auth/account-pending" // Import the new AccountPending component
+import { AccountPending } from "@/components/auth/account-pending" // Import the new Account Pending component
 
 const CustomModal = dynamic(() => import("@/components/CustomModal"), {
   loading: () => null,
@@ -348,6 +348,14 @@ export default function Home() {
     resolutionDpis,
   } = dataState
 
+  // Moved useEffect to the top to fix lint/correctness/useHookAtTopLevel
+  useEffect(() => {
+    if (!loading && !user) {
+      router.replace("/auth")
+    }
+  }, [loading, user, router])
+
+  // The rest of the component logic follows
   useEffect(() => {
     let mounted = true
 
@@ -1611,12 +1619,22 @@ export default function Home() {
     [showModal],
   )
 
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-400 mx-auto mb-4"></div>
+          <p className="text-blue-100">Loading...</p>
+        </div>
+      </div>
+    )
+  }
+
   if (user && profile && profile.status === "pending") {
     return <AccountPending />
   }
 
-  if (user && !profile && !loading) {
-    // Changed from !isLoading to !loading
+  if (user && !profile) {
     return <AccountPending />
   }
 
@@ -1715,107 +1733,82 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-900 text-white relative overflow-hidden">
       <NavigationHeader />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main className="container mx-auto px-4 py-8">
         <div className="space-y-8">
-          {!user ? (
-            <div className="text-center py-16">
-              <h1 className="text-4xl font-bold text-slate-900 dark:text-slate-100 mb-4">User Agent Generator</h1>
-              <p className="text-xl text-slate-600 dark:text-slate-400 mb-8">
-                Generate authentic user agents for iOS, Android, and Pixel devices
-              </p>
-              <Button asChild size="lg">
-                <Link href="/auth">Get Started</Link>
-              </Button>
-            </div>
-          ) : canUseGenerator ? (
-            <>
-              <AppHeader />
-              <GeneratorControls
-                platform={platform}
-                setPlatform={setPlatform}
-                appType={appType}
-                setAppType={setAppType}
-                quantity={quantity}
-                setQuantity={setQuantity}
-                isGenerating={isGenerating}
-                onGenerate={handleGenerate}
-              />
-              {userAgents.length > 0 && (
-                <Card className="bg-white/20 dark:bg-slate-800/20 backdrop-blur-xl border border-white/30 dark:border-slate-700/30 shadow-2xl">
-                  <CardHeader className="bg-gradient-to-r from-green-500/10 to-emerald-500/10 backdrop-blur-sm">
-                    <CardTitle className="flex items-center justify-between">
-                      <span className="text-slate-900 dark:text-slate-100">
-                        Generated User Agents ({userAgents.length})
-                      </span>
-                      <div className="flex gap-2">
+          <AppHeader />
+          <GeneratorControls
+            platform={platform}
+            setPlatform={setPlatform}
+            appType={appType}
+            setAppType={setAppType}
+            quantity={quantity}
+            setQuantity={setQuantity}
+            onGenerate={handleGenerate}
+            isGenerating={isGenerating}
+          />
+          {userAgents.length > 0 && (
+            <Card className="bg-white/20 dark:bg-slate-800/20 backdrop-blur-xl border border-white/30 dark:border-slate-700/30 shadow-2xl">
+              <CardHeader className="bg-gradient-to-r from-green-500/10 to-emerald-500/10 backdrop-blur-sm">
+                <CardTitle className="flex items-center justify-between">
+                  <span className="text-slate-900 dark:text-slate-100">
+                    Generated User Agents ({userAgents.length})
+                  </span>
+                  <div className="flex gap-2">
+                    <Button
+                      onClick={handleCopyAll}
+                      variant="outline"
+                      size="sm"
+                      className="bg-white/20 dark:bg-slate-700/20 backdrop-blur-md border-white/30 dark:border-slate-600/30"
+                    >
+                      <Copy className="w-4 h-4 mr-2" />
+                      Copy All
+                    </Button>
+                    <Button
+                      onClick={handleDownload}
+                      variant="outline"
+                      size="sm"
+                      className="bg-white/20 dark:bg-slate-700/20 backdrop-blur-md border-white/30 dark:border-slate-600/30"
+                    >
+                      <Download className="w-4 h-4 mr-2" />
+                      Download
+                    </Button>
+                  </div>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="max-h-96 overflow-y-auto">
+                <div className="space-y-2">
+                  {userAgents.map((ua, index) => (
+                    <div
+                      key={index}
+                      className="p-3 bg-slate-50/20 dark:bg-slate-700/20 backdrop-blur-sm rounded-lg border border-slate-200/30 dark:border-slate-600/30 hover:bg-slate-100/30 dark:hover:bg-slate-700/30 transition-colors"
+                    >
+                      <div className="flex items-center justify-between gap-2">
+                        <code className="text-sm text-slate-700 dark:text-slate-300 flex-1 break-all">{ua}</code>
                         <Button
-                          onClick={handleCopyAll}
-                          variant="outline"
+                          onClick={() => handleCopy(ua, index)}
+                          variant="ghost"
                           size="sm"
-                          className="bg-white/20 dark:bg-slate-700/20 backdrop-blur-md border-white/30 dark:border-slate-600/30"
+                          className="shrink-0 bg-white/10 backdrop-blur-sm hover:bg-white/20"
                         >
-                          <Copy className="w-4 h-4 mr-2" />
-                          Copy All
-                        </Button>
-                        <Button
-                          onClick={handleDownload}
-                          variant="outline"
-                          size="sm"
-                          className="bg-white/20 dark:bg-slate-700/20 backdrop-blur-md border-white/30 dark:border-slate-600/30"
-                        >
-                          <Download className="w-4 h-4 mr-2" />
-                          Download
+                          {copiedIndex === index ? (
+                            <Check className="w-4 h-4 text-green-600" />
+                          ) : (
+                            <Copy className="w-4 h-4" />
+                          )}
                         </Button>
                       </div>
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="max-h-96 overflow-y-auto">
-                    <div className="space-y-2">
-                      {userAgents.map((ua, index) => (
-                        <div
-                          key={index}
-                          className="p-3 bg-slate-50/20 dark:bg-slate-700/20 backdrop-blur-sm rounded-lg border border-slate-200/30 dark:border-slate-600/30 hover:bg-slate-100/30 dark:hover:bg-slate-700/30 transition-colors"
-                        >
-                          <div className="flex items-center justify-between gap-2">
-                            <code className="text-sm text-slate-700 dark:text-slate-300 flex-1 break-all">{ua}</code>
-                            <Button
-                              onClick={() => handleCopy(ua, index)}
-                              variant="ghost"
-                              size="sm"
-                              className="shrink-0 bg-white/10 backdrop-blur-sm hover:bg-white/20"
-                            >
-                              {copiedIndex === index ? (
-                                <Check className="w-4 h-4 text-green-600" />
-                              ) : (
-                                <Copy className="w-4 h-4" />
-                              )}
-                            </Button>
-                          </div>
-                        </div>
-                      ))}
                     </div>
-                  </CardContent>
-                </Card>
-              )}
-              <GeneratedAgentsHistory />
-            </>
-          ) : (
-            <div className="text-center py-16">
-              <div className="p-4 bg-amber-100 dark:bg-amber-900/30 rounded-full w-fit mx-auto mb-6">
-                <Clock className="h-12 w-12 text-amber-600 dark:text-amber-400" />
-              </div>
-              <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-100 mb-4">আক্সেস সীমিত</h2>
-              <p className="text-slate-600 dark:text-slate-400 mb-8">আপনার অ্যাকাউন্ট সীমিত। সাপোর্টের সাথে যোগাযোগ করুন।</p>
-              <Button asChild>
-                <Link href="/pricing">View Pricing Plans</Link>
-              </Button>
-            </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
           )}
+          <GeneratedAgentsHistory />
         </div>
-      </div>
+      </main>
 
       {/* Progress Modal */}
       {progressModal.isOpen && (

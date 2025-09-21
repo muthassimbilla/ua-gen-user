@@ -128,10 +128,7 @@ export function AuthForm() {
           setError(`লগইনে সমস্যা: ${error.message}`)
         }
       } else {
-        setSuccess("লগইন সফল! রিডাইরেক্ট হচ্ছে...")
-        setTimeout(() => {
-          router.push("/")
-        }, 1000)
+        router.push("/")
       }
     } catch (err) {
       console.error("Signin exception:", err)
