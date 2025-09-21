@@ -58,6 +58,11 @@ const loadSupabaseModules = async () => {
   if (supabaseModulesCache) return supabaseModulesCache
 
   try {
+    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+      console.warn("[v0] Supabase environment variables not available, using mock data")
+      return null
+    }
+
     const module = await import("@/lib/supabase")
     supabaseModulesCache = {
       DeviceModel: module.DeviceModel,
@@ -348,6 +353,15 @@ export default function Home() {
 
     const initializeSupabase = async () => {
       try {
+        if (
+          typeof window !== "undefined" &&
+          (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)
+        ) {
+          console.warn("[v0] Supabase environment variables not available")
+          setConnectionError("Supabase configuration not available")
+          return
+        }
+
         const modules = await loadSupabaseModules()
         if (mounted) {
           setSupabaseModules(modules)

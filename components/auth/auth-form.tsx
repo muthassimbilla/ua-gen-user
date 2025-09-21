@@ -19,6 +19,7 @@ export function AuthForm() {
   const [error, setError] = useState("")
   const [success, setSuccess] = useState("")
   const [activeTab, setActiveTab] = useState("signin")
+  const [emailWarnings, setEmailWarnings] = useState<string[]>([])
   const router = useRouter()
 
   const { signUp, signIn, resetPassword, signInWithMagicLink } = useAuth()
@@ -39,6 +40,13 @@ export function AuthForm() {
       [e.target.name]: e.target.value,
     }))
     setError("")
+
+    if (e.target.name === "email" && e.target.value) {
+      const validation = validateGmailEmail(e.target.value)
+      setEmailWarnings(validation.warnings || [])
+    } else if (e.target.name === "email") {
+      setEmailWarnings([])
+    }
   }
 
   const handleSignUp = async (e: React.FormEvent) => {
@@ -46,7 +54,6 @@ export function AuthForm() {
     setIsLoading(true)
     setError("")
 
-    // Validate Gmail email
     const emailValidation = validateGmailEmail(formData.email)
     if (!emailValidation.isValid) {
       setError(emailValidation.error!)
@@ -54,14 +61,12 @@ export function AuthForm() {
       return
     }
 
-    // Validate password match
     if (formData.password !== formData.confirmPassword) {
       setError("পাসওয়ার্ড মিল নেই")
       setIsLoading(false)
       return
     }
 
-    // Validate password strength
     if (formData.password.length < 6) {
       setError("পাসওয়ার্ড কমপক্ষে ৬ অক্ষরের হতে হবে")
       setIsLoading(false)
@@ -104,7 +109,6 @@ export function AuthForm() {
     setIsLoading(true)
     setError("")
 
-    // Validate Gmail email
     const emailValidation = validateGmailEmail(formData.email)
     if (!emailValidation.isValid) {
       setError(emailValidation.error!)
@@ -142,7 +146,6 @@ export function AuthForm() {
     setIsLoading(true)
     setError("")
 
-    // Validate Gmail email
     const emailValidation = validateGmailEmail(formData.email)
     if (!emailValidation.isValid) {
       setError(emailValidation.error!)
@@ -171,7 +174,6 @@ export function AuthForm() {
     setIsLoading(true)
     setError("")
 
-    // Validate Gmail email
     const emailValidation = validateGmailEmail(formData.email)
     if (!emailValidation.isValid) {
       setError(emailValidation.error!)
@@ -223,6 +225,16 @@ export function AuthForm() {
           {success && (
             <Alert className="mb-4 border-green-200/50 bg-green-50/20 backdrop-blur-sm text-green-800 dark:text-green-200">
               <AlertDescription>{success}</AlertDescription>
+            </Alert>
+          )}
+
+          {emailWarnings.length > 0 && (
+            <Alert className="mb-4 border-yellow-200/50 bg-yellow-50/20 backdrop-blur-sm text-yellow-800 dark:text-yellow-200">
+              <AlertDescription>
+                {emailWarnings.map((warning, index) => (
+                  <div key={index}>⚠️ {warning}</div>
+                ))}
+              </AlertDescription>
             </Alert>
           )}
 

@@ -84,6 +84,10 @@ export async function POST(request: NextRequest) {
     const adminChatId = process.env.TELEGRAM_ADMIN_CHAT_ID || process.env.TELEGRAM_CHAT_ID
     const supportUsername = process.env.TELEGRAM_SUPPORT_USERNAME || "support"
 
+    console.log("[v0] Telegram - Sending invoice for transaction:", transactionId)
+    console.log("[v0] Telegram - Bot token configured:", !!botToken)
+    console.log("[v0] Telegram - Admin chat ID:", adminChatId)
+
     if (adminChatId) {
       const adminResponse = await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
         method: "POST",
@@ -122,7 +126,10 @@ export async function POST(request: NextRequest) {
       })
 
       if (!adminResponse.ok) {
-        console.error("Failed to send admin message:", await adminResponse.text())
+        const errorText = await adminResponse.text()
+        console.error("[v0] Telegram - Failed to send admin message:", errorText)
+      } else {
+        console.log("[v0] Telegram - Admin message sent successfully")
       }
     }
 
