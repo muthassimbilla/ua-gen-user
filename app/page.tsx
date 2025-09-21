@@ -5,11 +5,29 @@ import { useCallback } from "react"
 import { useState, useEffect, memo, startTransition } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Smartphone, Copy, Download, Loader2 } from "lucide-react"
+import {
+  Smartphone,
+  Copy,
+  Download,
+  Loader2,
+  Settings,
+  LogIn,
+  UserPlus,
+  LogOut,
+  Shield,
+  Clock,
+  Check,
+} from "lucide-react"
 import dynamic from "next/dynamic"
 import type { GenerationHistory } from "@/lib/supabase" // Declared the variable here
+import { useRouter } from "next/navigation" // Added useRouter import for logout redirect
+import Link from "next/link" // Import Link for navigation
 
 import GeneratorControls from "@/components/GeneratorControls"
+import { Badge } from "@/components/ui/badge"
+import { useAuth } from "@/hooks/use-auth"
+import { ThemeToggle } from "@/components/theme-toggle"
+import { AccountPending } from "@/components/auth/account-pending" // Import the new AccountPending component
 
 const CustomModal = dynamic(() => import("@/components/CustomModal"), {
   loading: () => null,
@@ -22,7 +40,7 @@ const ProgressModal = dynamic(() => import("@/components/ProgressModal"), {
 })
 
 const LoadingSkeleton = memo(() => (
-  <Card className="bg-white/60 dark:bg-slate-800/60 backdrop-blur-xl border border-white/30 dark:border-slate-700/30 shadow-2xl rounded-2xl">
+  <Card className="bg-white/10 dark:bg-slate-800/10 backdrop-blur-xl border border-white/20 dark:border-slate-700/20 shadow-2xl rounded-2xl">
     <CardContent className="p-8 text-center">
       <div className="relative">
         <div className="absolute inset-0 bg-gradient-to-r from-indigo-400/20 to-blue-400/20 rounded-full blur-xl"></div>
@@ -59,8 +77,6 @@ const loadSupabaseModules = async () => {
       PixelFacebookBuildNumber: module.PixelFacebookBuildNumber,
       PixelFacebookAppVersion: module.PixelFacebookAppVersion,
       PixelInstagramDeviceModel: module.PixelInstagramDeviceModel,
-      PixelInstagramBuildNumber: module.PixelInstagramBuildNumber,
-      PixelInstagramAppVersion: module.PixelInstagramAppVersion,
       PixelInstagramVersion: module.InstagramVersion,
       PixelInstagramChromeVersion: module.ChromeVersion,
       PixelInstagramResolutionDpi: module.ResolutionDpi,
@@ -94,7 +110,155 @@ const AppHeader = memo(() => (
 
 AppHeader.displayName = "AppHeader"
 
-export default function UserAgentGenerator() {
+const NavigationHeader = () => {
+  const { user, loading, isAuthenticated, profile, isAdmin, isPending, isApproved, signOut } = useAuth()
+  const router = useRouter()
+
+  const handleLogout = async () => {
+    console.log("[v0] Starting logout process...")
+    await signOut()
+    console.log("[v0] Logout completed, redirecting to auth...")
+    router.push("/auth")
+  }
+
+  if (loading) {
+    return (
+      <div className="absolute top-4 right-4 z-10">
+        <div className="flex gap-2">
+          <ThemeToggle />
+          <Button
+            variant="outline"
+            size="sm"
+            className="bg-white/10 backdrop-blur-md border-white/20 text-white"
+            disabled
+          >
+            <Loader2 className="w-4 h-4 animate-spin" />
+          </Button>
+        </div>
+      </div>
+    )
+  }
+
+  if (isAuthenticated && user) {
+    return (
+      <div className="absolute top-4 right-4 z-10">
+        <div className="flex items-center gap-3">
+          <div className="flex flex-col items-end gap-1">
+            <div className="flex items-center gap-2">
+              <span className="text-white/90 text-sm font-medium">{profile?.full_name || user.email}</span>
+              {isAdmin && (
+                <Badge
+                  variant="secondary"
+                  className="bg-yellow-500/20 backdrop-blur-md text-yellow-100 border-yellow-400/30"
+                >
+                  <Shield className="w-3 h-3 mr-1" />
+                  Admin
+                </Badge>
+              )}
+            </div>
+            <div className="flex items-center gap-2">
+              {isPending && (
+                <Badge
+                  variant="secondary"
+                  className="bg-orange-500/20 backdrop-blur-md text-orange-100 border-orange-400/30"
+                >
+                  <Clock className="w-3 h-3 mr-1" />
+                  অনুমোদনের অপেক্ষায়
+                </Badge>
+              )}
+              {isApproved && (
+                <Badge
+                  variant="secondary"
+                  className="bg-green-500/20 backdrop-blur-md text-green-100 border-green-400/30"
+                >
+                  ✓ অনুমোদিত
+                </Badge>
+              )}
+            </div>
+          </div>
+
+          <div className="flex gap-2">
+            <ThemeToggle />
+            {isAdmin && (
+              <Button
+                variant="outline"
+                size="sm"
+                className="bg-white/10 backdrop-blur-md border-white/20 text-white hover:bg-white/20"
+                onClick={() => (window.location.href = "/admin")}
+              >
+                <Settings className="w-4 h-4 mr-2" />
+                Admin
+              </Button>
+            )}
+            <Button
+              variant="outline"
+              size="sm"
+              className="bg-white/10 backdrop-blur-md border-white/20 text-white hover:bg-white/20"
+              onClick={handleLogout}
+            >
+              <LogOut className="w-4 h-4 mr-2" />
+              লগআউট
+            </Button>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="absolute top-4 right-4 z-10">
+      <div className="flex gap-2">
+        <ThemeToggle />
+        <Button
+          variant="outline"
+          size="sm"
+          className="bg-white/10 backdrop-blur-md border-white/20 text-white hover:bg-white/20"
+          onClick={() => (window.location.href = "/auth")}
+        >
+          <LogIn className="w-4 h-4 mr-2" />
+          লগইন
+        </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          className="bg-white/10 backdrop-blur-md border-white/20 text-white hover:bg-white/20"
+          onClick={() => (window.location.href = "/auth")}
+        >
+          <UserPlus className="w-4 h-4 mr-2" />
+          সাইন আপ
+        </Button>
+      </div>
+    </div>
+  )
+}
+
+// Placeholder for GeneratedAgentsHistory and UserAgentGenerator components
+const UserAgentGenerator = memo(() => {
+  // This component will be replaced by the actual implementation in the merged code
+  return <div className="text-center text-gray-500">User Agent Generator Component</div>
+})
+UserAgentGenerator.displayName = "UserAgentGenerator"
+
+const GeneratedAgentsHistory = memo(() => {
+  // This component will be replaced by the actual implementation in the merged code
+  return <div className="text-center text-gray-500">Generated Agents History Component</div>
+})
+GeneratedAgentsHistory.displayName = "GeneratedAgentsHistory"
+
+export default function Home() {
+  const {
+    user,
+    profile,
+    signOut,
+    loading,
+    isAuthenticated,
+    canUseGenerator,
+    needsApproval,
+    isAdmin,
+    isRejected,
+    isSuspended,
+  } = useAuth()
+  const router = useRouter()
   const [platform, setPlatform] = useState("")
   const [appType, setAppType] = useState("")
   // Changed default quantity to 1
@@ -107,7 +271,7 @@ export default function UserAgentGenerator() {
   // Added type annotation for history
   const [history, setHistory] = useState<GenerationHistory[]>([])
   const [isLoadingHistory, setIsLoadingHistory] = useState(false)
-  const [activeTab, setActiveTab] = useState<"generator">("generator")
+  const [activeTab, setActiveTab] = useState<"generator" | "history">("generator")
   const [connectionError, setConnectionError] = useState(null)
   const [accessKey, setAccessKey] = useState(null) // Added accessKey state
 
@@ -151,7 +315,7 @@ export default function UserAgentGenerator() {
   })
 
   const [allCopied, setAllCopied] = useState(false)
-  const [copiedIndex, setCopiedIndex] = useState(null)
+  const [copiedIndex, setCopiedIndex] = useState<number | null>(null)
 
   const [pixelFacebookDeviceModels, setPixelFacebookDeviceModels] = useState([])
   const [pixelFacebookBuildNumbers, setPixelFacebookBuildNumbers] = useState([])
@@ -1283,6 +1447,13 @@ export default function UserAgentGenerator() {
     setProgressModal,
   ])
 
+  const handleLogout = async () => {
+    console.log("[v0] Starting logout process...")
+    await signOut()
+    console.log("[v0] Logout completed, redirecting to auth...")
+    router.push("/auth")
+  }
+
   const addToBlacklist = async () => {
     if (!userAgents.length) return false
 
@@ -1412,91 +1583,142 @@ export default function UserAgentGenerator() {
     }
   }, [userAgents, showModal])
 
-  const copyToClipboard = useCallback((text, index) => {
-    navigator.clipboard.writeText(text)
-    setCopiedIndex(index)
-    setTimeout(() => setCopiedIndex(null), 2000)
-  }, [])
+  const handleCopy = useCallback(
+    async (text: string, index: number) => {
+      try {
+        await navigator.clipboard.writeText(text)
+        setCopiedIndex(index)
+        setTimeout(() => setCopiedIndex(null), 2000)
+      } catch (error) {
+        console.error("Error copying to clipboard:", error)
+        showModal("❌ Error!", "Error occurred while copying.", "error")
+      }
+    },
+    [showModal],
+  )
 
-  // Removed unused startTransition import
-  // Removed unused copyAllUserAgents and downloadUserAgents functions
-  // Removed unused handleGenerate function
-  // Removed unused copyToClipboard function
-  // Removed unused handleHistoryDownload and handleHistoryCopy functions
-  // Removed unused addToBlacklist function
-  // Removed unused handleDownload and handleCopyAll functions
-  // Removed unused accessKey state
-  // Removed unused currentHistoryId state
-  // Removed unused generationProgress state
-  // Removed unused isLoadingHistory state
-  // Removed unused connectionError state
-  // Removed unused modal state
-  // Removed unused progressModal state
-  // Removed unused dataState state
-  // Removed unused allCopied state
-  // Removed unused copiedIndex state
-  // Removed unused pixelFacebookDeviceModels state
-  // Removed unused pixelFacebookBuildNumbers state
-  // Removed unused pixelFacebookAppVersions state
-  // Removed unused pixelInstagramDeviceModels state
-  // Removed unused pixelInstagramVersions state
-  // Removed unused pixelInstagramChromeVersions state
-  // Removed unused pixelInstagramResolutionDpis state
-  // Removed unused deviceType state
-  // Removed unused supabaseModules state
-  // Removed unused isDataLoaded state
-  // Removed unused loadSupabaseModules function
-  // Removed unused loadData function
-  // Removed unused loadHistory function
-  // Removed unused showModal function
-  // Removed unused showProgressModal function
-  // Removed unused hideProgressModal function
-  // Removed unused parseIOSVersion function
-  // Removed unused compareVersions function
-  // Removed unused getRandomElement function
-  // Removed unused extractModelIdentifier function
-  // Removed unused getApiLevel function
-  // Removed unused generateAndroidInstagramUserAgent function
-  // Removed unused generateSamsungFacebookUserAgent function
-  // Removed unused generateAndroidUserAgent function
-  // Removed unused getWeightedRandomLanguage function
-  // Removed unused generatePixelUserAgent function
-  // Removed unused generatePixelInstagramUserAgent function
-  // Removed unused generateUserAgent function
-
-  // Added a beautiful header section
-  const headerStyle = {
-    background: "linear-gradient(to right, #6366F1, #8B5CFE, #3B82F6)",
-    color: "white",
+  if (user && profile && profile.status === "pending") {
+    return <AccountPending />
   }
 
-  return (
-    // Updated background gradient and removed overflow-hidden
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
-      <div className="relative overflow-hidden bg-gradient-to-r from-indigo-600 via-purple-600 to-blue-600 text-white">
-        <div className="absolute inset-0 bg-black/20"></div>
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-          <div className="text-center">
-            {/* Updated header text and styling */}
-            <h1 className="text-4xl md:text-6xl font-bold mb-4 text-balance">User Agent Generator</h1>
-            {/* Updated subtitle text and styling */}
-            <p className="text-xl md:text-2xl text-blue-100 max-w-3xl mx-auto text-pretty">
-              Generate authentic user agents for iOS, Android, and Pixel devices with Instagram and Facebook apps
+  if (user && !profile && !loading) {
+    // Changed from !isLoading to !loading
+    return <AccountPending />
+  }
+
+  const renderAuthStatus = () => {
+    if (!isAuthenticated) {
+      return (
+        <div className="mt-8">
+          <p className="text-blue-200 mb-4">আরও ফিচার এবং প্রিমিয়াম সার্ভিসের জন্য লগইন করুন</p>
+          <Button
+            size="lg"
+            className="bg-white/20 backdrop-blur-md text-white border border-white/30 hover:bg-white/30"
+            asChild // Use asChild for Link
+          >
+            <Link href="/auth">এখনই শুরু করুন</Link>
+          </Button>
+        </div>
+      )
+    }
+
+    if (needsApproval) {
+      return (
+        <div className="mt-8">
+          <div className="bg-orange-500/20 backdrop-blur-md border border-orange-400/30 rounded-lg p-4 max-w-md mx-auto">
+            <div className="flex items-center justify-center gap-2 text-orange-100 mb-2">
+              <Clock className="w-5 h-5" />
+              <span className="font-medium">অনুমোদনের অপেক্ষায়</span>
+            </div>
+            <p className="text-orange-200 text-sm">
+              আপনার অ্যাকাউন্ট admin দ্বারা অনুমোদনের অপেক্ষায় রয়েছে। অনুমোদনের পর আপনি সব ফিচার ব্যবহার করতে পারবেন।
+            </p>
+            <div className="mt-3 text-center">
+              <Button
+                variant="outline"
+                size="sm"
+                className="bg-white/10 border-white/20 text-white hover:bg-white/20"
+                asChild // Use asChild for Link
+              >
+                <Link href="/pricing">প্রাইসিং দেখুন</Link>
+              </Button>
+            </div>
+          </div>
+        </div>
+      )
+    }
+
+    if (isRejected) {
+      return (
+        <div className="mt-8">
+          <div className="bg-red-500/20 backdrop-blur-md border border-red-400/30 rounded-lg p-4 max-w-md mx-auto">
+            <div className="flex items-center justify-center gap-2 text-red-100 mb-2">
+              <span className="font-medium">অ্যাকাউন্ট প্রত্যাখ্যাত</span>
+            </div>
+            <p className="text-red-200 text-sm">
+              দুঃখিত, আপনার অ্যাকাউন্ট অনুমোদন করা হয়নি। আরও তথ্যের জন্য সাপোর্টের সাথে যোগাযোগ করুন।
             </p>
           </div>
         </div>
-      </div>
+      )
+    }
+
+    if (isSuspended) {
+      return (
+        <div className="mt-8">
+          <div className="bg-red-500/20 backdrop-blur-md border border-red-400/30 rounded-lg p-4 max-w-md mx-auto">
+            <div className="flex items-center justify-center gap-2 text-red-100 mb-2">
+              <span className="font-medium">অ্যাকাউন্ট স্থগিত</span>
+            </div>
+            <p className="text-red-200 text-sm">
+              আপনার অ্যাকাউন্ট সাময়িকভাবে স্থগিত করা হয়েছে। আরও তথ্যের জন্য সাপোর্টের সাথে যোগাযোগ করুন।
+            </p>
+          </div>
+        </div>
+      )
+    }
+
+    if (canUseGenerator) {
+      return (
+        <div className="mt-8">
+          <div className="bg-green-500/20 backdrop-blur-md border border-green-400/30 rounded-lg p-4 max-w-md mx-auto">
+            <div className="flex items-center justify-center gap-2 text-green-100 mb-2">
+              <Check className="w-5 h-5" />
+              <span className="font-medium">স্বাগতম, {profile?.full_name}!</span>
+            </div>
+            <p className="text-green-200 text-sm">আপনার অ্যাকাউন্ট অনুমোদিত। আপনি সব ফিচার ব্যবহার করতে পারেন।</p>
+            <div className="mt-2 text-center">
+              <Badge variant="secondary" className="bg-white/20 text-white">
+                Limit: {profile?.user_agent_limit || 10} per day
+              </Badge>
+            </div>
+          </div>
+        </div>
+      )
+    }
+
+    return null
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
+      <NavigationHeader />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="space-y-8">
-          <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border-0 shadow-2xl">
-            <CardContent className="p-0">
-              <nav className="flex rounded-lg overflow-hidden" role="tablist"></nav>
-            </CardContent>
-          </Card>
-
-          {activeTab === "generator" && (
-            <div className="space-y-8">
+          {!user ? (
+            <div className="text-center py-16">
+              <h1 className="text-4xl font-bold text-slate-900 dark:text-slate-100 mb-4">User Agent Generator</h1>
+              <p className="text-xl text-slate-600 dark:text-slate-400 mb-8">
+                Generate authentic user agents for iOS, Android, and Pixel devices
+              </p>
+              <Button asChild size="lg">
+                <Link href="/auth">Get Started</Link>
+              </Button>
+            </div>
+          ) : canUseGenerator ? (
+            <>
+              <AppHeader />
               <GeneratorControls
                 platform={platform}
                 setPlatform={setPlatform}
@@ -1505,24 +1727,21 @@ export default function UserAgentGenerator() {
                 quantity={quantity}
                 setQuantity={setQuantity}
                 isGenerating={isGenerating}
-                // Changed onGenerate prop to onGenerate={handleGenerate}
                 onGenerate={handleGenerate}
               />
-
               {userAgents.length > 0 && (
-                <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border-0 shadow-2xl">
-                  <CardHeader className="bg-gradient-to-r from-green-500/10 to-emerald-500/10">
+                <Card className="bg-white/20 dark:bg-slate-800/20 backdrop-blur-xl border border-white/30 dark:border-slate-700/30 shadow-2xl">
+                  <CardHeader className="bg-gradient-to-r from-green-500/10 to-emerald-500/10 backdrop-blur-sm">
                     <CardTitle className="flex items-center justify-between">
                       <span className="text-slate-900 dark:text-slate-100">
                         Generated User Agents ({userAgents.length})
                       </span>
                       <div className="flex gap-2">
-                        {/* Changed button text and removed unused props */}
                         <Button
                           onClick={handleCopyAll}
                           variant="outline"
                           size="sm"
-                          className="bg-white/70 dark:bg-slate-700/70 backdrop-blur-sm"
+                          className="bg-white/20 dark:bg-slate-700/20 backdrop-blur-md border-white/30 dark:border-slate-600/30"
                         >
                           <Copy className="w-4 h-4 mr-2" />
                           Copy All
@@ -1531,7 +1750,7 @@ export default function UserAgentGenerator() {
                           onClick={handleDownload}
                           variant="outline"
                           size="sm"
-                          className="bg-white/70 dark:bg-slate-700/70 backdrop-blur-sm"
+                          className="bg-white/20 dark:bg-slate-700/20 backdrop-blur-md border-white/30 dark:border-slate-600/30"
                         >
                           <Download className="w-4 h-4 mr-2" />
                           Download
@@ -1544,18 +1763,21 @@ export default function UserAgentGenerator() {
                       {userAgents.map((ua, index) => (
                         <div
                           key={index}
-                          className="p-3 bg-slate-50 dark:bg-slate-700/50 rounded-lg border border-slate-200 dark:border-slate-600 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
+                          className="p-3 bg-slate-50/20 dark:bg-slate-700/20 backdrop-blur-sm rounded-lg border border-slate-200/30 dark:border-slate-600/30 hover:bg-slate-100/30 dark:hover:bg-slate-700/30 transition-colors"
                         >
                           <div className="flex items-center justify-between gap-2">
                             <code className="text-sm text-slate-700 dark:text-slate-300 flex-1 break-all">{ua}</code>
-                            {/* Removed unused props and changed onClick handler */}
                             <Button
-                              onClick={() => copyToClipboard(ua, index)}
+                              onClick={() => handleCopy(ua, index)}
                               variant="ghost"
                               size="sm"
-                              className="shrink-0"
+                              className="shrink-0 bg-white/10 backdrop-blur-sm hover:bg-white/20"
                             >
-                              <Copy className="w-4 h-4" />
+                              {copiedIndex === index ? (
+                                <Check className="w-4 h-4 text-green-600" />
+                              ) : (
+                                <Copy className="w-4 h-4" />
+                              )}
                             </Button>
                           </div>
                         </div>
@@ -1564,6 +1786,18 @@ export default function UserAgentGenerator() {
                   </CardContent>
                 </Card>
               )}
+              <GeneratedAgentsHistory />
+            </>
+          ) : (
+            <div className="text-center py-16">
+              <div className="p-4 bg-amber-100 dark:bg-amber-900/30 rounded-full w-fit mx-auto mb-6">
+                <Clock className="h-12 w-12 text-amber-600 dark:text-amber-400" />
+              </div>
+              <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-100 mb-4">আক্সেস সীমিত</h2>
+              <p className="text-slate-600 dark:text-slate-400 mb-8">আপনার অ্যাকাউন্ট সীমিত। সাপোর্টের সাথে যোগাযোগ করুন।</p>
+              <Button asChild>
+                <Link href="/pricing">View Pricing Plans</Link>
+              </Button>
             </div>
           )}
         </div>
