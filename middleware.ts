@@ -1,169 +1,69 @@
-import { createServerClient } from "@supabase/ssr"
-import { NextResponse, type NextRequest } from "next/server"
+import { NextResponse } from "next/server"
+import type { NextRequest } from "next/server"
 
-export async function middleware(request: NextRequest) {
-  console.log("[v0] Middleware triggered for path:", request.nextUrl.pathname)
+// Rate limiting store (in production, use Redis)
+const rateLimitStore = new Map<string, { count: number; resetTime: number }>()
 
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+function getRateLimitKey(ip: string, path: string): string {
+  return `${ip}:${path}`
+}
 
-  if (!supabaseUrl || !supabaseAnonKey) {
-    console.warn("[v0] Middleware - Supabase environment variables not available, allowing all requests")
-    return NextResponse.next({
-      request,
-    })
+function isRateLimited(key: string, limit: number, windowMs: number): boolean {
+  const now = Date.now()
+  const record = rateLimitStore.get(key)
+
+  if (!record || now > record.resetTime) {
+    rateLimitStore.set(key, { count: 1, resetTime: now + windowMs })
+    return false
   }
 
-  let supabaseResponse = NextResponse.next({
-    request,
-  })
+  if (record.count >= limit) {
+    return true
+  }
 
-  const supabase = createServerClient(supabaseUrl, supabaseAnonKey, {
-    cookies: {
-      getAll() {
-        return request.cookies.getAll()
-      },
-      setAll(cookiesToSet) {
-        cookiesToSet.forEach(({ name, value, options }) => request.cookies.set(name, value))
-        supabaseResponse = NextResponse.next({
-          request,
-        })
-        cookiesToSet.forEach(({ name, value, options }) => supabaseResponse.cookies.set(name, value, options))
-      },
-    },
-  })
+  record.count++
+  return false
+}
 
-  let user = null
-  let authError = null
+export function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl
+  const ip = request.ip || request.headers.get("x-forwarded-for") || "unknown"
 
-  try {
-    const authResult = await supabase.auth.getUser()
-    user = authResult.data.user
-    authError = authResult.error
-  } catch (error) {
-    console.log("[v0] Middleware - Auth fetch failed, retrying once:", error)
-    try {
-      await new Promise((resolve) => setTimeout(resolve, 100)) // Small delay
-      const retryResult = await supabase.auth.getUser()
-      user = retryResult.data.user
-      authError = retryResult.error
-    } catch (retryError) {
-      console.log("[v0] Middleware - Auth retry failed:", retryError)
-      authError = retryError
+  // Rate limiting for API routes
+  if (pathname.startsWith("/api/")) {
+    const rateLimitKey = getRateLimitKey(ip, pathname)
+
+    // Different limits for different endpoints
+    let limit = 100 // Default: 100 requests per minute
+    const windowMs = 60 * 1000 // 1 minute
+
+    if (pathname.includes("/auth/")) {
+      limit = 5 // Auth endpoints: 5 requests per minute
+    } else if (pathname.includes("/admin/")) {
+      limit = 20 // Admin endpoints: 20 requests per minute
+    }
+
+    if (isRateLimited(rateLimitKey, limit, windowMs)) {
+      return NextResponse.json({ error: "অনেক বেশি অনুরোধ। কিছুক্ষণ পর চেষ্টা করুন।" }, { status: 429 })
     }
   }
 
-  console.log("[v0] Middleware - Auth error:", authError)
-  console.log("[v0] Middleware - User object:", user ? { id: user.id, email: user.email } : null)
+  // Security headers
+  const response = NextResponse.next()
 
-  const publicRoutes = ["/auth", "/pending", "/adminbilla"]
-  const isPublicRoute = publicRoutes.some((route) => request.nextUrl.pathname.startsWith(route))
-  const isAdminRoute = request.nextUrl.pathname.startsWith("/adminbilla/")
-  const isRootRoute = request.nextUrl.pathname === "/"
+  response.headers.set("X-Frame-Options", "DENY")
+  response.headers.set("X-Content-Type-Options", "nosniff")
+  response.headers.set("Referrer-Policy", "strict-origin-when-cross-origin")
+  response.headers.set("X-XSS-Protection", "1; mode=block")
 
-  console.log("[v0] Middleware - Is public route:", isPublicRoute)
-  console.log("[v0] Middleware - User exists:", !!user)
-
-  // Handle unauthenticated users
-  if (!user || authError) {
-    console.log("[v0] Middleware - No user found or auth error")
-    if (!isPublicRoute) {
-      console.log("[v0] Middleware - Redirecting unauthenticated user to auth")
-      const url = request.nextUrl.clone()
-      url.pathname = "/auth"
-      return NextResponse.redirect(url)
-    }
-    return supabaseResponse
+  // Log suspicious activity
+  if (pathname.includes("/admin/") && !pathname.includes("/admin/login")) {
+    console.log(`[v0] Admin access attempt from IP: ${ip}, Path: ${pathname}`)
   }
 
-  let profile = null
-  let profileError = null
-
-  try {
-    const profileResult = await supabase.from("user_profiles").select("status, role, email").eq("id", user.id).single()
-
-    profile = profileResult.data
-    profileError = profileResult.error
-  } catch (error) {
-    console.log("[v0] Middleware - Profile fetch failed, retrying once:", error)
-    try {
-      await new Promise((resolve) => setTimeout(resolve, 100)) // Small delay
-      const retryResult = await supabase.from("user_profiles").select("status, role, email").eq("id", user.id).single()
-
-      profile = retryResult.data
-      profileError = retryResult.error
-    } catch (retryError) {
-      console.log("[v0] Middleware - Profile retry failed:", retryError)
-      profileError = retryError
-    }
-  }
-
-  console.log("[v0] Middleware - User ID:", user.id)
-  console.log("[v0] Middleware - Profile error:", profileError)
-  console.log("[v0] Middleware - Profile data:", profile)
-  console.log("[v0] Middleware - Current path:", request.nextUrl.pathname)
-
-  if (profileError || !profile) {
-    console.log("[v0] Middleware - Profile not found, redirecting to auth")
-    if (!isPublicRoute) {
-      const url = request.nextUrl.clone()
-      url.pathname = "/auth"
-      url.searchParams.set("message", "profile_not_found")
-      return NextResponse.redirect(url)
-    }
-    return supabaseResponse
-  }
-
-  if (isAdminRoute) {
-    if (profile.role !== "admin" && profile.role !== "super_admin") {
-      console.log("[v0] Middleware - Redirecting non-admin from admin route")
-      const url = request.nextUrl.clone()
-      url.pathname = "/adminbilla"
-      return NextResponse.redirect(url)
-    }
-    return supabaseResponse
-  }
-
-  // Handle user status for protected routes
-  if (!isPublicRoute) {
-    console.log("[v0] Middleware - Checking user status:", profile.status)
-
-    if (profile.status === "pending") {
-      console.log("[v0] Middleware - Redirecting pending user to pending approval page")
-      const url = request.nextUrl.clone()
-      url.pathname = "/pending"
-      return NextResponse.redirect(url)
-    }
-
-    if (profile.status === "rejected" || profile.status === "suspended") {
-      console.log("[v0] Middleware - Redirecting restricted user to auth")
-      const url = request.nextUrl.clone()
-      url.pathname = "/auth"
-      url.searchParams.set("message", "account_restricted")
-      return NextResponse.redirect(url)
-    }
-  }
-
-  // Handle approved users trying to access pending page
-  if (request.nextUrl.pathname === "/pending" && profile?.status === "approved") {
-    console.log("[v0] Middleware - Redirecting approved user away from pending page")
-    const url = request.nextUrl.clone()
-    url.pathname = "/"
-    return NextResponse.redirect(url)
-  }
-
-  return supabaseResponse
+  return response
 }
 
 export const config = {
-  matcher: [
-    /*
-     * Match all request paths except for the ones starting with:
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     * Feel free to modify this pattern to include more paths.
-     */
-    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
-  ],
+  matcher: ["/api/:path*", "/admin/:path*", "/dashboard/:path*"],
 }

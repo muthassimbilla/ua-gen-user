@@ -29,10 +29,10 @@ export default function GeneratorControls({
   onGenerate,
 }: GeneratorControlsProps) {
   return (
-    <Card className="bg-white/20 dark:bg-slate-800/20 backdrop-blur-xl border border-white/30 dark:border-slate-700/30 shadow-2xl rounded-2xl overflow-hidden">
-      <CardHeader className="pb-4 bg-gradient-to-r from-white/10 to-transparent dark:from-slate-700/10 dark:to-transparent backdrop-blur-sm">
+    <Card className="bg-white/60 dark:bg-slate-800/60 backdrop-blur-xl border border-white/30 dark:border-slate-700/30 shadow-2xl rounded-2xl overflow-hidden">
+      <CardHeader className="pb-4 bg-gradient-to-r from-white/50 to-transparent dark:from-slate-700/50 dark:to-transparent backdrop-blur-sm">
         <CardTitle className="flex items-center gap-2 text-xl font-bold text-slate-900 dark:text-slate-100">
-          <div className="p-2 bg-gradient-to-br from-indigo-500/20 to-blue-500/20 backdrop-blur-md rounded-lg">
+          <div className="p-2 bg-gradient-to-br from-indigo-500/20 to-blue-500/20 rounded-lg backdrop-blur-sm">
             <Settings className="w-5 h-5 text-indigo-600 dark:text-indigo-400" aria-hidden="true" />
           </div>
           Generation settings
@@ -47,7 +47,7 @@ export default function GeneratorControls({
             <Select value={platform} onValueChange={setPlatform} disabled={isGenerating}>
               <SelectTrigger
                 id="platform"
-                className="bg-white/30 dark:bg-slate-700/30 backdrop-blur-md border border-white/50 dark:border-slate-600/50 shadow-lg"
+                className="bg-white/70 dark:bg-slate-700/70 backdrop-blur-sm border border-white/40 dark:border-slate-600/40 shadow-lg"
                 aria-label="Select platform"
               >
                 <SelectValue placeholder="Select Platform" />
@@ -84,7 +84,7 @@ export default function GeneratorControls({
             <Select value={appType} onValueChange={setAppType} disabled={isGenerating || !platform}>
               <SelectTrigger
                 id="appType"
-                className="bg-white/30 dark:bg-slate-700/30 backdrop-blur-md border border-white/50 dark:border-slate-600/50 shadow-lg"
+                className="bg-white/70 dark:bg-slate-700/70 backdrop-blur-sm border border-white/40 dark:border-slate-600/40 shadow-lg"
                 aria-label="Select app type"
               >
                 <SelectValue placeholder={!platform ? "Select Platform First" : "Select App"} />
@@ -159,7 +159,7 @@ export default function GeneratorControls({
                   setQuantity(Number.parseInt(value) || 0)
                 }
               }}
-              className="bg-white/30 dark:bg-slate-700/30 backdrop-blur-md border border-white/50 dark:border-slate-600/50 shadow-lg"
+              className="bg-white/70 dark:bg-slate-700/70 backdrop-blur-sm border border-white/40 dark:border-slate-600/40 shadow-lg"
               placeholder="Enter quantity (0-10,000)"
               disabled={isGenerating}
               aria-describedby="quantity-help"
@@ -173,7 +173,7 @@ export default function GeneratorControls({
         <Button
           onClick={onGenerate}
           disabled={isGenerating || !platform || !appType || quantity < 1}
-          className="w-full bg-gradient-to-r from-indigo-500/80 to-purple-600/80 backdrop-blur-md hover:from-indigo-600/80 hover:to-purple-700/80 text-white h-12 text-base font-semibold rounded-lg shadow-lg border-0"
+          className="w-full bg-indigo-600 dark:bg-indigo-700 text-white h-12 text-base font-semibold rounded-lg shadow-lg"
           aria-describedby="generate-help"
         >
           {isGenerating ? (

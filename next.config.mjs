@@ -98,6 +98,14 @@ const nextConfig = {
       }
     ]
   },
+  async rewrites() {
+    return [
+      {
+        source: '/generator',
+        destination: '/tool/user-agent-generator'
+      }
+    ]
+  },
   webpack: (config, { isServer, dev }) => {
     if (!isServer) {
       config.resolve.fallback = {
