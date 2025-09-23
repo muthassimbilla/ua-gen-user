@@ -2,138 +2,230 @@
 
 import type React from "react"
 
-import { useState } from "react"
-import { useAuth } from "@/components/auth-provider"
+import { useState, useEffect } from "react"
+import { useRouter, useSearchParams } from "next/navigation"
+import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Loader2, Key, User, Wrench } from "lucide-react"
-import Link from "next/link"
-import ThemeToggle from "@/components/theme-toggle"
+import { useAuth } from "@/lib/auth-context"
+import { Eye, EyeOff, MessageCircle, Lock, CheckCircle, XCircle, LogIn } from "lucide-react"
 
 export default function LoginPage() {
-  const [telegramUsername, setTelegramUsername] = useState("")
-  const [key, setKey] = useState("")
-  const [error, setError] = useState("")
-  const [loading, setLoading] = useState(false)
+  const router = useRouter()
+  const searchParams = useSearchParams()
   const { login } = useAuth()
+
+  const [formData, setFormData] = useState({
+    telegram_username: "",
+    password: "",
+  })
+  const [errors, setErrors] = useState<string[]>([])
+  const [successMessage, setSuccessMessage] = useState("")
+  const [loading, setLoading] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
+
+  // Check for success message from signup
+  useEffect(() => {
+    const message = searchParams.get("message")
+    if (message) {
+      setSuccessMessage(message)
+    }
+  }, [searchParams])
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target
+    setFormData((prev) => ({ ...prev, [name]: value }))
+
+    // Clear errors when user starts typing
+    if (errors.length > 0) {
+      setErrors([])
+    }
+  }
+
+  const validateForm = () => {
+    const newErrors: string[] = []
+
+    if (!formData.telegram_username.trim()) {
+      newErrors.push("টেলিগ্রাম ইউজারনেম প্রয়োজন")
+    }
+
+    if (!formData.password.trim()) {
+      newErrors.push("পাসওয়ার্ড প্রয়োজন")
+    }
+
+    return newErrors
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setError("")
     setLoading(true)
+    setErrors([])
+    setSuccessMessage("")
 
     try {
-      const success = await login(telegramUsername, key)
-      if (!success) {
-        setError("লগইন ব্যর্থ হয়েছে। আপনার Telegram Username এবং Key চেক করুন।")
+      // Validate form
+      const validationErrors = validateForm()
+      if (validationErrors.length > 0) {
+        setErrors(validationErrors)
+        return
       }
-    } catch (err) {
-      setError("একটি ত্রুটি ঘটেছে। আবার চেষ্টা করুন।")
+
+      // Login user
+      await login(formData.telegram_username.trim(), formData.password)
+
+      // Get redirect URL or default to dashboard
+      const redirectTo = searchParams.get("redirect") || "/dashboard"
+      router.push(redirectTo)
+    } catch (error: any) {
+      console.error("[v0] Login error:", error)
+      setErrors([error.message || "লগইন করতে সমস্যা হয়েছে"])
     } finally {
       setLoading(false)
     }
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background p-4">
-      <div className="absolute top-4 right-4">
-        <ThemeToggle />
-      </div>
-      <div className="w-full max-w-md space-y-6">
-        <div className="text-center space-y-2">
-          <div className="flex justify-center">
-            <div className="p-3 rounded-full bg-primary/10">
-              <Key className="h-8 w-8 text-primary" />
-            </div>
-          </div>
-          <h1 className="text-2xl font-bold text-foreground">স্বাগতম</h1>
-          <p className="text-muted-foreground">আপনার অ্যাকাউন্টে লগইন করুন</p>
-        </div>
-        <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
-          <CardHeader className="space-y-1">
-            <CardTitle className="text-xl">লগইন</CardTitle>
-            <CardDescription>আপনার Telegram Username এবং Key দিয়ে লগইন করুন</CardDescription>
+    <div className="auth-container flex items-center justify-center p-4">
+      <div className="w-full max-w-md">
+        <Card className="auth-form">
+          <CardHeader className="text-center space-y-2">
+            <CardTitle className="text-2xl font-bold text-balance">আপনার অ্যাকাউন্টে লগইন করুন</CardTitle>
+            <CardDescription className="text-muted-foreground">
+              টেলিগ্রাম ইউজারনেম এবং পাসওয়ার্ড দিয়ে লগইন করুন
+            </CardDescription>
           </CardHeader>
-          <CardContent>
+
+          <CardContent className="space-y-6">
+            {/* Success Message */}
+            {successMessage && (
+              <Alert className="border-green-500/20 bg-green-500/10">
+                <CheckCircle className="h-4 w-4 text-green-500" />
+                <AlertDescription className="text-green-400">{successMessage}</AlertDescription>
+              </Alert>
+            )}
+
+            {/* Error Messages */}
+            {errors.length > 0 && (
+              <Alert variant="destructive">
+                <XCircle className="h-4 w-4" />
+                <AlertDescription>
+                  <ul className="list-disc list-inside space-y-1">
+                    {errors.map((error, index) => (
+                      <li key={index}>{error}</li>
+                    ))}
+                  </ul>
+                </AlertDescription>
+              </Alert>
+            )}
+
             <form onSubmit={handleSubmit} className="space-y-4">
+              {/* Telegram Username Field */}
               <div className="space-y-2">
-                <Label htmlFor="telegram_username" className="flex items-center gap-2">
-                  <User className="h-4 w-4" />
-                  Telegram Username
+                <Label htmlFor="telegram_username" className="text-sm font-medium">
+                  টেলিগ্রাম ইউজারনেম
                 </Label>
-                <Input
-                  id="telegram_username"
-                  type="text"
-                  placeholder="@username"
-                  value={telegramUsername}
-                  onChange={(e) => setTelegramUsername(e.target.value)}
-                  required
-                  className="bg-background/50"
-                />
+                <div className="relative">
+                  <MessageCircle className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    id="telegram_username"
+                    name="telegram_username"
+                    type="text"
+                    placeholder="your_username"
+                    value={formData.telegram_username}
+                    onChange={handleInputChange}
+                    className="auth-input pl-10"
+                    required
+                    autoComplete="username"
+                  />
+                </div>
+                <p className="text-xs text-muted-foreground">@ চিহ্ন ছাড়া শুধুমাত্র ইউজারনেম লিখুন</p>
               </div>
+
+              {/* Password Field */}
               <div className="space-y-2">
-                <Label htmlFor="key" className="flex items-center gap-2">
-                  <Key className="h-4 w-4" />
-                  Key
+                <Label htmlFor="password" className="text-sm font-medium">
+                  পাসওয়ার্ড
                 </Label>
-                <Input
-                  id="key"
-                  type="password"
-                  placeholder="আপনার Key লিখুন"
-                  value={key}
-                  onChange={(e) => setKey(e.target.value)}
-                  required
-                  className="bg-background/50"
-                />
+                <div className="relative">
+                  <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    id="password"
+                    name="password"
+                    type={showPassword ? "text" : "password"}
+                    placeholder="আপনার পাসওয়ার্ড লিখুন"
+                    value={formData.password}
+                    onChange={handleInputChange}
+                    className="auth-input pl-10 pr-10"
+                    required
+                    autoComplete="current-password"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
               </div>
-              {error && (
-                <Alert variant="destructive">
-                  <AlertDescription>{error}</AlertDescription>
-                </Alert>
-              )}
-              <Button type="submit" className="w-full" disabled={loading}>
-                {loading ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    লগইন হচ্ছে...
-                  </>
-                ) : (
-                  "লগইন করুন"
-                )}
+
+              {/* Submit Button */}
+              <Button type="submit" className="auth-button w-full" disabled={loading}>
+                <LogIn className="h-4 w-4 mr-2" />
+                {loading ? "লগইন হচ্ছে..." : "লগইন করুন"}
               </Button>
             </form>
-            <div className="mt-6 space-y-3">
+
+            {/* Demo Users Section */}
+            <div className="space-y-3">
               <div className="relative">
                 <div className="absolute inset-0 flex items-center">
-                  <span className="w-full border-t border-border/50" />
+                  <span className="w-full border-t border-muted" />
                 </div>
                 <div className="relative flex justify-center text-xs uppercase">
-                  <span className="bg-card px-2 text-muted-foreground">অথবা</span>
+                  <span className="bg-background px-2 text-muted-foreground">অথবা ডেমো অ্যাকাউন্ট ব্যবহার করুন</span>
                 </div>
               </div>
-              <div className="flex gap-2">
-                <Button variant="outline" className="flex-1 bg-transparent" asChild>
-                  <Link href="/key-buy">Key কিনুন</Link>
-                </Button>
-                <Button variant="outline" size="icon" asChild>
-                  <Link href="/tools">
-                    <Wrench className="h-4 w-4" />
-                  </Link>
-                </Button>
+
+              <div className="grid gap-2">
+                <div className="p-3 rounded-lg bg-muted/20 border border-muted/30">
+                  <p className="text-xs font-medium text-muted-foreground mb-1">ডেমো ইউজার ১:</p>
+                  <p className="text-sm">
+                    <span className="font-mono">ahmed_rahman</span> | পাসওয়ার্ড:{" "}
+                    <span className="font-mono">demo123456</span>
+                  </p>
+                </div>
+                <div className="p-3 rounded-lg bg-muted/20 border border-muted/30">
+                  <p className="text-xs font-medium text-muted-foreground mb-1">ডেমো ইউজার ২:</p>
+                  <p className="text-sm">
+                    <span className="font-mono">fatima_khatun</span> | পাসওয়ার্ড:{" "}
+                    <span className="font-mono">demo123456</span>
+                  </p>
+                </div>
+                <div className="p-3 rounded-lg bg-muted/20 border border-muted/30">
+                  <p className="text-xs font-medium text-muted-foreground mb-1">ডেমো ইউজার ৩:</p>
+                  <p className="text-sm">
+                    <span className="font-mono">mohammad_karim</span> | পাসওয়ার্ড:{" "}
+                    <span className="font-mono">demo123456</span>
+                  </p>
+                </div>
               </div>
+            </div>
+
+            {/* Signup Link */}
+            <div className="text-center">
+              <p className="text-sm text-muted-foreground">
+                নতুন ব্যবহারকারী?{" "}
+                <Link href="/signup" className="auth-link font-medium">
+                  অ্যাকাউন্ট তৈরি করুন
+                </Link>
+              </p>
             </div>
           </CardContent>
         </Card>
-        <p className="text-center text-sm text-muted-foreground">
-          সমস্যা হলে{" "}
-          <Link href="/tools" className="text-primary hover:underline">
-            Our Tools
-          </Link>{" "}
-          পেজে যান
-        </p>
       </div>
     </div>
   )

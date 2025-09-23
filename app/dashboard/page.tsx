@@ -1,93 +1,35 @@
 "use client"
-
-import type React from "react"
-
-import { useAuth } from "@/components/auth-provider"
+import { useState } from "react"
+import { useAuth } from "@/lib/auth-context"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Alert, AlertDescription } from "@/components/ui/alert"
-import { User, Globe, Calendar, Shield, LogOut, Edit3, Clock, CheckCircle, AlertTriangle } from "lucide-react"
-import { useState, useEffect } from "react"
-import ThemeToggle from "@/components/theme-toggle"
+import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { User, MessageCircle, Calendar, LogOut, Settings, Shield, Clock, CheckCircle, Activity } from "lucide-react"
+import ProtectedRoute from "@/components/protected-route"
 
 export default function DashboardPage() {
   const { user, logout } = useAuth()
-  const [newKey, setNewKey] = useState("")
-  const [loading, setLoading] = useState(false)
-  const [message, setMessage] = useState("")
-  const [keyHistory, setKeyHistory] = useState([])
+  const [loggingOut, setLoggingOut] = useState(false)
 
-  useEffect(() => {
-    // Load key usage history
-    loadKeyHistory()
-  }, [])
-
-  const loadKeyHistory = async () => {
+  const handleLogout = async () => {
+    setLoggingOut(true)
     try {
-      // This would fetch from your API
-      const mockHistory = [
-        {
-          id: 1,
-          old_key: "OLD_KEY_123",
-          new_key: "CURRENT_KEY",
-          changed_at: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
-          changed_by: "user",
-        },
-      ]
-      setKeyHistory(mockHistory)
+      await logout()
     } catch (error) {
-      console.error("Failed to load key history:", error)
-    }
-  }
-
-  const handleKeyChange = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setLoading(true)
-    setMessage("")
-
-    try {
-      // Here you would call your API to change the key
-      await new Promise((resolve) => setTimeout(resolve, 1000)) // Simulate API call
-
-      setMessage("Key সফলভাবে পরিবর্তন হয়েছে")
-      setNewKey("")
-      loadKeyHistory()
-    } catch (error) {
-      setMessage("Key পরিবর্তন করতে ব্যর্থ হয়েছে")
+      console.error("[v0] Logout error:", error)
     } finally {
-      setLoading(false)
+      setLoggingOut(false)
     }
   }
 
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case "approved":
-        return (
-          <Badge className="bg-green-500/10 text-green-600 border-green-500/20">
-            <CheckCircle className="w-3 h-3 mr-1" />
-            অনুমোদিত
-          </Badge>
-        )
-      case "pending":
-        return (
-          <Badge className="bg-yellow-500/10 text-yellow-600 border-yellow-500/20">
-            <Clock className="w-3 h-3 mr-1" />
-            অপেক্ষমান
-          </Badge>
-        )
-      case "blocked":
-        return (
-          <Badge className="bg-red-500/10 text-red-600 border-red-500/20">
-            <AlertTriangle className="w-3 h-3 mr-1" />
-            ব্লক করা
-          </Badge>
-        )
-      default:
-        return <Badge variant="secondary">{status}</Badge>
-    }
+  const getInitials = (name: string) => {
+    return name
+      .split(" ")
+      .map((word) => word.charAt(0))
+      .join("")
+      .toUpperCase()
+      .slice(0, 2)
   }
 
   const formatDate = (dateString: string) => {
@@ -95,181 +37,223 @@ export default function DashboardPage() {
       year: "numeric",
       month: "long",
       day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
     })
   }
 
-  const getDaysUntilExpiry = () => {
-    if (!user?.key_expires_at) return null
-    const expiryDate = new Date(user.key_expires_at)
-    const today = new Date()
-    const diffTime = expiryDate.getTime() - today.getTime()
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
-    return diffDays
-  }
-
-  if (!user) {
-    return <div>Loading...</div>
-  }
-
-  const daysUntilExpiry = getDaysUntilExpiry()
-
   return (
-    <div className="min-h-screen bg-background p-4">
-      <div className="absolute top-4 right-4 flex gap-2">
-        <ThemeToggle />
-        <Button variant="outline" size="icon" onClick={logout}>
-          <LogOut className="h-4 w-4" />
-        </Button>
-      </div>
-
-      <div className="max-w-4xl mx-auto space-y-6 pt-16">
-        <div className="text-center space-y-2">
-          <h1 className="text-3xl font-bold text-foreground">ড্যাশবোর্ড</h1>
-          <p className="text-muted-foreground">স্বাগতম, {user.full_name}</p>
-        </div>
-
-        {/* Key Expiry Warning */}
-        {daysUntilExpiry !== null && daysUntilExpiry <= 7 && (
-          <Alert variant={daysUntilExpiry <= 3 ? "destructive" : "default"}>
-            <AlertTriangle className="h-4 w-4" />
-            <AlertDescription>আপনার Key {daysUntilExpiry} দিন পর expire হবে। অনুগ্রহ করে নতুন Key নিন।</AlertDescription>
-          </Alert>
-        )}
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {/* User Info Card */}
-          <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <User className="h-5 w-5" />
-                ব্যবহারকারীর তথ্য
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <div>
-                <Label className="text-sm text-muted-foreground">নাম</Label>
-                <p className="font-medium">{user.full_name}</p>
-              </div>
-              <div>
-                <Label className="text-sm text-muted-foreground">Telegram</Label>
-                <p className="font-medium">@{user.telegram_username}</p>
-              </div>
-              <div>
-                <Label className="text-sm text-muted-foreground">স্ট্যাটাস</Label>
-                <div className="mt-1">{getStatusBadge(user.status)}</div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Current IP Card */}
-          <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Globe className="h-5 w-5" />
-                বর্তমান IP
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-center space-y-2">
-                <div className="text-2xl font-mono font-bold text-primary">{user.current_ip}</div>
-                <p className="text-sm text-muted-foreground">আপনার বর্তমান IP ঠিকানা</p>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Key Expiry Card */}
-          <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Calendar className="h-5 w-5" />
-                Key Expiry
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-center space-y-2">
-                {user.key_expires_at ? (
-                  <>
-                    <div
-                      className={`text-lg font-bold ${daysUntilExpiry && daysUntilExpiry <= 7 ? "text-red-500" : "text-green-500"}`}
-                    >
-                      {daysUntilExpiry} দিন বাকি
-                    </div>
-                    <p className="text-sm text-muted-foreground">{formatDate(user.key_expires_at)}</p>
-                  </>
-                ) : (
-                  <p className="text-muted-foreground">কোন expiry date নেই</p>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Key Change Section */}
-        <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Edit3 className="h-5 w-5" />
-              Key পরিবর্তন করুন
-            </CardTitle>
-            <CardDescription>আপনার বর্তমান Key পরিবর্তন করুন</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleKeyChange} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="new_key">নতুন Key</Label>
-                <Input
-                  id="new_key"
-                  type="text"
-                  placeholder="নতুন Key লিখুন"
-                  value={newKey}
-                  onChange={(e) => setNewKey(e.target.value)}
-                  required
-                />
-              </div>
-
-              {message && (
-                <Alert>
-                  <AlertDescription>{message}</AlertDescription>
-                </Alert>
-              )}
-
-              <Button type="submit" disabled={loading || !newKey}>
-                {loading ? "পরিবর্তন করা হচ্ছে..." : "Key পরিবর্তন করুন"}
+    <ProtectedRoute>
+      <div className="min-h-screen bg-background p-4 lg:p-8">
+        <div className="max-w-7xl mx-auto space-y-8">
+          {/* Header Section */}
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+            <div>
+              <h1 className="text-3xl font-bold text-balance">স্বাগতম, {user?.full_name}!</h1>
+              <p className="text-muted-foreground mt-1">আপনার ড্যাশবোর্ডে আপনাকে স্বাগতম</p>
+            </div>
+            <div className="flex items-center gap-3">
+              <Button variant="outline" size="sm">
+                <Settings className="h-4 w-4 mr-2" />
+                সেটিংস
               </Button>
-            </form>
-          </CardContent>
-        </Card>
+              <Button variant="destructive" size="sm" onClick={handleLogout} disabled={loggingOut}>
+                <LogOut className="h-4 w-4 mr-2" />
+                {loggingOut ? "লগআউট হচ্ছে..." : "লগআউট"}
+              </Button>
+            </div>
+          </div>
 
-        {/* Key Usage History */}
-        <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Shield className="h-5 w-5" />
-              Key ব্যবহারের ইতিহাস
-            </CardTitle>
-            <CardDescription>আপনার পূর্ববর্তী Key পরিবর্তনের তথ্য</CardDescription>
-          </CardHeader>
-          <CardContent>
-            {keyHistory.length > 0 ? (
-              <div className="space-y-3">
-                {keyHistory.map((history: any) => (
-                  <div key={history.id} className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
+          {/* Stats Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <Card className="glass-card">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">অ্যাকাউন্ট স্ট্যাটাস</CardTitle>
+                <CheckCircle className="h-4 w-4 text-green-500" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-green-500">সক্রিয়</div>
+                <p className="text-xs text-muted-foreground">আপনার অ্যাকাউন্ট সম্পূর্ণ সক্রিয়</p>
+              </CardContent>
+            </Card>
+
+            <Card className="glass-card">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">সদস্যতার সময়</CardTitle>
+                <Calendar className="h-4 w-4 text-primary" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">
+                  {user?.created_at
+                    ? Math.floor((Date.now() - new Date(user.created_at).getTime()) / (1000 * 60 * 60 * 24))
+                    : 0}
+                </div>
+                <p className="text-xs text-muted-foreground">দিন</p>
+              </CardContent>
+            </Card>
+
+            <Card className="glass-card">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">নিরাপত্তা স্কোর</CardTitle>
+                <Shield className="h-4 w-4 text-blue-500" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-blue-500">১০০%</div>
+                <p className="text-xs text-muted-foreground">সম্পূর্ণ নিরাপদ</p>
+              </CardContent>
+            </Card>
+
+            <Card className="glass-card">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">সর্বশেষ লগইন</CardTitle>
+                <Clock className="h-4 w-4 text-orange-500" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-orange-500">এখনই</div>
+                <p className="text-xs text-muted-foreground">সক্রিয় সেশন</p>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Main Content Grid */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {/* Profile Card */}
+            <div className="lg:col-span-1">
+              <Card className="glass-card">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <User className="h-5 w-5" />
+                    প্রোফাইল তথ্য
+                  </CardTitle>
+                  <CardDescription>আপনার অ্যাকাউন্টের বিস্তারিত তথ্য</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <div className="flex items-center space-x-4">
+                    <Avatar className="h-16 w-16">
+                      <AvatarFallback className="text-lg font-semibold bg-primary text-primary-foreground">
+                        {user?.full_name ? getInitials(user.full_name) : "U"}
+                      </AvatarFallback>
+                    </Avatar>
                     <div>
-                      <p className="font-medium">Key পরিবর্তিত হয়েছে</p>
-                      <p className="text-sm text-muted-foreground">{formatDate(history.changed_at)}</p>
+                      <h3 className="text-lg font-semibold">{user?.full_name}</h3>
+                      <Badge variant="secondary" className="mt-1">
+                        <MessageCircle className="h-3 w-3 mr-1" />@{user?.telegram_username}
+                      </Badge>
                     </div>
-                    <Badge variant="outline">{history.changed_by === "user" ? "ব্যবহারকারী" : "অ্যাডমিন"}</Badge>
                   </div>
-                ))}
-              </div>
-            ) : (
-              <p className="text-muted-foreground text-center py-4">কোন Key পরিবর্তনের ইতিহাস নেই</p>
-            )}
-          </CardContent>
-        </Card>
+
+                  <div className="space-y-4">
+                    <div className="flex justify-between items-center py-2 border-b border-muted/20">
+                      <span className="text-sm text-muted-foreground">পূর্ণ নাম</span>
+                      <span className="text-sm font-medium">{user?.full_name}</span>
+                    </div>
+                    <div className="flex justify-between items-center py-2 border-b border-muted/20">
+                      <span className="text-sm text-muted-foreground">টেলিগ্রাম ইউজারনেম</span>
+                      <span className="text-sm font-medium">@{user?.telegram_username}</span>
+                    </div>
+                    <div className="flex justify-between items-center py-2 border-b border-muted/20">
+                      <span className="text-sm text-muted-foreground">যোগদানের তারিখ</span>
+                      <span className="text-sm font-medium">
+                        {user?.created_at ? formatDate(user.created_at) : "N/A"}
+                      </span>
+                    </div>
+                    <div className="flex justify-between items-center py-2">
+                      <span className="text-sm text-muted-foreground">অ্যাকাউন্ট স্ট্যাটাস</span>
+                      <Badge variant="default" className="bg-green-500/20 text-green-400 border-green-500/30">
+                        <CheckCircle className="h-3 w-3 mr-1" />
+                        সক্রিয়
+                      </Badge>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Activity & Features */}
+            <div className="lg:col-span-2 space-y-6">
+              {/* Welcome Message */}
+              <Card className="glass-card">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Activity className="h-5 w-5" />
+                    স্বাগতম বার্তা
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <p className="text-muted-foreground">
+                      আপনার নতুন অ্যাকাউন্টে স্বাগতম! এই ড্যাশবোর্ড থেকে আপনি আপনার প্রোফাইল পরিচালনা করতে পারবেন এবং সিস্টেমের সব ফিচার
+                      ব্যবহার করতে পারবেন।
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      <Badge variant="outline">নিরাপদ লগইন</Badge>
+                      <Badge variant="outline">এনক্রিপ্টেড ডাটা</Badge>
+                      <Badge variant="outline">২৪/৭ সাপোর্ট</Badge>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Quick Actions */}
+              <Card className="glass-card">
+                <CardHeader>
+                  <CardTitle>দ্রুত অ্যাকশন</CardTitle>
+                  <CardDescription>সাধারণ কাজগুলো দ্রুত সম্পন্ন করুন</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <Button variant="outline" className="h-auto p-4 flex flex-col items-start space-y-2 bg-transparent">
+                      <Settings className="h-5 w-5" />
+                      <div className="text-left">
+                        <div className="font-medium">প্রোফাইল আপডেট</div>
+                        <div className="text-xs text-muted-foreground">আপনার তথ্য পরিবর্তন করুন</div>
+                      </div>
+                    </Button>
+                    <Button variant="outline" className="h-auto p-4 flex flex-col items-start space-y-2 bg-transparent">
+                      <Shield className="h-5 w-5" />
+                      <div className="text-left">
+                        <div className="font-medium">নিরাপত্তা সেটিংস</div>
+                        <div className="text-xs text-muted-foreground">পাসওয়ার্ড পরিবর্তন করুন</div>
+                      </div>
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* System Status */}
+              <Card className="glass-card">
+                <CardHeader>
+                  <CardTitle>সিস্টেম স্ট্যাটাস</CardTitle>
+                  <CardDescription>সিস্টেমের বর্তমান অবস্থা</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm">ডাটাবেজ সংযোগ</span>
+                      <Badge variant="default" className="bg-green-500/20 text-green-400 border-green-500/30">
+                        <CheckCircle className="h-3 w-3 mr-1" />
+                        সক্রিয়
+                      </Badge>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm">Authentication সার্ভিস</span>
+                      <Badge variant="default" className="bg-green-500/20 text-green-400 border-green-500/30">
+                        <CheckCircle className="h-3 w-3 mr-1" />
+                        সক্রিয়
+                      </Badge>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm">API সার্ভিস</span>
+                      <Badge variant="default" className="bg-green-500/20 text-green-400 border-green-500/30">
+                        <CheckCircle className="h-3 w-3 mr-1" />
+                        সক্রিয়
+                      </Badge>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        </div>
       </div>
-    </div>
+    </ProtectedRoute>
   )
 }

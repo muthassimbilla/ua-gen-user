@@ -1,69 +1,72 @@
 import { NextResponse } from "next/server"
 import type { NextRequest } from "next/server"
 
-// Rate limiting store (in production, use Redis)
-const rateLimitStore = new Map<string, { count: number; resetTime: number }>()
+// Routes that require authentication
+const protectedRoutes = ["/dashboard", "/profile", "/tool"]
 
-function getRateLimitKey(ip: string, path: string): string {
-  return `${ip}:${path}`
-}
+// Routes that should redirect to dashboard if already authenticated
+const authRoutes = ["/login", "/signup"]
 
-function isRateLimited(key: string, limit: number, windowMs: number): boolean {
-  const now = Date.now()
-  const record = rateLimitStore.get(key)
-
-  if (!record || now > record.resetTime) {
-    rateLimitStore.set(key, { count: 1, resetTime: now + windowMs })
-    return false
-  }
-
-  if (record.count >= limit) {
-    return true
-  }
-
-  record.count++
-  return false
-}
-
-export function middleware(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
-  const ip = request.ip || request.headers.get("x-forwarded-for") || "unknown"
 
-  // Rate limiting for API routes
-  if (pathname.startsWith("/api/")) {
-    const rateLimitKey = getRateLimitKey(ip, pathname)
+  if (
+    pathname.startsWith("/_next/") ||
+    pathname.startsWith("/api/") ||
+    pathname.includes(".") ||
+    pathname === "/favicon.ico" ||
+    pathname === "/robots.txt" ||
+    pathname === "/sitemap.xml" ||
+    pathname === "/sw.js" ||
+    pathname === "/manifest.json"
+  ) {
+    return NextResponse.next()
+  }
 
-    // Different limits for different endpoints
-    let limit = 100 // Default: 100 requests per minute
-    const windowMs = 60 * 1000 // 1 minute
+  // We'll do proper validation in the components/pages instead
+  const sessionToken = request.cookies.get("session_token")?.value
+  const isAuthenticated = !!sessionToken
 
-    if (pathname.includes("/auth/")) {
-      limit = 5 // Auth endpoints: 5 requests per minute
-    } else if (pathname.includes("/admin/")) {
-      limit = 20 // Admin endpoints: 20 requests per minute
-    }
-
-    if (isRateLimited(rateLimitKey, limit, windowMs)) {
-      return NextResponse.json({ error: "অনেক বেশি অনুরোধ। কিছুক্ষণ পর চেষ্টা করুন।" }, { status: 429 })
+  // Handle protected routes
+  if (protectedRoutes.some((route) => pathname.startsWith(route))) {
+    if (!isAuthenticated) {
+      // Redirect to login page
+      const loginUrl = new URL("/login", request.url)
+      loginUrl.searchParams.set("redirect", pathname)
+      return NextResponse.redirect(loginUrl)
     }
   }
 
-  // Security headers
-  const response = NextResponse.next()
-
-  response.headers.set("X-Frame-Options", "DENY")
-  response.headers.set("X-Content-Type-Options", "nosniff")
-  response.headers.set("Referrer-Policy", "strict-origin-when-cross-origin")
-  response.headers.set("X-XSS-Protection", "1; mode=block")
-
-  // Log suspicious activity
-  if (pathname.includes("/admin/") && !pathname.includes("/admin/login")) {
-    console.log(`[v0] Admin access attempt from IP: ${ip}, Path: ${pathname}`)
+  // Handle auth routes (login, signup)
+  if (authRoutes.some((route) => pathname.startsWith(route))) {
+    if (isAuthenticated) {
+      // Redirect to dashboard if already authenticated
+      return NextResponse.redirect(new URL("/dashboard", request.url))
+    }
   }
 
-  return response
+  // Handle root route
+  if (pathname === "/") {
+    if (isAuthenticated) {
+      return NextResponse.redirect(new URL("/dashboard", request.url))
+    } else {
+      return NextResponse.redirect(new URL("/login", request.url))
+    }
+  }
+
+  return NextResponse.next()
 }
 
 export const config = {
-  matcher: ["/api/:path*", "/admin/:path*", "/dashboard/:path*"],
+  matcher: [
+    /*
+     * Match all request paths except for the ones starting with:
+     * - api (API routes)
+     * - _next/static (static files)
+     * - _next/image (image optimization files)
+     * - favicon.ico (favicon file)
+     * - public folder files
+     */
+    "/((?!api|_next/static|_next/image|favicon.ico|robots.txt|sitemap.xml|sw.js|manifest.json|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|js|css|woff|woff2|ttf|otf|eot)$).*)",
+  ],
 }
