@@ -38,18 +38,14 @@ function validateEnvironment(): { isValid: boolean; error?: string } {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
   const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
-  if (!supabaseUrl || supabaseUrl === "https://your-project.supabase.co") {
-    return {
-      isValid: false,
-      error: "Supabase URL কনফিগার করা হয়নি। প্রজেক্ট সেটিংস থেকে Supabase integration যোগ করুন।",
-    }
-  }
-
-  if (!supabaseKey || supabaseKey === "your-anon-key") {
-    return {
-      isValid: false,
-      error: "Supabase API Key কনফিগার করা হয়নি। প্রজেক্ট সেটিংস থেকে Supabase integration যোগ করুন।",
-    }
+  if (
+    !supabaseUrl ||
+    supabaseUrl === "https://your-project.supabase.co" ||
+    !supabaseKey ||
+    supabaseKey === "your-anon-key"
+  ) {
+    console.warn("[v0] Supabase not configured, running in demo mode")
+    return { isValid: false, error: "Demo mode - Supabase integration required for full functionality" }
   }
 
   return { isValid: true }
@@ -59,7 +55,8 @@ function validateEnvironment(): { isValid: boolean; error?: string } {
 export function createBrowserSupabaseClient() {
   const validation = validateEnvironment()
   if (!validation.isValid) {
-    throw new Error(validation.error)
+    // Return a mock client for demo purposes
+    return null
   }
 
   return createBrowserClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!)
@@ -104,6 +101,10 @@ export class AuthService {
   static async signup(signupData: SignupData): Promise<User> {
     try {
       const supabase = createBrowserSupabaseClient()
+
+      if (!supabase) {
+        throw new Error("Supabase integration প্রয়োজন। প্রজেক্ট সেটিংস থেকে Supabase integration যোগ করুন।")
+      }
 
       // Validate password
       const passwordValidation = PasswordUtils.validatePassword(signupData.password)
@@ -161,6 +162,33 @@ export class AuthService {
     try {
       const supabase = createBrowserSupabaseClient()
 
+      if (!supabase) {
+        // Demo users for testing
+        const demoUsers = [
+          { id: "demo-1", full_name: "আহমেদ রহমান", telegram_username: "ahmed_rahman", password: "demo123456" },
+          { id: "demo-2", full_name: "ফাতিমা খাতুন", telegram_username: "fatima_khatun", password: "demo123456" },
+          { id: "demo-3", full_name: "মোহাম্মদ করিম", telegram_username: "mohammad_karim", password: "demo123456" },
+        ]
+
+        const demoUser = demoUsers.find((u) => u.telegram_username === credentials.telegram_username)
+
+        if (!demoUser || demoUser.password !== credentials.password) {
+          throw new Error("ভুল টেলিগ্রাম ইউজারনেম অথবা পাসওয়ার্ড")
+        }
+
+        const sessionToken = "demo-session-" + Date.now()
+        const { password, ...userWithoutPassword } = demoUser
+
+        return {
+          user: {
+            ...userWithoutPassword,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+          },
+          sessionToken,
+        }
+      }
+
       // Find user by telegram username
       const { data: user, error: userError } = await supabase
         .from("users")
@@ -204,8 +232,8 @@ export class AuthService {
     } catch (error: any) {
       console.error("[v0] Login error:", error)
 
-      if (error.message.includes("Supabase")) {
-        throw new Error(error.message)
+      if (error.message.includes("Supabase") || error.message.includes("ভুল টেলিগ্রাম")) {
+        throw error
       }
 
       throw new Error("লগইন করতে সমস্যা হয়েছে। পরে আবার চেষ্টা করুন।")
@@ -215,6 +243,11 @@ export class AuthService {
   static async logout(sessionToken: string): Promise<void> {
     try {
       const supabase = createBrowserSupabaseClient()
+
+      if (!supabase) {
+        console.log("[v0] Demo logout")
+        return
+      }
 
       const { error } = await supabase.from("user_sessions").delete().eq("session_token", sessionToken)
 
@@ -236,6 +269,20 @@ export class AuthService {
     try {
       console.log("[v0] Checking session for token:", sessionToken.substring(0, 10) + "...")
       const supabase = createBrowserSupabaseClient()
+
+      if (!supabase) {
+        if (sessionToken.startsWith("demo-session-")) {
+          // Return a demo user
+          return {
+            id: "demo-1",
+            full_name: "ডেমো ইউজার",
+            telegram_username: "demo_user",
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+          }
+        }
+        return null
+      }
 
       const { data: session, error: sessionError } = await supabase
         .from("user_sessions")

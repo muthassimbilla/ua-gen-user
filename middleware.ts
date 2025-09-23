@@ -2,9 +2,9 @@ import { NextResponse } from "next/server"
 import type { NextRequest } from "next/server"
 
 // Routes that require authentication
-const protectedRoutes = ["/dashboard", "/profile", "/tool"]
+const protectedRoutes = ["/profile", "/tool"]
 
-// Routes that should redirect to dashboard if already authenticated
+// Routes that should redirect to /tool if already authenticated
 const authRoutes = ["/login", "/signup"]
 
 export async function middleware(request: NextRequest) {
@@ -40,15 +40,14 @@ export async function middleware(request: NextRequest) {
   // Handle auth routes (login, signup)
   if (authRoutes.some((route) => pathname.startsWith(route))) {
     if (isAuthenticated) {
-      // Redirect to dashboard if already authenticated
-      return NextResponse.redirect(new URL("/dashboard", request.url))
+      return NextResponse.redirect(new URL("/tool", request.url))
     }
   }
 
   // Handle root route
   if (pathname === "/") {
     if (isAuthenticated) {
-      return NextResponse.redirect(new URL("/dashboard", request.url))
+      return NextResponse.redirect(new URL("/tool", request.url))
     } else {
       return NextResponse.redirect(new URL("/login", request.url))
     }

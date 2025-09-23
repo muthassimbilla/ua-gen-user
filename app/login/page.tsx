@@ -76,8 +76,8 @@ export default function LoginPage() {
       // Login user
       await login(formData.telegram_username.trim(), formData.password)
 
-      // Get redirect URL or default to dashboard
-      const redirectTo = searchParams.get("redirect") || "/dashboard"
+      // Get redirect URL or default to /tool
+      const redirectTo = searchParams.get("redirect") || "/tool"
       router.push(redirectTo)
     } catch (error: any) {
       console.error("[v0] Login error:", error)
