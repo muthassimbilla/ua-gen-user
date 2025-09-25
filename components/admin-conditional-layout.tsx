@@ -60,14 +60,7 @@ export function AdminConditionalLayout({ children }: AdminConditionalLayoutProps
 
   // For protected routes, render with navigation if admin is authenticated
   return (
-    <div
-      className="min-h-screen"
-      style={{
-        background:
-          "linear-gradient(135deg, hsl(var(--background)) 0%, hsl(var(--muted)) 25%, hsl(var(--accent)) 50%, hsl(var(--muted)) 75%, hsl(var(--background)) 100%)",
-        backgroundSize: "400% 400%",
-      }}
-    >
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
       <AdminNavigation />
       <main className="ml-0 lg:ml-64 p-4 lg:p-6 min-h-screen">
         <div className="w-full">{children}</div>

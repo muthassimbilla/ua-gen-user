@@ -32,28 +32,36 @@ export default function SidebarNavigation() {
     <>
       {/* Sidebar */}
       <div
-        className={`fixed inset-y-0 left-0 z-50 w-64 transform transition-transform duration-300 ease-in-out ${
+        className={`fixed inset-y-0 left-0 z-50 w-64 transform transition-all duration-500 ease-out ${
           isSidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
-        } glass-nav`}
+        } bg-gradient-to-b from-white/20 via-white/10 to-white/5 dark:from-gray-900/30 dark:via-gray-900/20 dark:to-gray-900/10 backdrop-blur-2xl border-r border-white/30 dark:border-gray-700/40 shadow-2xl`}
       >
         <div className="flex flex-col h-full relative">
           <div className="absolute inset-0 overflow-hidden pointer-events-none">
-            <div className="absolute top-20 left-10 w-32 h-32 bg-blue-500/5 rounded-full blur-3xl animate-pulse" />
+            <div className="absolute top-20 left-10 w-32 h-32 bg-gradient-to-r from-blue-500/10 to-indigo-500/10 rounded-full blur-3xl animate-pulse" />
             <div
-              className="absolute bottom-40 right-8 w-24 h-24 bg-indigo-500/5 rounded-full blur-2xl animate-pulse"
+              className="absolute bottom-40 right-8 w-24 h-24 bg-gradient-to-r from-indigo-500/10 to-purple-500/10 rounded-full blur-2xl animate-pulse"
               style={{ animationDelay: "1s" }}
+            />
+            <div
+              className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-40 h-40 bg-gradient-to-r from-cyan-500/5 to-blue-500/5 rounded-full blur-3xl animate-pulse"
+              style={{ animationDelay: "2s" }}
             />
           </div>
 
           {/* Logo */}
-          <div className="flex items-center gap-3 px-6 py-6 border-b border-white/10 relative">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-lg glass-floating relative overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent" />
-              <Code className="w-6 h-6 text-white relative z-10" />
+          <div className="flex items-center gap-4 px-6 py-8 border-b border-white/30 dark:border-gray-700/40 relative">
+            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-500 via-indigo-500 to-purple-600 flex items-center justify-center shadow-xl relative overflow-hidden group">
+              <div className="absolute inset-0 bg-gradient-to-br from-white/30 to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-br from-transparent via-white/10 to-white/20" />
+              <Code className="w-8 h-8 text-white relative z-10 group-hover:scale-110 transition-transform duration-300" />
             </div>
-            <span className="text-xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent glass-text-glow">
-              Flo Hiv Tool
-            </span>
+            <div className="flex-1">
+              <span className="text-xl font-bold bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 bg-clip-text text-transparent">
+                Flo Hiv Tool
+              </span>
+              <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">Developer Suite</p>
+            </div>
           </div>
 
           {/* Navigation Items */}
@@ -87,29 +95,35 @@ export default function SidebarNavigation() {
                   <Link
                     key={item.name}
                     href={item.href}
-                    className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 font-medium group relative overflow-hidden ${
+                    className={`flex items-center gap-4 px-4 py-4 rounded-2xl transition-all duration-300 font-medium group relative overflow-hidden ${
                       itemIsActive
-                        ? "glass-button bg-gradient-to-r from-blue-500/20 to-indigo-600/20 text-blue-600 dark:text-blue-400 shadow-lg border border-blue-500/30"
-                        : "text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 glass-button hover:bg-blue-50/50 dark:hover:bg-blue-900/20"
+                        ? "bg-gradient-to-r from-blue-500/25 via-indigo-500/20 to-purple-500/25 text-blue-600 dark:text-blue-400 shadow-xl border border-blue-500/40 backdrop-blur-sm transform scale-[1.02]"
+                        : "text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-white/15 dark:hover:bg-gray-800/40 backdrop-blur-sm hover:scale-[1.02] hover:shadow-lg"
                     }`}
                     onClick={() => setIsSidebarOpen(false)}
                   >
                     {itemIsActive && (
-                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent animate-pulse" />
+                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/15 to-transparent animate-pulse" />
                     )}
 
-                    <IconComponent
-                      className={`w-5 h-5 relative z-10 ${
-                        itemIsActive
-                          ? "text-blue-600 dark:text-blue-400"
-                          : "text-slate-500 dark:text-slate-400 group-hover:text-blue-500"
-                      }`}
-                    />
+                    <div className={`p-2 rounded-xl transition-all duration-300 ${
+                      itemIsActive 
+                        ? "bg-blue-500/20 dark:bg-blue-500/30" 
+                        : "bg-slate-100/50 dark:bg-slate-800/50 group-hover:bg-blue-500/20"
+                    }`}>
+                      <IconComponent
+                        className={`w-5 h-5 relative z-10 transition-all duration-300 ${
+                          itemIsActive
+                            ? "text-blue-600 dark:text-blue-400 scale-110"
+                            : "text-slate-500 dark:text-slate-400 group-hover:text-blue-500 group-hover:scale-110"
+                        }`}
+                      />
+                    </div>
                     <div className="flex-1 relative z-10">
-                      <div className="text-sm">{item.name}</div>
+                      <div className="text-sm font-semibold">{item.name}</div>
                     </div>
                     {itemIsActive && (
-                      <div className="w-2 h-2 rounded-full bg-blue-500/60 glass-floating relative z-10" />
+                      <div className="w-3 h-3 rounded-full bg-gradient-to-r from-blue-500 to-indigo-500 animate-pulse relative z-10 shadow-lg" />
                     )}
                   </Link>
                 )
@@ -118,15 +132,16 @@ export default function SidebarNavigation() {
           </nav>
 
           {/* Bottom Section */}
-          <div className="px-4 py-6 border-t border-white/10 relative">
-            <div className="absolute top-0 left-4 right-4 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+          <div className="px-4 py-6 border-t border-white/30 dark:border-gray-700/40 relative">
+            <div className="absolute top-0 left-4 right-4 h-px bg-gradient-to-r from-transparent via-white/30 to-transparent" />
 
-            <div className="flex items-center justify-between mb-4">
-              <span className="text-sm font-medium text-slate-600 dark:text-slate-400">Theme</span>
+            <div className="flex items-center justify-between mb-6 p-3 rounded-xl bg-white/10 dark:bg-gray-800/30 backdrop-blur-sm border border-white/20 dark:border-gray-700/30">
+              <span className="text-sm font-semibold text-slate-600 dark:text-slate-400">Theme</span>
               <ThemeToggle />
             </div>
-            <div className="text-center">
-              <p className="text-xs text-slate-500 dark:text-slate-400">Flo Hiv Tool © 2025</p>
+            <div className="text-center space-y-2">
+              <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">Flo Hiv Tool © 2025</p>
+              <p className="text-xs text-slate-400 dark:text-slate-500">Made with ❤️ for developers</p>
             </div>
           </div>
         </div>
@@ -135,7 +150,7 @@ export default function SidebarNavigation() {
       {/* Mobile Menu Button */}
       <button
         onClick={toggleSidebar}
-        className="lg:hidden fixed top-4 left-4 z-50 w-12 h-12 rounded-xl glass-button flex items-center justify-center shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105"
+        className="lg:hidden fixed top-4 left-4 z-50 w-14 h-14 rounded-2xl bg-white/20 dark:bg-gray-900/20 backdrop-blur-xl border border-white/30 dark:border-gray-700/40 flex items-center justify-center shadow-2xl hover:shadow-3xl transition-all duration-300 hover:scale-110 active:scale-95"
       >
         {isSidebarOpen ? (
           <X className="w-6 h-6 text-slate-600 dark:text-slate-400" />

@@ -90,16 +90,8 @@
     width: 100%;
     min-height: 100vh;
     /* Removed scroll-behavior smooth for instant navigation */
-    /* Enhanced background with better contrast for both modes */
-    background: linear-gradient(
-      135deg,
-      hsl(var(--background)) 0%,
-      hsl(var(--muted)) 25%,
-      hsl(var(--accent)) 50%,
-      hsl(var(--muted)) 75%,
-      hsl(var(--background)) 100%
-    );
-    background-size: 400% 400%;
+    /* Simple background without complex gradients */
+    background: hsl(var(--background));
     /* Removed background animation for instant loading */
     /* Removed all transitions for instant page changes */
   }
@@ -205,8 +197,7 @@
   /* Enhanced auth form styles with better contrast */
   .auth-container {
     min-height: 100vh;
-    background: var(--glass-gradient);
-    backdrop-filter: var(--backdrop-blur);
+    background: hsl(var(--background));
     position: relative;
     overflow: hidden;
   }
@@ -218,8 +209,8 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background: radial-gradient(circle at 20% 30%, hsl(var(--primary) / 0.1) 0%, transparent 50%),
-      radial-gradient(circle at 80% 70%, hsl(var(--accent) / 0.1) 0%, transparent 50%);
+    background: radial-gradient(circle at 20% 30%, hsl(var(--primary) / 0.05) 0%, transparent 50%),
+      radial-gradient(circle at 80% 70%, hsl(var(--accent) / 0.05) 0%, transparent 50%);
     pointer-events: none;
     /* Removed floating orbs animation for instant loading */
   }

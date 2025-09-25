@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { AdminAuthService } from "@/lib/admin-auth-service"
 import { useAdminAuth } from "@/lib/admin-auth-context"
-import { Shield, Lock, User, Eye, EyeOff, AlertCircle, CheckCircle } from "lucide-react"
+import { Shield, Lock, User, Eye, EyeOff, AlertCircle } from "lucide-react"
 
 export default function AdminLoginPage() {
   const [credentials, setCredentials] = useState({
@@ -53,15 +53,9 @@ export default function AdminLoginPage() {
     }
   }
 
-  const fillDemoCredentials = () => {
-    setCredentials({
-      username: "admin",
-      password: "admin123",
-    })
-  }
 
   return (
-    <div className="min-h-screen auth-container flex items-center justify-center p-4">
+    <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
       {/* Background decorative elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-red-500/10 rounded-full blur-3xl animate-pulse" />
@@ -161,36 +155,6 @@ export default function AdminLoginPage() {
             </Button>
           </form>
 
-          {/* Demo Credentials */}
-          <div className="mt-8 p-4 rounded-xl bg-gradient-to-r from-blue-50/50 to-indigo-50/50 dark:from-blue-900/20 dark:to-indigo-900/20 border border-blue-200/50 dark:border-blue-800/50 backdrop-blur-sm">
-            <div className="flex items-center gap-2 mb-3">
-              <CheckCircle className="w-5 h-5 text-blue-600 dark:text-blue-400" />
-              <h3 className="font-semibold text-blue-800 dark:text-blue-200">Demo Account</h3>
-            </div>
-            <div className="space-y-2 text-sm">
-              <div className="flex justify-between items-center">
-                <span className="text-blue-700 dark:text-blue-300">Username:</span>
-                <code className="px-2 py-1 bg-blue-100/50 dark:bg-blue-800/30 rounded text-blue-800 dark:text-blue-200 font-mono">
-                  admin
-                </code>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-blue-700 dark:text-blue-300">Password:</span>
-                <code className="px-2 py-1 bg-blue-100/50 dark:bg-blue-800/30 rounded text-blue-800 dark:text-blue-200 font-mono">
-                  admin123
-                </code>
-              </div>
-            </div>
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={fillDemoCredentials}
-              className="w-full mt-3 border-blue-200/50 dark:border-blue-800/50 text-blue-600 dark:text-blue-400 hover:bg-blue-50/50 dark:hover:bg-blue-900/30 bg-transparent"
-            >
-              Use Demo Credentials
-            </Button>
-          </div>
 
           {/* Security Notice */}
           <div className="mt-6 text-center">
