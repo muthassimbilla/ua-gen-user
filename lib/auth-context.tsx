@@ -4,6 +4,9 @@ import type React from "react"
 import { createContext, useContext, useEffect, useState } from "react"
 import type { User } from "./auth-client"
 import { AuthService } from "./auth-client"
+import { useStatusMiddleware } from "./status-middleware"
+import { useStatusNotification } from "@/components/status-notification-provider"
+import type { UserStatus } from "./user-status-service"
 
 interface AuthContextType {
   user: User | null
@@ -11,6 +14,8 @@ interface AuthContextType {
   login: (telegram_username: string, password: string) => Promise<void>
   logout: () => Promise<void>
   refreshUser: () => Promise<void>
+  userStatus: UserStatus | null
+  checkUserStatus: () => Promise<UserStatus | null>
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
@@ -18,8 +23,11 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined)
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
+  const [userStatus, setUserStatus] = useState<UserStatus | null>(null)
+  const [isLoginInProgress, setIsLoginInProgress] = useState(false)
 
-  // Get session token from localStorage
+  const { showNotification } = useStatusNotification()
+
   const getSessionToken = (): string | null => {
     if (typeof window === "undefined") return null
     return localStorage.getItem("session_token")
@@ -30,19 +38,34 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     if (token) {
       localStorage.setItem("session_token", token)
-      // Set cookie for middleware access
-      document.cookie = `session_token=${token}; path=/; max-age=${7 * 24 * 60 * 60}; secure; samesite=strict`
+
+      // Set cookie with proper domain and security settings
+      const cookieValue = `session_token=${token}; path=/; max-age=${7 * 24 * 60 * 60}; samesite=strict`
+      document.cookie = cookieValue
+
+      console.log("[v0] Session token set:", token.substring(0, 10) + "...")
+
+      setTimeout(() => {
+        console.log("[v0] Cookie should be set now")
+      }, 100)
     } else {
       localStorage.removeItem("session_token")
-      // Remove cookie
       document.cookie = "session_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT"
+      console.log("[v0] Session token cleared")
     }
   }
 
-  // Check authentication status
   const checkAuth = async () => {
+    // Don't check auth if login is in progress
+    if (isLoginInProgress) {
+      console.log("[v0] Login in progress, skipping auth check")
+      return
+    }
+
     try {
       console.log("[v0] Starting auth check...")
+      setLoading(true)
+
       const sessionToken = getSessionToken()
       if (!sessionToken) {
         console.log("[v0] No session token found")
@@ -58,7 +81,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setUser(currentUser)
       } else {
         console.log("[v0] Session invalid, clearing...")
-        // Session is invalid, clear it
         setUser(null)
         setSessionToken(null)
       }
@@ -71,23 +93,32 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }
 
-  // Login function
   const login = async (telegram_username: string, password: string) => {
     try {
+      console.log("[v0] Starting login for:", telegram_username)
+      setIsLoginInProgress(true)
+      setLoading(true)
+
       const { user: loggedInUser, sessionToken } = await AuthService.login({
         telegram_username,
         password,
       })
 
-      setUser(loggedInUser)
+      console.log("[v0] Login successful, setting user and token")
+
       setSessionToken(sessionToken)
+      setUser(loggedInUser)
+
+      console.log("[v0] User and session set successfully")
     } catch (error) {
-      console.error("Login failed:", error)
+      console.error("[v0] Login failed:", error)
       throw error
+    } finally {
+      setLoading(false)
+      setIsLoginInProgress(false)
     }
   }
 
-  // Logout function
   const logout = async () => {
     try {
       const sessionToken = getSessionToken()
@@ -96,39 +127,69 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
 
       setUser(null)
+      setUserStatus(null)
       setSessionToken(null)
+
+      if (typeof window !== "undefined") {
+        window.location.href = "/login"
+      }
     } catch (error) {
       console.error("[v0] Logout failed:", error)
-      // Still clear local state even if server logout fails
       setUser(null)
+      setUserStatus(null)
       setSessionToken(null)
+
+      if (typeof window !== "undefined") {
+        window.location.href = "/login"
+      }
     }
   }
 
-  // Refresh user data
   const refreshUser = async () => {
     await checkAuth()
   }
 
-  useEffect(() => {
-    // Sync session token from cookies to localStorage if needed
-    if (typeof window !== "undefined") {
-      const cookieToken = document.cookie
-        .split("; ")
-        .find((row) => row.startsWith("session_token="))
-        ?.split("=")[1]
+  const handleStatusInvalid = async (status: UserStatus) => {
+    console.log("[v0] User status invalid:", status.message)
+    setUserStatus(status)
 
-      const localToken = localStorage.getItem("session_token")
+    // Show notification to user
+    showNotification(status)
 
-      if (cookieToken && !localToken) {
-        localStorage.setItem("session_token", cookieToken)
-      } else if (!cookieToken && localToken) {
-        // Cookie expired but localStorage still has token, clear it
-        localStorage.removeItem("session_token")
+    // Only trigger logout for actual account issues, not network problems
+    if (
+      status.status === "suspended" ||
+      status.status === "expired" ||
+      (status.status === "inactive" && !status.message.includes("network") && !status.message.includes("status check"))
+    ) {
+      console.log("[v0] Account suspended/expired, logging out")
+      // Wait a bit before logout to let user see the notification
+      setTimeout(async () => {
+        await logout()
+      }, 2000)
+    } else {
+      console.log("[v0] Network/temporary issue, not logging out")
+    }
+  }
+
+  const { checkStatus } = useStatusMiddleware(user?.id || null, handleStatusInvalid)
+
+  const checkUserStatus = async (): Promise<UserStatus | null> => {
+    const status = await checkStatus()
+    if (status) {
+      setUserStatus(status)
+
+      if (!status.is_valid) {
+        showNotification(status)
       }
     }
+    return status
+  }
 
-    checkAuth()
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      checkAuth()
+    }
   }, [])
 
   const value: AuthContextType = {
@@ -137,6 +198,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     login,
     logout,
     refreshUser,
+    userStatus,
+    checkUserStatus,
   }
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

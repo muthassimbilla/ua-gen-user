@@ -75,7 +75,7 @@
     scrollbar-gutter: stable both-edges;
     width: 100vw;
     overflow-x: hidden;
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    /* Removed all transitions for instant page changes */
   }
 
   body {
@@ -89,7 +89,7 @@
     scrollbar-gutter: stable both-edges;
     width: 100%;
     min-height: 100vh;
-    scroll-behavior: smooth;
+    /* Removed scroll-behavior smooth for instant navigation */
     /* Enhanced background with better contrast for both modes */
     background: linear-gradient(
       135deg,
@@ -100,35 +100,11 @@
       hsl(var(--background)) 100%
     );
     background-size: 400% 400%;
-    animation: gradientShift 15s ease infinite;
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    /* Removed background animation for instant loading */
+    /* Removed all transitions for instant page changes */
   }
 
-  /* Enhanced universal transitions */
-  *,
-  *::before,
-  *::after {
-    transition:
-      background-color 0.4s cubic-bezier(0.4, 0, 0.2, 1),
-      border-color 0.4s cubic-bezier(0.4, 0, 0.2, 1),
-      color 0.4s cubic-bezier(0.4, 0, 0.2, 1),
-      fill 0.4s cubic-bezier(0.4, 0, 0.2, 1),
-      stroke 0.4s cubic-bezier(0.4, 0, 0.2, 1),
-      box-shadow 0.4s cubic-bezier(0.4, 0, 0.2, 1),
-      backdrop-filter 0.4s cubic-bezier(0.4, 0, 0.2, 1),
-      transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  }
-
-  /* Improved gradient animation */
-  @keyframes gradientShift {
-    0%,
-    100% {
-      background-position: 0% 50%;
-    }
-    50% {
-      background-position: 100% 50%;
-    }
-  }
+  /* Removed all universal transitions for instant interactions */
 }
 
 /* Enhanced scrollbar styles with better contrast */
@@ -151,7 +127,7 @@
 
 ::-webkit-scrollbar-thumb:hover {
   background: hsl(var(--accent-foreground) / 0.2);
-  transform: scale(1.1);
+  /* Removed transform scale for instant hover */
 }
 
 * {
@@ -196,20 +172,7 @@
     background: radial-gradient(circle at 30% 20%, hsl(var(--primary) / 0.1) 0%, transparent 50%),
       radial-gradient(circle at 70% 80%, hsl(var(--accent) / 0.1) 0%, transparent 50%);
     pointer-events: none;
-    animation: floatingOrbs 20s ease-in-out infinite;
-  }
-
-  @keyframes floatingOrbs {
-    0%,
-    100% {
-      transform: translate(0, 0) rotate(0deg);
-    }
-    33% {
-      transform: translate(30px, -30px) rotate(120deg);
-    }
-    66% {
-      transform: translate(-20px, 20px) rotate(240deg);
-    }
+    /* Removed floating orbs animation for instant loading */
   }
 
   /* Enhanced glassmorphism card styles */
@@ -234,7 +197,7 @@
   }
 
   .glass-card:hover {
-    transform: translateY(-2px);
+    /* Removed transform and transitions for instant hover */
     box-shadow: 0 12px 40px var(--glass-shadow), inset 0 1px 0 hsl(var(--accent) / 0.2);
     border-color: hsl(var(--primary) / 0.3);
   }
@@ -258,7 +221,7 @@
     background: radial-gradient(circle at 20% 30%, hsl(var(--primary) / 0.1) 0%, transparent 50%),
       radial-gradient(circle at 80% 70%, hsl(var(--accent) / 0.1) 0%, transparent 50%);
     pointer-events: none;
-    animation: floatingOrbs 20s ease-in-out infinite;
+    /* Removed floating orbs animation for instant loading */
   }
 
   .auth-form {
@@ -289,7 +252,7 @@
     border-radius: var(--radius);
     box-shadow: inset 0 2px 8px hsl(var(--muted) / 0.3);
     color: hsl(var(--foreground));
-    transition: all 0.3s ease;
+    /* Removed transition for instant input changes */
   }
 
   .auth-input:focus {
@@ -312,31 +275,31 @@
     color: hsl(var(--primary-foreground));
     position: relative;
     overflow: hidden;
-    transition: all 0.3s ease;
+    /* Removed transition for instant button interactions */
   }
 
   .auth-button:hover {
-    transform: translateY(-1px);
+    /* Removed transform and transitions for instant hover */
     box-shadow: 0 6px 20px hsl(var(--primary) / 0.4), inset 0 1px 0 hsl(var(--primary-foreground) / 0.2);
     background: linear-gradient(135deg, hsl(var(--primary) / 0.9) 0%, hsl(var(--primary) / 0.7) 100%);
   }
 
   .auth-button:active {
-    transform: translateY(0);
+    /* Removed transform for instant click feedback */
     box-shadow: 0 2px 8px hsl(var(--primary) / 0.3), inset 0 1px 0 hsl(var(--primary-foreground) / 0.1);
   }
 
   .auth-button:disabled {
     opacity: 0.6;
     cursor: not-allowed;
-    transform: none;
+    /* Removed transform for instant disabled state */
   }
 
   /* Enhanced link styles with proper contrast */
   .auth-link {
     color: hsl(var(--primary));
     text-decoration: none;
-    transition: all 0.3s ease;
+    /* Removed transition for instant link interactions */
     position: relative;
   }
 
@@ -353,7 +316,7 @@
     width: 0;
     height: 1px;
     background: hsl(var(--primary));
-    transition: width 0.3s ease;
+    /* Removed transition for instant underline */
   }
 
   .auth-link:hover::after {
@@ -363,13 +326,12 @@
   /* Enhanced theme toggle animation */
   .theme-toggle-icon {
     transform-origin: center;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    /* Removed transition for instant theme toggle */
     color: hsl(var(--foreground));
   }
 
   .theme-toggle-icon:hover {
-    transform: rotate(15deg) scale(1.1);
-    filter: drop-shadow(0 0 8px hsl(var(--primary) / 0.4));
+    /* Removed transform and filter for instant hover */
   }
 
   /* Enhanced text contrast for better readability */
@@ -390,5 +352,36 @@
 
   .demo-user-card .text-muted-foreground {
     color: hsl(var(--muted-foreground)) !important;
+  }
+
+  /* Added glass-modal styles for proper dialog positioning */
+  .glass-modal {
+    background: var(--glass-bg);
+    backdrop-filter: var(--backdrop-blur);
+    border: 1px solid hsl(var(--border));
+    border-radius: calc(var(--radius) * 1.5);
+    box-shadow: 0 25px 50px var(--glass-shadow), inset 0 1px 0 hsl(var(--accent) / 0.1);
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    max-height: 90vh;
+    max-width: 90vw;
+    overflow-y: auto;
+    z-index: 50;
+  }
+
+  /* Added glass-button styles for dialog close button */
+  .glass-button {
+    background: var(--glass-bg);
+    backdrop-filter: var(--backdrop-blur);
+    border: 1px solid hsl(var(--border));
+    border-radius: var(--radius);
+    box-shadow: 0 4px 16px var(--glass-shadow);
+  }
+
+  /* Added glass-text-glow for dialog title */
+  .glass-text-glow {
+    text-shadow: 0 0 10px hsl(var(--primary) / 0.3);
   }
 }

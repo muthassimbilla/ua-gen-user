@@ -94,7 +94,7 @@ export default function ProgressModal({
                         />
                       ))}
                     </div>
-                    <span className="text-xs text-slate-500 dark:text-slate-400">{pulseAnimation} সেকেন্ড চলছে...</span>
+                    <span className="text-xs text-slate-500 dark:text-slate-400">{pulseAnimation} seconds running...</span>
                   </div>
                 </div>
               </div>
@@ -121,7 +121,7 @@ export default function ProgressModal({
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-medium text-slate-700 dark:text-slate-300 flex items-center gap-2">
                     <Zap className="w-4 h-4 text-blue-500" aria-hidden="true" />
-                    প্রগ্রেস
+                    Progress
                   </span>
                   <span className="text-lg font-bold text-blue-600 dark:text-blue-400" aria-live="polite">
                     {progress}%
@@ -154,7 +154,7 @@ export default function ProgressModal({
                 <div className="flex items-center justify-center gap-2 text-xs text-slate-500 dark:text-slate-400">
                   <div className="flex items-center gap-1">
                     <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" aria-hidden="true" />
-                    <span>উচ্চ গতি</span>
+                    <span>High Speed</span>
                   </div>
                   <div className="w-1 h-1 bg-slate-400 rounded-full" aria-hidden="true" />
                   <div className="flex items-center gap-1">
@@ -163,7 +163,7 @@ export default function ProgressModal({
                       style={{ animationDuration: "3s" }}
                       aria-hidden="true"
                     />
-                    <span>প্রসেসিং...</span>
+                    <span>Processing...</span>
                   </div>
                 </div>
               </div>
@@ -172,7 +172,7 @@ export default function ProgressModal({
             <div className="mt-6 p-3 bg-blue-50 dark:bg-blue-950/20 rounded-lg border border-blue-200 dark:border-blue-800">
               <div className="flex items-center gap-2 text-sm text-blue-700 dark:text-blue-300">
                 <Sparkles className="w-4 h-4" aria-hidden="true" />
-                <span>💡 টিপস: প্রতিটি ইউজার এজেন্ট ইউনিক এবং সম্পূর্ণ বৈধ হবে!</span>
+                <span>💡 Tips: Each user agent will be unique and completely valid!</span>
               </div>
             </div>
           </main>

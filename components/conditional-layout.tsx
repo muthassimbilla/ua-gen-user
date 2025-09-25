@@ -4,7 +4,7 @@ import type React from "react"
 import { usePathname } from "next/navigation"
 import { useAuth } from "@/lib/auth-context"
 import SidebarNavigation from "@/components/sidebar-navigation"
-import LoadingSpinner from "@/components/loading-spinner"
+import TopNavigation from "@/components/top-navigation"
 
 interface ConditionalLayoutProps {
   children: React.ReactNode
@@ -18,22 +18,23 @@ export default function ConditionalLayout({ children }: ConditionalLayoutProps) 
   const authRoutes = ["/login", "/signup"]
   const isAuthRoute = authRoutes.includes(pathname)
 
-  // Show loading spinner while checking authentication
-  if (loading) {
-    return <LoadingSpinner />
+  // Show loading while checking authentication for non-auth routes
+  if (!isAuthRoute && loading) {
+    return <div className="flex items-center justify-center min-h-screen">Loading...</div>
   }
 
-  // For auth routes, render without sidebar
+  // For auth routes, render without sidebar and top nav
   if (isAuthRoute) {
     return <>{children}</>
   }
 
-  // For protected routes, render with sidebar if user is authenticated
+  // For protected routes, render with both sidebar and top nav if user is authenticated
   if (user) {
     return (
       <>
         <SidebarNavigation />
-        <div className="lg:ml-64">{children}</div>
+        <TopNavigation />
+        <div className="lg:ml-64 pt-16">{children}</div>
       </>
     )
   }

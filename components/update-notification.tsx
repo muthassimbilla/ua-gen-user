@@ -38,9 +38,9 @@ export default function UpdateNotification({ onUpdate, onDismiss }: UpdateNotifi
           </div>
 
           <div className="flex-1 min-w-0">
-            <h3 className="text-sm font-medium text-blue-900 dark:text-blue-100">নতুন আপডেট পাওয়া গেছে!</h3>
+            <h3 className="text-sm font-medium text-blue-900 dark:text-blue-100">New update available!</h3>
             <p className="text-xs text-blue-700 dark:text-blue-300 mt-1">
-              আপনার অ্যাপটি আপডেট করুন নতুন ফিচার এবং উন্নতির জন্য।
+              Update your app for new features and improvements.
             </p>
 
             <div className="flex gap-2 mt-3">
@@ -53,10 +53,10 @@ export default function UpdateNotification({ onUpdate, onDismiss }: UpdateNotifi
                 {isUpdating ? (
                   <>
                     <RefreshCw className="w-3 h-3 mr-1 animate-spin" />
-                    আপডেট হচ্ছে...
+                    Updating...
                   </>
                 ) : (
-                  "এখনই আপডেট করুন"
+                  "Update Now"
                 )}
               </Button>
 
@@ -66,7 +66,7 @@ export default function UpdateNotification({ onUpdate, onDismiss }: UpdateNotifi
                 onClick={handleDismiss}
                 className="text-blue-700 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900 text-xs h-7"
               >
-                পরে করব
+                Later
               </Button>
             </div>
           </div>

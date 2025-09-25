@@ -69,7 +69,7 @@ export default function SignupPage() {
 
     // Validate password confirmation
     if (formData.password !== formData.confirmPassword) {
-      newErrors.push("পাসওয়ার্ড এবং নিশ্চিতকরণ পাসওয়ার্ড মিলছে না")
+      newErrors.push("Password and confirmation password do not match")
     }
 
     return newErrors
@@ -100,14 +100,17 @@ export default function SignupPage() {
       console.log("[v0] Signup successful, redirecting to login")
 
       // Redirect to login page with success message
-      router.push("/login?message=অ্যাকাউন্ট সফলভাবে তৈরি হয়েছে! এখন লগইন করুন।")
+      router.push("/login?message=Account created successfully! You can login after admin approval.")
     } catch (error: any) {
       console.error("[v0] Signup error:", error)
 
       if (error.message.includes("Supabase")) {
-        setErrors([error.message, "সমাধান: প্রজেক্টের উপরের ডানদিকে গিয়ার আইকনে ক্লিক করুন এবং Supabase integration যোগ করুন।"])
+        setErrors([
+          error.message,
+          "Solution: Click the gear icon in the top right of the project and add Supabase integration.",
+        ])
       } else {
-        setErrors([error.message || "অ্যাকাউন্ট তৈরি করতে সমস্যা হয়েছে"])
+        setErrors([error.message || "Failed to create account"])
       }
     } finally {
       setLoading(false)
@@ -119,8 +122,10 @@ export default function SignupPage() {
       <div className="w-full max-w-md">
         <Card className="auth-form">
           <CardHeader className="text-center space-y-2">
-            <CardTitle className="text-2xl font-bold text-balance">নতুন অ্যাকাউন্ট তৈরি করুন</CardTitle>
-            <CardDescription className="text-muted-foreground">আপনার তথ্য দিয়ে একটি নতুন অ্যাকাউন্ট তৈরি করুন</CardDescription>
+            <CardTitle className="text-2xl font-bold text-balance">Create New Account</CardTitle>
+            <CardDescription className="text-muted-foreground">
+              Fill in your information to create a new account
+            </CardDescription>
           </CardHeader>
 
           <CardContent className="space-y-6">
@@ -140,8 +145,8 @@ export default function SignupPage() {
             <Alert>
               <AlertTriangle className="h-4 w-4" />
               <AlertDescription>
-                <strong>নোট:</strong> অ্যাকাউন্ট তৈরি করতে Supabase database integration প্রয়োজন। যদি error আসে, তাহলে
-                প্রজেক্টের উপরের ডানদিকে গিয়ার আইকনে ক্লিক করে Supabase integration যোগ করুন।
+                <strong>Note:</strong> Supabase database integration is required to create an account. If you get an
+                error, click the gear icon in the top right of the project and add Supabase integration.
               </AlertDescription>
             </Alert>
 
@@ -149,7 +154,7 @@ export default function SignupPage() {
               {/* Full Name Field */}
               <div className="space-y-2">
                 <Label htmlFor="full_name" className="text-sm font-medium">
-                  পূর্ণ নাম
+                  Full Name
                 </Label>
                 <div className="relative">
                   <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -157,7 +162,7 @@ export default function SignupPage() {
                     id="full_name"
                     name="full_name"
                     type="text"
-                    placeholder="আপনার পূর্ণ নাম লিখুন"
+                    placeholder="Enter your full name"
                     value={formData.full_name}
                     onChange={handleInputChange}
                     className="auth-input pl-10"
@@ -169,7 +174,7 @@ export default function SignupPage() {
               {/* Telegram Username Field */}
               <div className="space-y-2">
                 <Label htmlFor="telegram_username" className="text-sm font-medium">
-                  টেলিগ্রাম ইউজারনেম
+                  Telegram Username
                 </Label>
                 <div className="relative">
                   <MessageCircle className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -184,13 +189,13 @@ export default function SignupPage() {
                     required
                   />
                 </div>
-                <p className="text-xs text-muted-foreground">@ চিহ্ন ছাড়া শুধুমাত্র ইউজারনেম লিখুন</p>
+                <p className="text-xs text-muted-foreground">Enter username without @ symbol</p>
               </div>
 
               {/* Password Field */}
               <div className="space-y-2">
                 <Label htmlFor="password" className="text-sm font-medium">
-                  পাসওয়ার্ড
+                  Password
                 </Label>
                 <div className="relative">
                   <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -198,7 +203,7 @@ export default function SignupPage() {
                     id="password"
                     name="password"
                     type={showPassword ? "text" : "password"}
-                    placeholder="একটি শক্তিশালী পাসওয়ার্ড তৈরি করুন"
+                    placeholder="Create a strong password"
                     value={formData.password}
                     onChange={handleInputChange}
                     className="auth-input pl-10 pr-10"
@@ -223,7 +228,7 @@ export default function SignupPage() {
                         <XCircle className="h-3 w-3 text-red-500" />
                       )}
                       <span className={passwordValidation.isValid ? "text-green-500" : "text-red-500"}>
-                        পাসওয়ার্ড {passwordValidation.isValid ? "শক্তিশালী" : "দুর্বল"}
+                        Password is {passwordValidation.isValid ? "strong" : "weak"}
                       </span>
                     </div>
                     {passwordValidation.errors.length > 0 && (
@@ -243,7 +248,7 @@ export default function SignupPage() {
               {/* Confirm Password Field */}
               <div className="space-y-2">
                 <Label htmlFor="confirmPassword" className="text-sm font-medium">
-                  পাসওয়ার্ড নিশ্চিত করুন
+                  Confirm Password
                 </Label>
                 <div className="relative">
                   <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -251,7 +256,7 @@ export default function SignupPage() {
                     id="confirmPassword"
                     name="confirmPassword"
                     type={showConfirmPassword ? "text" : "password"}
-                    placeholder="পাসওয়ার্ড পুনরায় লিখুন"
+                    placeholder="Re-enter your password"
                     value={formData.confirmPassword}
                     onChange={handleInputChange}
                     className="auth-input pl-10 pr-10"
@@ -268,29 +273,29 @@ export default function SignupPage() {
                 {formData.confirmPassword && formData.password !== formData.confirmPassword && (
                   <p className="text-xs text-red-400 flex items-center space-x-1">
                     <XCircle className="h-3 w-3" />
-                    <span>পাসওয়ার্ড মিলছে না</span>
+                    <span>Passwords do not match</span>
                   </p>
                 )}
                 {formData.confirmPassword && formData.password === formData.confirmPassword && (
                   <p className="text-xs text-green-500 flex items-center space-x-1">
                     <CheckCircle className="h-3 w-3" />
-                    <span>পাসওয়ার্ড মিলেছে</span>
+                    <span>Passwords match</span>
                   </p>
                 )}
               </div>
 
               {/* Submit Button */}
               <Button type="submit" className="auth-button w-full" disabled={loading}>
-                {loading ? "অ্যাকাউন্ট তৈরি হচ্ছে..." : "অ্যাকাউন্ট তৈরি করুন"}
+                {loading ? "Creating Account..." : "Create Account"}
               </Button>
             </form>
 
             {/* Login Link */}
             <div className="text-center">
               <p className="text-sm text-muted-foreground">
-                ইতিমধ্যে অ্যাকাউন্ট আছে?{" "}
+                Already have an account?{" "}
                 <Link href="/login" className="auth-link font-medium">
-                  লগইন করুন
+                  Sign In
                 </Link>
               </p>
             </div>

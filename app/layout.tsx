@@ -6,9 +6,9 @@ import { ThemeProvider } from "@/components/theme-provider"
 import { Toaster } from "@/components/ui/toaster"
 import PageTransition from "@/components/page-transition"
 import AutoUpdateProvider from "@/components/auto-update-provider"
-import ServiceWorkerRegistration from "@/components/service-worker-registration"
 import { AuthProvider } from "@/lib/auth-context"
 import ConditionalLayout from "@/components/conditional-layout"
+import { StatusNotificationProvider } from "@/components/status-notification-provider"
 
 const inter = Inter({
   subsets: ["latin"],
@@ -93,40 +93,24 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <head>
-        <link rel="icon" href="/favicon.ico" sizes="32x32" />
-        <link rel="icon" href="/icon.png" type="image/png" sizes="192x192" />
-        <link rel="apple-touch-icon" href="/apple-touch-icon.png" sizes="180x180" />
-        <link rel="manifest" href="/manifest.json" />
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link rel="dns-prefetch" href="https://vercel.com" />
-        <link rel="dns-prefetch" href="https://api.vercel.com" />
-        <meta name="format-detection" content="telephone=no" />
-        <meta name="mobile-web-app-capable" content="yes" />
-        <meta name="apple-mobile-web-app-capable" content="yes" />
-        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-        <meta name="apple-mobile-web-app-title" content="Flo Hiv Tool" />
-        <meta name="msapplication-TileColor" content="#3b82f6" />
-        <meta name="msapplication-config" content="/browserconfig.xml" />
-      </head>
       <body className={inter.className}>
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
           enableSystem
-          disableTransitionOnChange={false}
+          disableTransitionOnChange={true}
           storageKey="devtools-pro-theme"
         >
-          <AuthProvider>
-            <AutoUpdateProvider>
-              <ConditionalLayout>
-                <PageTransition>{children}</PageTransition>
-              </ConditionalLayout>
-              <Toaster />
-              <ServiceWorkerRegistration />
-            </AutoUpdateProvider>
-          </AuthProvider>
+          <StatusNotificationProvider>
+            <AuthProvider>
+              <AutoUpdateProvider>
+                <ConditionalLayout>
+                  <PageTransition>{children}</PageTransition>
+                </ConditionalLayout>
+                <Toaster />
+              </AutoUpdateProvider>
+            </AuthProvider>
+          </StatusNotificationProvider>
         </ThemeProvider>
       </body>
     </html>

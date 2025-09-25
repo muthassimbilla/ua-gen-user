@@ -26,7 +26,6 @@ const nextConfig = {
   compiler: {
     removeConsole: process.env.NODE_ENV === 'production',
   },
-  output: 'standalone',
   async headers() {
     return [
       {
@@ -63,7 +62,7 @@ const nextConfig = {
           {
             key: 'Cache-Control',
             value: process.env.NODE_ENV === 'production' 
-              ? 'public, max-age=3600, must-revalidate' 
+              ? 'public, max-age=0, must-revalidate' 
               : 'no-cache, no-store, must-revalidate'
           }
         ]
@@ -74,7 +73,7 @@ const nextConfig = {
           {
             key: 'Cache-Control',
             value: process.env.NODE_ENV === 'production'
-              ? 'public, max-age=86400, must-revalidate'
+              ? 'public, max-age=31536000, immutable'
               : 'no-cache, no-store, must-revalidate'
           }
         ]
@@ -106,7 +105,7 @@ const nextConfig = {
       }
     ]
   },
-  webpack: (config, { isServer, dev }) => {
+  webpack: (config, { isServer }) => {
     if (!isServer) {
       config.resolve.fallback = {
         ...config.resolve.fallback,
@@ -114,54 +113,6 @@ const nextConfig = {
         net: false,
         tls: false,
       }
-    }
-    
-    config.optimization = {
-      ...config.optimization,
-      usedExports: true,
-      sideEffects: false,
-      moduleIds: 'deterministic',
-      splitChunks: {
-        chunks: 'all',
-        minSize: 20000,
-        maxSize: 244000,
-        cacheGroups: {
-          vendor: {
-            test: /[\\/]node_modules[\\/]/,
-            name: 'vendors',
-            chunks: 'all',
-            priority: 10,
-            reuseExistingChunk: true,
-          },
-          common: {
-            name: 'common',
-            minChunks: 2,
-            chunks: 'all',
-            priority: 5,
-            reuseExistingChunk: true,
-          },
-          ui: {
-            test: /[\\/]components[\\/]ui[\\/]/,
-            name: 'ui',
-            chunks: 'all',
-            priority: 8,
-            reuseExistingChunk: true,
-          },
-          supabase: {
-            test: /[\\/]node_modules[\\/]@supabase[\\/]/,
-            name: 'supabase',
-            chunks: 'all',
-            priority: 9,
-            reuseExistingChunk: true,
-          },
-        },
-      },
-    }
-
-    if (!dev) {
-      config.optimization.providedExports = true
-      config.optimization.usedExports = true
-      config.optimization.sideEffects = false
     }
     
     return config

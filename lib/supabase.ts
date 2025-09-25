@@ -1,22 +1,34 @@
 import { createClient } from "@supabase/supabase-js"
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || ""
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ""
+let supabaseInstance: any = null
 
-// Only create client if both URL and key are available
-export const supabase =
-  supabaseUrl && supabaseAnonKey
-    ? createClient(supabaseUrl, supabaseAnonKey, {
-        auth: {
-          autoRefreshToken: true,
-          persistSession: true,
-          detectSessionInUrl: true,
-        },
-      })
-    : null
+const getSupabaseClient = () => {
+  if (supabaseInstance) return supabaseInstance
+
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || ""
+  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ""
+
+  // Only create client if both URL and key are available
+  if (supabaseUrl && supabaseAnonKey) {
+    supabaseInstance = createClient(supabaseUrl, supabaseAnonKey, {
+      auth: {
+        autoRefreshToken: true,
+        persistSession: true,
+        detectSessionInUrl: true,
+      },
+    })
+  }
+
+  return supabaseInstance
+}
+
+export const supabase = getSupabaseClient()
 
 export const isSupabaseAvailable = () => {
-  return supabase !== null && supabaseUrl && supabaseAnonKey
+  const client = getSupabaseClient()
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || ""
+  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ""
+  return client !== null && supabaseUrl && supabaseAnonKey
 }
 
 // Database entity classes
@@ -24,14 +36,15 @@ export class BaseEntity {
   static tableName = ""
 
   static async list(orderBy = "id", limit = 100) {
-    if (!isSupabaseAvailable()) {
+    const client = getSupabaseClient()
+    if (!client || !isSupabaseAvailable()) {
       console.warn(`Supabase not available for ${this.tableName}`)
       return []
     }
 
     console.log(`Fetching data from ${this.tableName} with limit ${limit}...`)
 
-    const { data, error } = await supabase!
+    const { data, error } = await client
       .from(this.tableName)
       .select("*")
       .order(orderBy.startsWith("-") ? orderBy.slice(1) : orderBy, {
@@ -50,13 +63,14 @@ export class BaseEntity {
   }
 
   static async create(data: any) {
-    if (!isSupabaseAvailable()) {
+    const client = getSupabaseClient()
+    if (!client || !isSupabaseAvailable()) {
       throw new Error("Supabase not available")
     }
 
     console.log(`Creating ${this.tableName}:`, data)
 
-    const { data: result, error } = await supabase!.from(this.tableName).insert(data).select().single()
+    const { data: result, error } = await client.from(this.tableName).insert(data).select().single()
 
     console.log(`${this.tableName} create result:`, result)
     console.log(`${this.tableName} create error:`, error)
@@ -69,13 +83,14 @@ export class BaseEntity {
   }
 
   static async update(id: string, data: any) {
-    if (!isSupabaseAvailable()) {
+    const client = getSupabaseClient()
+    if (!client || !isSupabaseAvailable()) {
       throw new Error("Supabase not available")
     }
 
     console.log(`Updating ${this.tableName} ${id}:`, data)
 
-    const { data: result, error } = await supabase!.from(this.tableName).update(data).eq("id", id).select().single()
+    const { data: result, error } = await client.from(this.tableName).update(data).eq("id", id).select().single()
 
     console.log(`${this.tableName} update result:`, result)
     console.log(`${this.tableName} update error:`, error)
@@ -88,13 +103,14 @@ export class BaseEntity {
   }
 
   static async delete(id: string) {
-    if (!isSupabaseAvailable()) {
+    const client = getSupabaseClient()
+    if (!client || !isSupabaseAvailable()) {
       throw new Error("Supabase not available")
     }
 
     console.log(`Deleting ${this.tableName} ${id}`)
 
-    const { error } = await supabase!.from(this.tableName).delete().eq("id", id)
+    const { error } = await client.from(this.tableName).delete().eq("id", id)
 
     console.log(`${this.tableName} delete error:`, error)
 
@@ -106,14 +122,15 @@ export class BaseEntity {
   }
 
   static async filter(filters: any, orderBy = "id", limit = 100) {
-    if (!isSupabaseAvailable()) {
+    const client = getSupabaseClient()
+    if (!client || !isSupabaseAvailable()) {
       console.warn(`Supabase not available for ${this.tableName}`)
       return []
     }
 
     console.log(`Filtering ${this.tableName}:`, filters)
 
-    let query = supabase!.from(this.tableName).select("*")
+    let query = client.from(this.tableName).select("*")
 
     Object.entries(filters).forEach(([key, value]) => {
       query = query.eq(key, value)
@@ -172,14 +189,15 @@ export class BlacklistedUserAgent extends BaseEntity {
   static tableName = "blacklisted_user_agents"
 
   static async createOrUpdate(data: any) {
-    if (!isSupabaseAvailable()) {
+    const client = getSupabaseClient()
+    if (!client || !isSupabaseAvailable()) {
       throw new Error("Supabase not available")
     }
 
     console.log(`Creating or updating ${this.tableName}:`, data)
 
     // Use upsert to handle duplicates - update on conflict with hash
-    const { data: result, error } = await supabase!
+    const { data: result, error } = await client
       .from(this.tableName)
       .upsert(data, {
         onConflict: "hash",
@@ -199,7 +217,8 @@ export class BlacklistedUserAgent extends BaseEntity {
   }
 
   static async bulkCreateOrUpdate(dataArray: any[]) {
-    if (!isSupabaseAvailable()) {
+    const client = getSupabaseClient()
+    if (!client || !isSupabaseAvailable()) {
       throw new Error("Supabase not available")
     }
 
@@ -208,7 +227,7 @@ export class BlacklistedUserAgent extends BaseEntity {
     console.log(`Bulk creating/updating ${dataArray.length} ${this.tableName} records`)
 
     // Use bulk upsert without .single() for better performance
-    const { data: result, error } = await supabase!
+    const { data: result, error } = await client
       .from(this.tableName)
       .upsert(dataArray, {
         onConflict: "hash",
@@ -261,7 +280,8 @@ export class User extends BaseEntity {
   }
 
   static async loginWithEmail(email: string) {
-    if (!isSupabaseAvailable()) {
+    const client = getSupabaseClient()
+    if (!client || !isSupabaseAvailable()) {
       throw new Error("Supabase not available")
     }
 
@@ -269,7 +289,7 @@ export class User extends BaseEntity {
       console.log("Attempting admin login with email:", email)
 
       // First check if user exists
-      const { data: existingUser, error: selectError } = await supabase!
+      const { data: existingUser, error: selectError } = await client
         .from("users")
         .select("*")
         .eq("email", email)
@@ -295,11 +315,7 @@ export class User extends BaseEntity {
 
         console.log("Creating new admin user:", newUserData)
 
-        const { data: newUser, error: insertError } = await supabase!
-          .from("users")
-          .insert(newUserData)
-          .select()
-          .single()
+        const { data: newUser, error: insertError } = await client.from("users").insert(newUserData).select().single()
 
         console.log("New admin user created:", newUser)
         console.log("Insert error:", insertError)
@@ -371,6 +387,8 @@ function getRandomElement(arr: any[]) {
 
 // Example usage of the updated generateUserAgent function
 async function generateUserAgent() {
+  const client = getSupabaseClient()
+
   const iosVersionUA = "15.0"
   const iosVersion = {
     webkit_version: "605.1.15",
@@ -392,46 +410,59 @@ async function generateUserAgent() {
   if (Math.random() < 0.5) {
     userAgent = `Mozilla/5.0 (iPhone; CPU iPhone OS ${iosVersionUA} like Mac OS X) AppleWebKit/${iosVersion.webkit_version} (KHTML, like Gecko) Mobile/${iosVersion.build_number} [FBAN/FBIOS;FBAV/${appVersion.version};FBBV/${appVersion.build_number};FBDV/${device.model_name};FBMD/iPhone;FBSN/iOS;FBSV/${iosVersion.version};FBSS/2;FBID/phone;FBLC/${language}]`
   } else {
-    // Fetch device scaling from database
-    const { data: deviceScalingData, error: deviceScalingError } = await supabase!
-      .from("device_scaling")
-      .select("scaling")
-      .single()
+    // Fetch device scaling from database if available
+    if (client && isSupabaseAvailable()) {
+      const { data: deviceScalingData, error: deviceScalingError } = await client
+        .from("device_scaling")
+        .select("scaling")
+        .single()
 
-    if (deviceScalingError) {
-      console.error("Error fetching device scaling:", deviceScalingError)
-      throw deviceScalingError
-    }
-
-    const fbss = deviceScalingData ? deviceScalingData.scaling.replace(".00", "") : "2"
-    const extra = Math.random() < 0.1 ? ";FBOP/80" : ""
-
-    // Use FBRV from database or generate random
-    let fbrv = appVersion.fbrv
-    if (!fbrv) {
-      // Fallback to random generation if no FBRV in database
-      fbrv = Math.floor(Math.random() * 999999) + 700000000
-    } else {
-      // Handle partial FBRV completion
-      const fbrvStr = fbrv.toString()
-      if (fbrvStr.length < 9) {
-        // Complete partial FBRV with random numbers
-        const remainingDigits = 9 - fbrvStr.length
-        const randomPart = Math.floor(Math.random() * Math.pow(10, remainingDigits))
-          .toString()
-          .padStart(remainingDigits, "0")
-        fbrv = fbrvStr + randomPart
+      if (deviceScalingError) {
+        console.error("Error fetching device scaling:", deviceScalingError)
       }
+
+      const fbss = deviceScalingData ? deviceScalingData.scaling.replace(".00", "") : "2"
+      const extra = Math.random() < 0.1 ? ";FBOP/80" : ""
+
+      // Use FBRV from database or generate random
+      let fbrv = appVersion.fbrv
+      if (!fbrv) {
+        // Fallback to random generation if no FBRV in database
+        fbrv = Math.floor(Math.random() * 999999) + 700000000
+      } else {
+        // Handle partial FBRV completion
+        const fbrvStr = fbrv.toString()
+        if (fbrvStr.length < 9) {
+          // Complete partial FBRV with random numbers
+          const remainingDigits = 9 - fbrvStr.length
+          const randomPart = Math.floor(Math.random() * Math.pow(10, remainingDigits))
+            .toString()
+            .padStart(remainingDigits, "0")
+          fbrv = fbrvStr + randomPart
+        }
+      }
+
+      const fbrv_part = extra ? "" : `;FBOP/5;FBRV/${fbrv}`
+      const iabmv = Math.random() < 0.9 ? ";IABMV/1" : ""
+
+      userAgent =
+        `Mozilla/5.0 (iPhone; CPU iPhone OS ${iosVersionUA} like Mac OS X) ` +
+        `AppleWebKit/${iosVersion.webkit_version} (KHTML, like Gecko) Mobile/${iosVersion.build_number} ` +
+        `[FBAN/FBIOS;FBAV/${appVersion.version};FBBV/${appVersion.build_number};FBDV/${device.model_name};FBMD/iPhone;FBSN/iOS;` +
+        `FBSV/${iosVersion.version};FBSS/${fbss};FBID/phone;FBLC/${language}${extra}${fbrv_part}${iabmv}]`
+    } else {
+      // Fallback when Supabase is not available
+      const fbss = "2"
+      const fbrv = Math.floor(Math.random() * 999999) + 700000000
+      const fbrv_part = `;FBOP/5;FBRV/${fbrv}`
+      const iabmv = Math.random() < 0.9 ? ";IABMV/1" : ""
+
+      userAgent =
+        `Mozilla/5.0 (iPhone; CPU iPhone OS ${iosVersionUA} like Mac OS X) ` +
+        `AppleWebKit/${iosVersion.webkit_version} (KHTML, like Gecko) Mobile/${iosVersion.build_number} ` +
+        `[FBAN/FBIOS;FBAV/${appVersion.version};FBBV/${appVersion.build_number};FBDV/${device.model_name};FBMD/iPhone;FBSN/iOS;` +
+        `FBSV/${iosVersion.version};FBSS/${fbss};FBID/phone;FBLC/${language}${fbrv_part}${iabmv}]`
     }
-
-    const fbrv_part = extra ? "" : `;FBOP/5;FBRV/${fbrv}`
-    const iabmv = Math.random() < 0.9 ? ";IABMV/1" : ""
-
-    userAgent =
-      `Mozilla/5.0 (iPhone; CPU iPhone OS ${iosVersionUA} like Mac OS X) ` +
-      `AppleWebKit/${iosVersion.webkit_version} (KHTML, like Gecko) Mobile/${iosVersion.build_number} ` +
-      `[FBAN/FBIOS;FBAV/${appVersion.version};FBBV/${appVersion.build_number};FBDV/${device.model_name};FBMD/iPhone;FBSN/iOS;` +
-      `FBSV/${iosVersion.version};FBSS/${fbss};FBID/phone;FBLC/${language}${extra}${fbrv_part}${iabmv}]`
   }
 
   console.log("Generated User Agent:", userAgent)
@@ -443,13 +474,14 @@ export class AccessKey extends BaseEntity {
   static tableName = "access_keys"
 
   static async authenticate(accessKey: string) {
-    if (!isSupabaseAvailable()) {
+    const client = getSupabaseClient()
+    if (!client || !isSupabaseAvailable()) {
       throw new Error("Supabase not available")
     }
 
     console.log("Authenticating with key:", accessKey)
 
-    const { data: user, error } = await supabase!
+    const { data: user, error } = await client
       .from(this.tableName)
       .select("*")
       .eq("access_key", accessKey)
@@ -546,7 +578,8 @@ export class UserGeneration extends BaseEntity {
   static tableName = "user_generations"
 
   static async createGeneration(accessKey: string, userName: string, generatedData: any, platform: string) {
-    if (!isSupabaseAvailable()) {
+    const client = getSupabaseClient()
+    if (!client || !isSupabaseAvailable()) {
       throw new Error("Supabase not available")
     }
 
@@ -562,11 +595,12 @@ export class UserGeneration extends BaseEntity {
   }
 
   static async getUserHistory(accessKey: string, limit = 50) {
-    if (!isSupabaseAvailable()) {
+    const client = getSupabaseClient()
+    if (!client || !isSupabaseAvailable()) {
       return []
     }
 
-    const { data, error } = await supabase!
+    const { data, error } = await client
       .from(this.tableName)
       .select("*")
       .eq("access_key", accessKey)
@@ -634,11 +668,12 @@ export class AdminNotice extends BaseEntity {
   static tableName = "admin_notices"
 
   static async getActiveNotices(targetUser?: string) {
-    if (!isSupabaseAvailable()) {
+    const client = getSupabaseClient()
+    if (!client || !isSupabaseAvailable()) {
       return []
     }
 
-    let query = supabase!.from(this.tableName).select("*").eq("is_active", true)
+    let query = client.from(this.tableName).select("*").eq("is_active", true)
 
     // Get notices for specific user or global notices
     if (targetUser) {

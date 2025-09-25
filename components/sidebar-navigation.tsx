@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { usePathname } from "next/navigation"
+import Link from "next/link"
 import { Code, Settings, Smartphone, Menu, X, Clock, Home } from "lucide-react"
 import ThemeToggle from "./theme-toggle"
 
@@ -65,16 +66,31 @@ export default function SidebarNavigation() {
                 const IconComponent = item.icon
                 const itemIsActive = isActive(item.href, item.name)
                 const isAvailable = item.status === "Active"
+
+                if (!isAvailable) {
+                  return (
+                    <div
+                      key={item.name}
+                      className="flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 font-medium group relative overflow-hidden text-slate-400 dark:text-slate-500 cursor-not-allowed opacity-60"
+                    >
+                      <IconComponent className="w-5 h-5 relative z-10 text-slate-400 dark:text-slate-500" />
+                      <div className="flex-1 relative z-10">
+                        <div className="text-sm">{item.name}</div>
+                        <div className="text-xs text-slate-400 dark:text-slate-500">Coming Soon</div>
+                      </div>
+                      <Clock className="w-4 h-4 text-slate-400 dark:text-slate-500 relative z-10" />
+                    </div>
+                  )
+                }
+
                 return (
-                  <a
+                  <Link
                     key={item.name}
                     href={item.href}
                     className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 font-medium group relative overflow-hidden ${
                       itemIsActive
                         ? "glass-button bg-gradient-to-r from-blue-500/20 to-indigo-600/20 text-blue-600 dark:text-blue-400 shadow-lg border border-blue-500/30"
-                        : isAvailable
-                          ? "text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 glass-button hover:bg-blue-50/50 dark:hover:bg-blue-900/20"
-                          : "text-slate-400 dark:text-slate-500 cursor-not-allowed opacity-60"
+                        : "text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 glass-button hover:bg-blue-50/50 dark:hover:bg-blue-900/20"
                     }`}
                     onClick={() => setIsSidebarOpen(false)}
                   >
@@ -86,20 +102,16 @@ export default function SidebarNavigation() {
                       className={`w-5 h-5 relative z-10 ${
                         itemIsActive
                           ? "text-blue-600 dark:text-blue-400"
-                          : isAvailable
-                            ? "text-slate-500 dark:text-slate-400 group-hover:text-blue-500"
-                            : "text-slate-400 dark:text-slate-500"
+                          : "text-slate-500 dark:text-slate-400 group-hover:text-blue-500"
                       }`}
                     />
                     <div className="flex-1 relative z-10">
                       <div className="text-sm">{item.name}</div>
-                      {!isAvailable && <div className="text-xs text-slate-400 dark:text-slate-500">Coming Soon</div>}
                     </div>
                     {itemIsActive && (
                       <div className="w-2 h-2 rounded-full bg-blue-500/60 glass-floating relative z-10" />
                     )}
-                    {!isAvailable && <Clock className="w-4 h-4 text-slate-400 dark:text-slate-500 relative z-10" />}
-                  </a>
+                  </Link>
                 )
               })}
             </div>
@@ -114,7 +126,7 @@ export default function SidebarNavigation() {
               <ThemeToggle />
             </div>
             <div className="text-center">
-              <p className="text-xs text-slate-500 dark:text-slate-400">Flo Hiv Tool © 2024</p>
+              <p className="text-xs text-slate-500 dark:text-slate-400">Flo Hiv Tool © 2025</p>
             </div>
           </div>
         </div>

@@ -65,8 +65,8 @@ export default function CustomModal({
   title,
   message,
   type = "info",
-  confirmText = "ঠিক আছে",
-  cancelText = "বাতিল",
+  confirmText = "OK",
+  cancelText = "Cancel",
   onConfirm,
   onCancel,
   showCancel = false,
@@ -108,7 +108,7 @@ export default function CustomModal({
       if (onConfirm) {
         onConfirm()
       }
-      onClose() // সবসময় modal বন্ধ করুন
+      onClose() // Always close modal
     }
   }
 
@@ -310,7 +310,7 @@ export default function CustomModal({
                 {isLoading ? (
                   <div className="flex items-center gap-2">
                     <Loader2 className="w-4 h-4 animate-spin" />
-                    <span>অপেক্ষা করুন...</span>
+                    <span>Please wait...</span>
                   </div>
                 ) : (
                   confirmText

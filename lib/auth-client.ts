@@ -1,6 +1,7 @@
 import { createBrowserClient } from "@supabase/ssr"
 import bcrypt from "bcryptjs"
 import { v4 as uuidv4 } from "uuid"
+import { DeviceFingerprint, IPDetection } from "./device-fingerprint"
 
 // Types for our authentication system
 export interface User {
@@ -9,6 +10,9 @@ export interface User {
   telegram_username: string
   created_at: string
   updated_at: string
+  is_approved: boolean
+  account_status: string
+  is_active: boolean
 }
 
 export interface UserSession {
@@ -20,6 +24,26 @@ export interface UserSession {
   last_accessed: string
   ip_address?: string
   user_agent?: string
+  device_fingerprint?: string
+  is_active?: boolean
+  logout_reason?: string
+}
+
+export interface UserDevice {
+  id: string
+  user_id: string
+  device_fingerprint: string
+  device_name?: string
+  browser_info?: string
+  os_info?: string
+  screen_resolution?: string
+  timezone?: string
+  language?: string
+  first_seen: string
+  last_seen: string
+  is_trusted: boolean
+  is_blocked: boolean
+  total_logins: number
 }
 
 export interface LoginCredentials {
@@ -51,15 +75,25 @@ function validateEnvironment(): { isValid: boolean; error?: string } {
   return { isValid: true }
 }
 
-// Create browser client for client-side operations
+let supabaseInstance: any = null
+
 export function createBrowserSupabaseClient() {
+  if (typeof window === "undefined") return null // Server-side rendering guard
+
+  if (supabaseInstance) return supabaseInstance
+
   const validation = validateEnvironment()
   if (!validation.isValid) {
-    // Return a mock client for demo purposes
+    // Return null for demo purposes
     return null
   }
 
-  return createBrowserClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!)
+  supabaseInstance = createBrowserClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+  )
+
+  return supabaseInstance
 }
 
 // Password hashing utilities
@@ -78,15 +112,15 @@ export class PasswordUtils {
     const errors: string[] = []
 
     if (password.length < 8) {
-      errors.push("পাসওয়ার্ড কমপক্ষে ৮ অক্ষরের হতে হবে")
+      errors.push("Password must be at least 8 characters long")
     }
 
     if (!/[A-Za-z]/.test(password)) {
-      errors.push("পাসওয়ার্ডে কমপক্ষে একটি ইংরেজি অক্ষর থাকতে হবে")
+      errors.push("Password must contain at least one English letter")
     }
 
     if (!/[0-9]/.test(password)) {
-      errors.push("পাসওয়ার্ডে কমপক্ষে একটি সংখ্যা থাকতে হবে")
+      errors.push("Password must contain at least one number")
     }
 
     return {
@@ -103,7 +137,7 @@ export class AuthService {
       const supabase = createBrowserSupabaseClient()
 
       if (!supabase) {
-        throw new Error("Supabase integration প্রয়োজন। প্রজেক্ট সেটিংস থেকে Supabase integration যোগ করুন।")
+        throw new Error("Supabase integration required. Please add Supabase integration from project settings.")
       }
 
       // Validate password
@@ -120,26 +154,28 @@ export class AuthService {
         .single()
 
       if (existingUser) {
-        throw new Error("এই টেলিগ্রাম ইউজারনেম ইতিমধ্যে ব্যবহৃত হয়েছে")
+        throw new Error("This Telegram username is already in use")
       }
 
       // Hash password
       const passwordHash = await PasswordUtils.hashPassword(signupData.password)
 
-      // Create user
       const { data: user, error } = await supabase
         .from("users")
         .insert({
           full_name: signupData.full_name,
           telegram_username: signupData.telegram_username,
           password_hash: passwordHash,
+          is_approved: false, // New users need admin approval
+          account_status: "active", // Account is active but not approved
+          is_active: true,
         })
-        .select("id, full_name, telegram_username, created_at, updated_at")
+        .select("id, full_name, telegram_username, created_at, updated_at, is_approved, account_status, is_active")
         .single()
 
       if (error) {
         console.error("Signup error:", error)
-        throw new Error("অ্যাকাউন্ট তৈরি করতে সমস্যা হয়েছে")
+        throw new Error("Failed to create account")
       }
 
       return user
@@ -151,10 +187,10 @@ export class AuthService {
       }
 
       if (error.code === "23505") {
-        throw new Error("এই টেলিগ্রাম ইউজারনেম ইতিমধ্যে ব্যবহৃত হয়েছে")
+        throw new Error("This Telegram username is already in use")
       }
 
-      throw new Error("অ্যাকাউন্ট তৈরি করতে সমস্যা হয়েছে। পরে আবার চেষ্টা করুন।")
+      throw new Error("Failed to create account. Please try again later.")
     }
   }
 
@@ -163,30 +199,38 @@ export class AuthService {
       const supabase = createBrowserSupabaseClient()
 
       if (!supabase) {
-        // Demo users for testing
-        const demoUsers = [
-          { id: "demo-1", full_name: "আহমেদ রহমান", telegram_username: "ahmed_rahman", password: "demo123456" },
-          { id: "demo-2", full_name: "ফাতিমা খাতুন", telegram_username: "fatima_khatun", password: "demo123456" },
-          { id: "demo-3", full_name: "মোহাম্মদ করিম", telegram_username: "mohammad_karim", password: "demo123456" },
-        ]
+        throw new Error("Supabase integration required. Please add Supabase integration from project settings.")
+      }
 
-        const demoUser = demoUsers.find((u) => u.telegram_username === credentials.telegram_username)
+      console.log("[v0] Starting login process...")
 
-        if (!demoUser || demoUser.password !== credentials.password) {
-          throw new Error("ভুল টেলিগ্রাম ইউজারনেম অথবা পাসওয়ার্ড")
+      let deviceInfo
+      let currentIP
+
+      try {
+        deviceInfo = await DeviceFingerprint.getDeviceInfo()
+        console.log("[v0] Device fingerprint:", deviceInfo.fingerprint.substring(0, 8) + "...")
+      } catch (error) {
+        console.error("[v0] Device fingerprint error:", error)
+        // Fallback device info
+        deviceInfo = {
+          fingerprint: "fallback-" + Date.now().toString(36),
+          name: "Unknown Device",
+          browser: "Unknown Browser",
+          os: "Unknown OS",
+          screenResolution: "1920x1080",
+          timezone: "UTC",
+          language: "en",
+          userAgent: navigator.userAgent || "Unknown",
         }
+      }
 
-        const sessionToken = "demo-session-" + Date.now()
-        const { password, ...userWithoutPassword } = demoUser
-
-        return {
-          user: {
-            ...userWithoutPassword,
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString(),
-          },
-          sessionToken,
-        }
+      try {
+        currentIP = await IPDetection.getCurrentIP()
+        console.log("[v0] Current IP:", currentIP)
+      } catch (error) {
+        console.error("[v0] IP detection error:", error)
+        currentIP = "127.0.0.1" // Fallback IP
       }
 
       // Find user by telegram username
@@ -197,33 +241,129 @@ export class AuthService {
         .single()
 
       if (userError || !user) {
-        throw new Error("ভুল টেলিগ্রাম ইউজারনেম অথবা পাসওয়ার্ড")
+        throw new Error("Invalid Telegram username or password")
+      }
+
+      if (!user.is_approved) {
+        throw new Error("Your account has not been approved yet. Waiting for admin approval.")
       }
 
       // Verify password
       const isPasswordValid = await PasswordUtils.verifyPassword(credentials.password, user.password_hash)
       if (!isPasswordValid) {
-        throw new Error("ভুল টেলিগ্রাম ইউজারনেম অথবা পাসওয়ার্ড")
+        throw new Error("Invalid Telegram username or password")
+      }
+
+      console.log("[v0] User authenticated, checking device policy...")
+
+      try {
+        const { data: deviceAllowed, error: deviceCheckError } = await supabase.rpc("is_device_allowed", {
+          p_user_id: user.id,
+          p_device_fingerprint: deviceInfo.fingerprint,
+        })
+
+        if (deviceCheckError) {
+          console.error("[v0] Device check error:", deviceCheckError)
+        }
+
+        if (!deviceAllowed) {
+          console.log("[v0] Device not allowed, logging out other devices")
+
+          // Logout all active sessions for this user
+          const { error: logoutError } = await supabase
+            .from("user_sessions")
+            .update({
+              is_active: false,
+              logout_reason: "new_device_login",
+            })
+            .eq("user_id", user.id)
+            .eq("is_active", true)
+
+          if (logoutError) {
+            console.error("[v0] Error logging out other devices:", logoutError)
+          }
+        }
+      } catch (error) {
+        console.error("[v0] Device policy check failed:", error)
+        // Continue with login even if device check fails
+      }
+
+      try {
+        const { error: deviceTrackError } = await supabase.rpc("track_device_login", {
+          p_user_id: user.id,
+          p_device_fingerprint: deviceInfo.fingerprint,
+          p_device_name: deviceInfo.name,
+          p_browser_info: deviceInfo.browser,
+          p_os_info: deviceInfo.os,
+          p_screen_resolution: deviceInfo.screenResolution,
+          p_timezone: deviceInfo.timezone,
+          p_language: deviceInfo.language,
+        })
+
+        if (deviceTrackError) {
+          console.error("[v0] Device tracking error:", deviceTrackError)
+        }
+      } catch (error) {
+        console.error("[v0] Device tracking failed:", error)
+        // Continue with login even if device tracking fails
       }
 
       // Generate session token
       const sessionToken = uuidv4() + "-" + Date.now().toString(36) + "-" + Math.random().toString(36).substr(2)
       const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // 7 days
 
-      // Create session
+      console.log("[v0] Creating session...")
+
       const { error: sessionError } = await supabase.from("user_sessions").insert({
         user_id: user.id,
         session_token: sessionToken,
         expires_at: expiresAt.toISOString(),
+        ip_address: currentIP,
+        user_agent: deviceInfo.userAgent,
+        device_fingerprint: deviceInfo.fingerprint,
+        is_active: true,
       })
 
       if (sessionError) {
-        console.error("Session creation error:", sessionError)
-        throw new Error("সেশন তৈরি করতে সমস্যা হয়েছে")
+        console.error("[v0] Session creation error:", sessionError)
+        throw new Error("Failed to create session")
+      }
+
+      console.log("[v0] Session created successfully")
+
+      if (currentIP && currentIP !== "127.0.0.1") {
+        try {
+          const ipInfo = await IPDetection.getIPInfo(currentIP)
+
+          const { error: ipHistoryError } = await supabase.from("user_ip_history").insert({
+            user_id: user.id,
+            ip_address: currentIP,
+            country: ipInfo?.country,
+            city: ipInfo?.city,
+            isp: ipInfo?.isp,
+            is_current: true,
+          })
+
+          if (ipHistoryError) {
+            console.error("[v0] IP history tracking error:", ipHistoryError)
+          }
+
+          // Mark other IPs as not current
+          await supabase
+            .from("user_ip_history")
+            .update({ is_current: false })
+            .eq("user_id", user.id)
+            .neq("ip_address", currentIP)
+        } catch (error) {
+          console.error("[v0] IP tracking failed:", error)
+          // Continue even if IP tracking fails
+        }
       }
 
       // Return user without password hash
       const { password_hash, ...userWithoutPassword } = user
+
+      console.log("[v0] Login successful for user:", user.telegram_username)
 
       return {
         user: userWithoutPassword,
@@ -232,11 +372,15 @@ export class AuthService {
     } catch (error: any) {
       console.error("[v0] Login error:", error)
 
-      if (error.message.includes("Supabase") || error.message.includes("ভুল টেলিগ্রাম")) {
+      if (
+        error.message.includes("Supabase") ||
+        error.message.includes("Invalid Telegram") ||
+        error.message.includes("approved")
+      ) {
         throw error
       }
 
-      throw new Error("লগইন করতে সমস্যা হয়েছে। পরে আবার চেষ্টা করুন।")
+      throw new Error("Login failed. Please try again later.")
     }
   }
 
@@ -245,8 +389,7 @@ export class AuthService {
       const supabase = createBrowserSupabaseClient()
 
       if (!supabase) {
-        console.log("[v0] Demo logout")
-        return
+        throw new Error("Supabase integration required")
       }
 
       const { error } = await supabase.from("user_sessions").delete().eq("session_token", sessionToken)
@@ -271,23 +414,17 @@ export class AuthService {
       const supabase = createBrowserSupabaseClient()
 
       if (!supabase) {
-        if (sessionToken.startsWith("demo-session-")) {
-          // Return a demo user
-          return {
-            id: "demo-1",
-            full_name: "ডেমো ইউজার",
-            telegram_username: "demo_user",
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString(),
-          }
-        }
+        console.log("[v0] Supabase not configured")
         return null
       }
+
+      const currentIP = await IPDetection.getCurrentIP()
 
       const { data: session, error: sessionError } = await supabase
         .from("user_sessions")
         .select("*")
         .eq("session_token", sessionToken)
+        .eq("is_active", true)
         .gt("expires_at", new Date().toISOString())
         .single()
 
@@ -296,11 +433,33 @@ export class AuthService {
         return null
       }
 
+      if (currentIP && session.ip_address && currentIP !== session.ip_address) {
+        // Skip IP change check for localhost/development environment
+        const isLocalhost = currentIP === "::1" || currentIP === "127.0.0.1" || currentIP.startsWith("192.168.") || currentIP.startsWith("10.") || currentIP.startsWith("172.")
+        const isOldLocalhost = session.ip_address === "::1" || session.ip_address === "127.0.0.1" || session.ip_address.startsWith("192.168.") || session.ip_address.startsWith("10.") || session.ip_address.startsWith("172.")
+        
+        if (isLocalhost || isOldLocalhost) {
+          console.log("[v0] Skipping IP change check for localhost:", session.ip_address, "->", currentIP)
+        } else {
+          console.log("[v0] IP changed from", session.ip_address, "to", currentIP)
+
+          // Logout due to IP change
+          await supabase.rpc("logout_due_to_ip_change", {
+            p_user_id: session.user_id,
+            p_old_ip: session.ip_address,
+            p_new_ip: currentIP,
+          })
+
+          console.log("[v0] Auto-logged out due to IP change")
+          return null
+        }
+      }
+
       console.log("[v0] Session found, fetching user:", session.user_id)
 
       const { data: user, error: userError } = await supabase
         .from("users")
-        .select("id, full_name, telegram_username, created_at, updated_at")
+        .select("id, full_name, telegram_username, created_at, updated_at, is_approved, account_status, is_active")
         .eq("id", session.user_id)
         .single()
 
@@ -320,6 +479,67 @@ export class AuthService {
       return null
     }
   }
+
+  static async getUserCurrentIP(): Promise<string | null> {
+    try {
+      return await IPDetection.getCurrentIP()
+    } catch (error) {
+      console.error("[v0] Failed to get current IP:", error)
+      return null
+    }
+  }
+
+  static async getUserDevices(sessionToken: string): Promise<UserDevice[]> {
+    try {
+      const supabase = createBrowserSupabaseClient()
+      if (!supabase) return []
+
+      const currentUser = await this.getCurrentUser(sessionToken)
+      if (!currentUser) return []
+
+      const { data: devices, error } = await supabase
+        .from("user_devices")
+        .select("*")
+        .eq("user_id", currentUser.id)
+        .order("last_seen", { ascending: false })
+
+      if (error) {
+        console.error("Error fetching user devices:", error)
+        return []
+      }
+
+      return devices || []
+    } catch (error) {
+      console.error("[v0] Error getting user devices:", error)
+      return []
+    }
+  }
+
+  static async logoutOtherDevices(sessionToken: string): Promise<boolean> {
+    try {
+      const supabase = createBrowserSupabaseClient()
+      if (!supabase) return false
+
+      const { data: session } = await supabase
+        .from("user_sessions")
+        .select("id, user_id")
+        .eq("session_token", sessionToken)
+        .eq("is_active", true)
+        .single()
+
+      if (!session) return false
+
+      const { error } = await supabase.rpc("logout_other_devices", {
+        p_user_id: session.user_id,
+        p_current_session_id: session.id,
+      })
+
+      return !error
+    } catch (error) {
+      console.error("[v0] Error logging out other devices:", error)
+      return false
+    }
+  }
 }
 
 // Validation utilities
@@ -328,26 +548,26 @@ export class ValidationUtils {
     const errors: string[] = []
 
     if (!username || username.trim().length === 0) {
-      errors.push("টেলিগ্রাম ইউজারনেম প্রয়োজন")
+      errors.push("Telegram username is required")
       return { isValid: false, errors }
     }
 
     const trimmedUsername = username.trim()
 
     if (trimmedUsername.length < 3) {
-      errors.push("টেলিগ্রাম ইউজারনেম কমপক্ষে ৩ অক্ষরের হতে হবে")
+      errors.push("Telegram username must be at least 3 characters long")
     }
 
     if (trimmedUsername.length > 32) {
-      errors.push("টেলিগ্রাম ইউজারনেম সর্বোচ্চ ৩২ অক্ষরের হতে পারে")
+      errors.push("Telegram username can be at most 32 characters long")
     }
 
     if (!/^[a-zA-Z0-9_]+$/.test(trimmedUsername)) {
-      errors.push("টেলিগ্রাম ইউজারনেমে শুধুমাত্র ইংরেজি অক্ষর, সংখ্যা এবং আন্ডারস্কোর (_) ব্যবহার করা যাবে")
+      errors.push("Telegram username can only contain English letters, numbers and underscores (_)")
     }
 
     if (trimmedUsername.startsWith("_") || trimmedUsername.endsWith("_")) {
-      errors.push("টেলিগ্রাম ইউজারনেম আন্ডারস্কোর (_) দিয়ে শুরু বা শেষ হতে পারে না")
+      errors.push("Telegram username cannot start or end with underscore (_)")
     }
 
     return {
@@ -360,18 +580,18 @@ export class ValidationUtils {
     const errors: string[] = []
 
     if (!name || name.trim().length === 0) {
-      errors.push("পূর্ণ নাম প্রয়োজন")
+      errors.push("Full name is required")
       return { isValid: false, errors }
     }
 
     const trimmedName = name.trim()
 
     if (trimmedName.length < 2) {
-      errors.push("পূর্ণ নাম কমপক্ষে ২ অক্ষরের হতে হবে")
+      errors.push("Full name must be at least 2 characters long")
     }
 
     if (trimmedName.length > 100) {
-      errors.push("পূর্ণ নাম সর্বোচ্চ ১০০ অক্ষরের হতে পারে")
+      errors.push("Full name can be at most 100 characters long")
     }
 
     return {

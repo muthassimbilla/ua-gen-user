@@ -70,7 +70,10 @@ export default function GeneratorControls({
                 <SelectItem value="pixel">
                   <div className="flex items-center gap-2">
                     <Smartphone className="w-4 h-4" aria-hidden="true" />
-                    Pixel
+                    <div className="flex flex-col">
+                      <span>Mix</span>
+                      <span className="text-xs text-muted-foreground">Pixel, Motorola</span>
+                    </div>
                   </div>
                 </SelectItem>
               </SelectContent>

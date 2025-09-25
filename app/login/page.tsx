@@ -11,7 +11,7 @@ import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { useAuth } from "@/lib/auth-context"
-import { Eye, EyeOff, MessageCircle, Lock, CheckCircle, XCircle, LogIn } from "lucide-react"
+import { Eye, EyeOff, MessageCircle, Lock, CheckCircle, XCircle, LogIn, Clock, AlertTriangle } from "lucide-react"
 
 export default function LoginPage() {
   const router = useRouter()
@@ -24,14 +24,21 @@ export default function LoginPage() {
   })
   const [errors, setErrors] = useState<string[]>([])
   const [successMessage, setSuccessMessage] = useState("")
+  const [pendingApproval, setPendingApproval] = useState(false)
   const [loading, setLoading] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
+  const [ipChangeLogout, setIpChangeLogout] = useState(false)
 
-  // Check for success message from signup
   useEffect(() => {
     const message = searchParams.get("message")
+    const reason = searchParams.get("reason")
+
     if (message) {
       setSuccessMessage(message)
+    }
+
+    if (reason === "ip_changed") {
+      setIpChangeLogout(true)
     }
   }, [searchParams])
 
@@ -39,9 +46,9 @@ export default function LoginPage() {
     const { name, value } = e.target
     setFormData((prev) => ({ ...prev, [name]: value }))
 
-    // Clear errors when user starts typing
     if (errors.length > 0) {
       setErrors([])
+      setPendingApproval(false)
     }
   }
 
@@ -49,11 +56,11 @@ export default function LoginPage() {
     const newErrors: string[] = []
 
     if (!formData.telegram_username.trim()) {
-      newErrors.push("টেলিগ্রাম ইউজারনেম প্রয়োজন")
+      newErrors.push("Telegram username is required")
     }
 
     if (!formData.password.trim()) {
-      newErrors.push("পাসওয়ার্ড প্রয়োজন")
+      newErrors.push("Password is required")
     }
 
     return newErrors
@@ -64,24 +71,31 @@ export default function LoginPage() {
     setLoading(true)
     setErrors([])
     setSuccessMessage("")
+    setPendingApproval(false)
 
     try {
-      // Validate form
       const validationErrors = validateForm()
       if (validationErrors.length > 0) {
         setErrors(validationErrors)
         return
       }
 
-      // Login user
       await login(formData.telegram_username.trim(), formData.password)
 
-      // Get redirect URL or default to /tool
+      // Wait a bit for the auth context to update
+      await new Promise((resolve) => setTimeout(resolve, 100))
+      
       const redirectTo = searchParams.get("redirect") || "/tool"
       router.push(redirectTo)
     } catch (error: any) {
       console.error("[v0] Login error:", error)
-      setErrors([error.message || "লগইন করতে সমস্যা হয়েছে"])
+
+      if (error.message.includes("not been approved") || error.message.includes("Waiting for admin approval")) {
+        setPendingApproval(true)
+        setErrors(["Your account is pending approval. Please wait for admin approval before logging in."])
+      } else {
+        setErrors([error.message || "Login failed. Please try again."])
+      }
     } finally {
       setLoading(false)
     }
@@ -92,14 +106,13 @@ export default function LoginPage() {
       <div className="w-full max-w-md">
         <Card className="auth-form">
           <CardHeader className="text-center space-y-2">
-            <CardTitle className="text-2xl font-bold text-balance">আপনার অ্যাকাউন্টে লগইন করুন</CardTitle>
+            <CardTitle className="text-2xl font-bold text-balance">Login to Your Account</CardTitle>
             <CardDescription className="text-muted-foreground">
-              টেলিগ্রাম ইউজারনেম এবং পাসওয়ার্ড দিয়ে লগইন করুন
+              Sign in with your Telegram username and password
             </CardDescription>
           </CardHeader>
 
           <CardContent className="space-y-6">
-            {/* Success Message */}
             {successMessage && (
               <Alert className="border-green-500/20 bg-green-500/10">
                 <CheckCircle className="h-4 w-4 text-green-500" />
@@ -107,8 +120,38 @@ export default function LoginPage() {
               </Alert>
             )}
 
-            {/* Error Messages */}
-            {errors.length > 0 && (
+            {ipChangeLogout && (
+              <Alert className="border-orange-500/20 bg-orange-500/10">
+                <AlertTriangle className="h-4 w-4 text-orange-500" />
+                <AlertDescription className="text-orange-600">
+                  <div className="space-y-2">
+                    <p className="font-medium">Your IP address has changed</p>
+                    <p className="text-sm">You have been automatically logged out for security reasons. Please log in again.</p>
+                    <p className="text-xs text-orange-500">One Key can only be used on one device/IP.</p>
+                  </div>
+                </AlertDescription>
+              </Alert>
+            )}
+
+            {pendingApproval && (
+              <Alert className="border-yellow-500/20 bg-yellow-500/10">
+                <Clock className="h-4 w-4 text-yellow-500" />
+                <AlertDescription className="text-yellow-600">
+                  <div className="space-y-2">
+                    <p className="font-medium">Account Pending Approval</p>
+                    <p className="text-sm">
+                      Your account has been created successfully but is still waiting for admin approval. You will be
+                      able to login once approved.
+                    </p>
+                    <p className="text-xs text-yellow-500">
+                      Approval is usually granted within 24 hours. Please be patient.
+                    </p>
+                  </div>
+                </AlertDescription>
+              </Alert>
+            )}
+
+            {errors.length > 0 && !pendingApproval && (
               <Alert variant="destructive">
                 <XCircle className="h-4 w-4" />
                 <AlertDescription>
@@ -121,11 +164,18 @@ export default function LoginPage() {
               </Alert>
             )}
 
+            <Alert>
+              <AlertTriangle className="h-4 w-4" />
+              <AlertDescription>
+                <strong>Note:</strong> New accounts require admin approval after registration. You will be able to login
+                after receiving approval.
+              </AlertDescription>
+            </Alert>
+
             <form onSubmit={handleSubmit} className="space-y-4">
-              {/* Telegram Username Field */}
               <div className="space-y-2">
                 <Label htmlFor="telegram_username" className="text-sm font-medium">
-                  টেলিগ্রাম ইউজারনেম
+                  Telegram Username
                 </Label>
                 <div className="relative">
                   <MessageCircle className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -141,13 +191,12 @@ export default function LoginPage() {
                     autoComplete="username"
                   />
                 </div>
-                <p className="text-xs text-muted-foreground">@ চিহ্ন ছাড়া শুধুমাত্র ইউজারনেম লিখুন</p>
+                <p className="text-xs text-muted-foreground">Enter username without @ symbol</p>
               </div>
 
-              {/* Password Field */}
               <div className="space-y-2">
                 <Label htmlFor="password" className="text-sm font-medium">
-                  পাসওয়ার্ড
+                  Password
                 </Label>
                 <div className="relative">
                   <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -155,7 +204,7 @@ export default function LoginPage() {
                     id="password"
                     name="password"
                     type={showPassword ? "text" : "password"}
-                    placeholder="আপনার পাসওয়ার্ড লিখুন"
+                    placeholder="Enter your password"
                     value={formData.password}
                     onChange={handleInputChange}
                     className="auth-input pl-10 pr-10"
@@ -172,55 +221,17 @@ export default function LoginPage() {
                 </div>
               </div>
 
-              {/* Submit Button */}
               <Button type="submit" className="auth-button w-full" disabled={loading}>
                 <LogIn className="h-4 w-4 mr-2" />
-                {loading ? "লগইন হচ্ছে..." : "লগইন করুন"}
+                {loading ? "Signing in..." : "Sign In"}
               </Button>
             </form>
 
-            {/* Demo Users Section */}
-            <div className="space-y-3">
-              <div className="relative">
-                <div className="absolute inset-0 flex items-center">
-                  <span className="w-full border-t border-muted" />
-                </div>
-                <div className="relative flex justify-center text-xs uppercase">
-                  <span className="bg-background px-2 text-muted-foreground">অথবা ডেমো অ্যাকাউন্ট ব্যবহার করুন</span>
-                </div>
-              </div>
-
-              <div className="grid gap-2">
-                <div className="p-3 rounded-lg bg-muted/20 border border-muted/30">
-                  <p className="text-xs font-medium text-muted-foreground mb-1">ডেমো ইউজার ১:</p>
-                  <p className="text-sm">
-                    <span className="font-mono">ahmed_rahman</span> | পাসওয়ার্ড:{" "}
-                    <span className="font-mono">demo123456</span>
-                  </p>
-                </div>
-                <div className="p-3 rounded-lg bg-muted/20 border border-muted/30">
-                  <p className="text-xs font-medium text-muted-foreground mb-1">ডেমো ইউজার ২:</p>
-                  <p className="text-sm">
-                    <span className="font-mono">fatima_khatun</span> | পাসওয়ার্ড:{" "}
-                    <span className="font-mono">demo123456</span>
-                  </p>
-                </div>
-                <div className="p-3 rounded-lg bg-muted/20 border border-muted/30">
-                  <p className="text-xs font-medium text-muted-foreground mb-1">ডেমো ইউজার ৩:</p>
-                  <p className="text-sm">
-                    <span className="font-mono">mohammad_karim</span> | পাসওয়ার্ড:{" "}
-                    <span className="font-mono">demo123456</span>
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {/* Signup Link */}
             <div className="text-center">
               <p className="text-sm text-muted-foreground">
-                নতুন ব্যবহারকারী?{" "}
+                New user?{" "}
                 <Link href="/signup" className="auth-link font-medium">
-                  অ্যাকাউন্ট তৈরি করুন
+                  Create Account
                 </Link>
               </p>
             </div>
