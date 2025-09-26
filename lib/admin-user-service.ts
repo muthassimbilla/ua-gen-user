@@ -33,22 +33,23 @@ export class AdminUserService {
         throw new Error("Failed to load user data")
       }
 
-      // Get device counts for each user
+      // Get active session counts instead of device counts since we removed device fingerprinting
       const usersWithDeviceCount = await Promise.all(
         users.map(async (user) => {
-          let deviceCount = 0
+          let sessionCount = 0
           try {
-            const { data: devices, error: deviceError } = await supabase
-              .from("user_devices")
+            // Count active sessions instead of devices
+            const { data: sessions, error: sessionError } = await supabase
+              .from("user_sessions")
               .select("id")
               .eq("user_id", user.id)
-              .eq("is_blocked", false)
+              .eq("is_active", true)
 
-            if (!deviceError && devices) {
-              deviceCount = devices.length
+            if (!sessionError && sessions) {
+              sessionCount = sessions.length
             }
-          } catch (deviceError) {
-            console.error("[v0] Error getting device count for user:", user.id, deviceError)
+          } catch (sessionError) {
+            console.error("[v0] Error getting session count for user:", user.id, sessionError)
           }
 
           return {
@@ -64,9 +65,9 @@ export class AdminUserService {
             current_status: this.calculateCurrentStatus(user),
             created_at: user.created_at,
             updated_at: user.updated_at || user.created_at,
-            device_count: deviceCount,
+            device_count: sessionCount, // Now shows active session count
           }
-        })
+        }),
       )
 
       return usersWithDeviceCount

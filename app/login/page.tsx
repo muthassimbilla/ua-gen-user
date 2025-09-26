@@ -45,6 +45,7 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
   const [ipChangeLogout, setIpChangeLogout] = useState(false)
+  const [sessionInvalidReason, setSessionInvalidReason] = useState(false)
 
   useEffect(() => {
     const message = searchParams.get("message")
@@ -56,6 +57,14 @@ export default function LoginPage() {
 
     if (reason === "ip_changed") {
       setIpChangeLogout(true)
+    }
+
+    if (reason === "session_invalid") {
+      setSessionInvalidReason(true)
+      // Clear the URL parameters to prevent interference with login
+      const newUrl = new URL(window.location.href)
+      newUrl.searchParams.delete("reason")
+      window.history.replaceState({}, "", newUrl.toString())
     }
   }, [searchParams])
 
@@ -94,6 +103,7 @@ export default function LoginPage() {
     setErrors([])
     setSuccessMessage("")
     setPendingApproval(false)
+    setSessionInvalidReason(false)
 
     try {
       const validationErrors = validateForm()
@@ -110,8 +120,9 @@ export default function LoginPage() {
       // Start login and redirect simultaneously
       await loginPromise
 
-      // Immediate redirect without waiting
-      router.push(redirectTo)
+      setTimeout(() => {
+        router.push(redirectTo)
+      }, 100)
     } catch (error: any) {
       console.error("[v0] Login error:", error)
 
@@ -265,6 +276,18 @@ export default function LoginPage() {
                   <Alert className="border-green-500/30 bg-green-500/10 backdrop-blur-sm rounded-xl">
                     <CheckCircle className="h-5 w-5 text-green-500" />
                     <AlertDescription className="text-green-400 font-medium">{successMessage}</AlertDescription>
+                  </Alert>
+                )}
+
+                {sessionInvalidReason && (
+                  <Alert className="border-orange-500/30 bg-orange-500/10 backdrop-blur-sm rounded-xl">
+                    <AlertTriangle className="h-5 w-5 text-orange-500" />
+                    <AlertDescription className="text-orange-600">
+                      <div className="space-y-2">
+                        <p className="font-semibold">Session Expired</p>
+                        <p className="text-sm">Your previous session has expired. Please log in again to continue.</p>
+                      </div>
+                    </AlertDescription>
                   </Alert>
                 )}
 

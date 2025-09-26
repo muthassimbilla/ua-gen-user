@@ -109,6 +109,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setSessionToken(sessionToken)
       setUser(loggedInUser)
 
+      await new Promise((resolve) => setTimeout(resolve, 200))
+
       console.log("[v0] User and session set successfully")
     } catch (error) {
       console.error("[v0] Login failed:", error)

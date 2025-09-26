@@ -110,19 +110,19 @@ export default function UserManagementPage() {
     setSelectedUser(user)
     setIsDevicesDialogOpen(true)
     setDevicesLoading(true)
-    
+
     try {
       console.log("Fetching devices for user:", user.id)
-      
+
       // Fetch user devices from API
       const response = await fetch(`/api/admin/user-devices?user_id=${user.id}`, {
         headers: {
           Authorization: `Bearer ${user.id}`,
         },
       })
-      
+
       console.log("API response status:", response.status)
-      
+
       if (response.ok) {
         const data = await response.json()
         console.log("API response data:", data)
@@ -411,7 +411,9 @@ export default function UserManagementPage() {
                 {user.expiration_date && (
                   <div className="flex items-center gap-2 text-xs lg:text-sm text-muted-foreground">
                     <Clock className="w-3 h-3 lg:w-4 lg:w-4 flex-shrink-0" />
-                    <span className="truncate">Expires: {new Date(user.expiration_date).toLocaleDateString("en-US")}</span>
+                    <span className="truncate">
+                      Expires: {new Date(user.expiration_date).toLocaleDateString("en-US")}
+                    </span>
                   </div>
                 )}
                 <div className="flex items-center gap-2 text-xs lg:text-sm text-muted-foreground">
@@ -420,7 +422,7 @@ export default function UserManagementPage() {
                 </div>
                 <div className="flex items-center gap-2 text-xs lg:text-sm text-muted-foreground">
                   <Smartphone className="w-3 h-3 lg:w-4 lg:w-4 flex-shrink-0" />
-                  <span className="truncate">Devices: {user.device_count || 0}</span>
+                  <span className="truncate">Active Sessions: {user.device_count || 0}</span>
                 </div>
               </div>
 
@@ -482,7 +484,7 @@ export default function UserManagementPage() {
                     className="bg-green-50 border-green-200 text-green-700 hover:bg-green-100 hover:border-green-300 hover:text-green-800 flex-1 text-xs lg:text-sm font-medium shadow-sm"
                   >
                     <Smartphone className="h-3 w-3 lg:h-4 lg:w-4 mr-1.5" />
-                    <span className="hidden sm:inline">Devices</span>
+                    <span className="hidden sm:inline">Sessions</span>
                   </Button>
                 </div>
 
@@ -669,18 +671,18 @@ export default function UserManagementPage() {
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Smartphone className="h-5 w-5" />
-              User Devices & IP Addresses
+              User Sessions & IP Addresses
             </DialogTitle>
             <DialogDescription>
-              View all devices and IP addresses used by {selectedUser?.full_name}
+              View all active sessions and IP addresses used by {selectedUser?.full_name}
             </DialogDescription>
           </DialogHeader>
-          
+
           {devicesLoading ? (
             <div className="flex items-center justify-center py-8">
               <div className="text-center">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-                <p className="text-muted-foreground">Loading devices...</p>
+                <p className="text-muted-foreground">Loading sessions...</p>
               </div>
             </div>
           ) : userDevices.length > 0 ? (
@@ -707,7 +709,7 @@ export default function UserManagementPage() {
                       )}
                     </div>
                   </div>
-                  
+
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                     <div>
                       <p className="font-medium text-muted-foreground">First Seen</p>
@@ -747,7 +749,10 @@ export default function UserManagementPage() {
                       <p className="font-medium text-muted-foreground mb-2">IP History</p>
                       <div className="space-y-2 max-h-32 overflow-y-auto">
                         {device.ip_history.slice(0, 5).map((ip: any, ipIndex: number) => (
-                          <div key={ipIndex} className="flex items-center justify-between text-sm bg-muted/50 p-2 rounded">
+                          <div
+                            key={ipIndex}
+                            className="flex items-center justify-between text-sm bg-muted/50 p-2 rounded"
+                          >
                             <div className="flex items-center gap-2">
                               <code className="font-mono text-xs">{ip.ip_address}</code>
                               {ip.is_current && (
@@ -756,13 +761,9 @@ export default function UserManagementPage() {
                             </div>
                             <div className="flex items-center gap-2 text-muted-foreground">
                               {ip.country && (
-                                <span className="text-xs">
-                                  {ip.city ? `${ip.city}, ${ip.country}` : ip.country}
-                                </span>
+                                <span className="text-xs">{ip.city ? `${ip.city}, ${ip.country}` : ip.country}</span>
                               )}
-                              <span className="text-xs">
-                                {new Date(ip.last_seen).toLocaleDateString("en-US")}
-                              </span>
+                              <span className="text-xs">{new Date(ip.last_seen).toLocaleDateString("en-US")}</span>
                             </div>
                           </div>
                         ))}
@@ -775,7 +776,7 @@ export default function UserManagementPage() {
           ) : (
             <div className="text-center py-8">
               <Smartphone className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-              <p className="text-muted-foreground">No devices found for this user</p>
+              <p className="text-muted-foreground">No active sessions found for this user</p>
             </div>
           )}
         </DialogContent>
