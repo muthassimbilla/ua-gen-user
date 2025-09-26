@@ -288,7 +288,7 @@ export class AuthService {
         currentIP = "unknown"
       }
 
-      // Simple IP-based security: logout all other sessions when IP changes
+      // IP-based security: logout all other sessions when IP changes
       try {
         if (currentIP) {
           // Check if this IP is different from any active session
@@ -486,14 +486,14 @@ export class AuthService {
         } else {
           console.log("[v0] IP address changed from", session.ip_address, "to", currentIP)
 
-          // Logout due to IP change
+          // Logout due to IP change - this is the correct behavior
           await supabase.rpc("logout_due_to_ip_change", {
             p_user_id: session.user_id,
             p_old_ip: session.ip_address,
             p_new_ip: currentIP,
           })
 
-          console.log("[v0] Auto-logged out due to IP address change")
+          console.log("[v0] Session expired due to IP address change")
           return null
         }
       }

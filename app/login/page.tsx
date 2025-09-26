@@ -113,16 +113,28 @@ export default function LoginPage() {
         return
       }
 
-      // Optimize login process
-      const loginPromise = login(formData.telegram_username.trim(), formData.password)
-      const redirectTo = searchParams.get("redirect") || "/tool"
+      // Add timeout to prevent infinite loading
+      const loginTimeout = setTimeout(() => {
+        setLoading(false)
+        setErrors(["Login is taking longer than expected. Please try again."])
+      }, 30000) // 30 second timeout
 
-      // Start login and redirect simultaneously
-      await loginPromise
+      try {
+        // Optimize login process
+        const loginPromise = login(formData.telegram_username.trim(), formData.password)
+        const redirectTo = searchParams.get("redirect") || "/tool"
 
-      setTimeout(() => {
-        router.push(redirectTo)
-      }, 100)
+        // Start login and redirect simultaneously
+        await loginPromise
+
+        clearTimeout(loginTimeout)
+        setTimeout(() => {
+          router.push(redirectTo)
+        }, 100)
+      } catch (loginError) {
+        clearTimeout(loginTimeout)
+        throw loginError
+      }
     } catch (error: any) {
       console.error("[v0] Login error:", error)
 
@@ -299,10 +311,10 @@ export default function LoginPage() {
                       <div className="space-y-2">
                         <p className="font-semibold">Security Alert: IP Address Changed</p>
                         <p className="text-sm">
-                          You have been automatically logged out for security reasons. Please log in again.
+                          Your session has expired due to IP address change. This is a security feature to protect your account.
                         </p>
                         <p className="text-xs text-orange-500 font-medium">
-                          One Key can only be used on one device/IP.
+                          Please log in again to continue. Your account is secure.
                         </p>
                       </div>
                     </AlertDescription>

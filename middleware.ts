@@ -49,22 +49,22 @@ async function handleIPChangeWithMigration(request: NextRequest, sessionToken: s
 
       console.log(`[v0] IP address changed for user ${session.user_id}: ${session.ip_address} -> ${currentIP}`)
 
-      const { data: migrationResult, error: migrationError } = await supabase.rpc("handle_ip_change_with_migration", {
+      // Logout due to IP change - this is the correct behavior
+      const { data: logoutResult, error: logoutError } = await supabase.rpc("logout_due_to_ip_change", {
         p_user_id: session.user_id,
         p_old_ip: session.ip_address,
         p_new_ip: currentIP,
-        p_session_token: sessionToken,
       })
 
-      if (migrationError) {
-        console.error("[v0] IP migration error:", migrationError)
+      if (logoutError) {
+        console.error("[v0] IP logout error:", logoutError)
         return false
       }
 
       console.log(
-        `[v0] IP migration successful for user ${session.user_id}. Old IP sessions logged out, current session migrated to new IP.`,
+        `[v0] Session expired due to IP address change for user ${session.user_id}. User needs to login again.`,
       )
-      return true // Session migrated successfully
+      return false // Session expired due to IP change
     }
 
     return true // Session still valid

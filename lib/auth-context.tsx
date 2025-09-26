@@ -99,19 +99,33 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setIsLoginInProgress(true)
       setLoading(true)
 
-      const { user: loggedInUser, sessionToken } = await AuthService.login({
-        telegram_username,
-        password,
-      })
+      // Add timeout to prevent infinite loading
+      const loginTimeout = setTimeout(() => {
+        console.error("[v0] Login timeout - taking too long")
+        setLoading(false)
+        setIsLoginInProgress(false)
+        throw new Error("Login is taking longer than expected. Please try again.")
+      }, 30000) // 30 second timeout
 
-      console.log("[v0] Login successful, setting user and token")
+      try {
+        const { user: loggedInUser, sessionToken } = await AuthService.login({
+          telegram_username,
+          password,
+        })
 
-      setSessionToken(sessionToken)
-      setUser(loggedInUser)
+        clearTimeout(loginTimeout)
+        console.log("[v0] Login successful, setting user and token")
 
-      await new Promise((resolve) => setTimeout(resolve, 200))
+        setSessionToken(sessionToken)
+        setUser(loggedInUser)
 
-      console.log("[v0] User and session set successfully")
+        await new Promise((resolve) => setTimeout(resolve, 200))
+
+        console.log("[v0] User and session set successfully")
+      } catch (loginError) {
+        clearTimeout(loginTimeout)
+        throw loginError
+      }
     } catch (error) {
       console.error("[v0] Login failed:", error)
       throw error
