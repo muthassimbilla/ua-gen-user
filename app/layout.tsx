@@ -9,6 +9,7 @@ import AutoUpdateProvider from "@/components/auto-update-provider"
 import { AuthProvider } from "@/lib/auth-context"
 import ConditionalLayout from "@/components/conditional-layout"
 import { StatusNotificationProvider } from "@/components/status-notification-provider"
+import { NetworkProvider } from "@/contexts/network-context"
 
 const inter = Inter({
   subsets: ["latin"],
@@ -101,16 +102,18 @@ export default function RootLayout({
           disableTransitionOnChange={true}
           storageKey="devtools-pro-theme"
         >
-          <StatusNotificationProvider>
-            <AuthProvider>
-              <AutoUpdateProvider>
-                <ConditionalLayout>
-                  <PageTransition>{children}</PageTransition>
-                </ConditionalLayout>
-                <Toaster />
-              </AutoUpdateProvider>
-            </AuthProvider>
-          </StatusNotificationProvider>
+          <NetworkProvider>
+            <StatusNotificationProvider>
+              <AuthProvider>
+                <AutoUpdateProvider>
+                  <ConditionalLayout>
+                    <PageTransition>{children}</PageTransition>
+                  </ConditionalLayout>
+                  <Toaster />
+                </AutoUpdateProvider>
+              </AuthProvider>
+            </StatusNotificationProvider>
+          </NetworkProvider>
         </ThemeProvider>
       </body>
     </html>

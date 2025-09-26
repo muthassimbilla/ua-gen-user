@@ -3,9 +3,10 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Smartphone, ArrowRight, Code, Settings, Shield, Star, Clock, Users } from "lucide-react"
+import { Smartphone, ArrowRight, Settings, Shield, Star, Clock, Users, Sparkles, Zap } from "lucide-react"
 import Link from "next/link"
 import { ProtectedRoute } from "@/components/protected-route"
+import { useEffect, useState } from "react"
 
 const tools = [
   {
@@ -26,42 +27,45 @@ const tools = [
     tags: ["iOS & Android", "Social Media", "Custom Headers"],
   },
   {
-    name: "Duplicate Checker",
-    features: [
-      "Test and debug REST APIs easily",
-      "Advanced request building tools",
-      "Response analysis and validation",
-      "Automated testing capabilities",
-    ],
-    href: "/tool/api-tester",
-    icon: Code,
-    category: "Development",
-    status: "Coming Soon",
-    color: "from-emerald-500 to-teal-600",
-    users: "Coming Soon",
-    rating: null,
-    tags: ["REST APIs", "Authentication", "Bulk Testing"],
-  },
-  {
     name: "Address Generator",
     features: [
-      "Generate framework configuration files",
-      "Support for popular deployment platforms",
-      "Development environment setup",
-      "Docker and CI/CD configurations",
+      "Convert IP address to physical location",
+      "Get detailed address information",
+      "Country, city, and postal code lookup",
+      "Real-time geolocation data",
     ],
-    href: "/tool/config-generator",
+    href: "/tool/address-generator",
     icon: Settings,
-    category: "DevOps",
-    status: "Coming Soon",
+    category: "Location Services",
+    status: "Active",
     color: "from-purple-500 to-pink-600",
-    users: "Coming Soon",
-    rating: null,
-    tags: ["Docker", "CI/CD", "Cloud Deploy"],
+    users: "8.2K+",
+    rating: 4.7,
+    tags: ["IP Geolocation", "Address Lookup", "Location Data"],
   },
 ]
 
 export default function ToolsPage() {
+  const [isLoaded, setIsLoaded] = useState(false)
+  const [showWelcome, setShowWelcome] = useState(false)
+
+  useEffect(() => {
+    // Page load animation
+    const timer = setTimeout(() => {
+      setIsLoaded(true)
+    }, 100)
+
+    // Welcome animation
+    const welcomeTimer = setTimeout(() => {
+      setShowWelcome(true)
+    }, 500)
+
+    return () => {
+      clearTimeout(timer)
+      clearTimeout(welcomeTimer)
+    }
+  }, [])
+
   return (
     <ProtectedRoute>
       <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
@@ -103,10 +107,21 @@ export default function ToolsPage() {
         <section className="relative z-10 px-6 pt-16 lg:pt-12 pb-8">
           <div className="max-w-6xl mx-auto text-center">
             <div className="mb-8">
-              <h1 className="text-4xl lg:text-5xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent mb-4">
+              {/* Welcome Animation */}
+              {showWelcome && (
+                <div className="mb-6 animate-fade-in-up">
+                  <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-green-500/10 to-emerald-500/10 border border-green-500/20 text-green-600 dark:text-green-400 text-sm font-medium">
+                    <Sparkles className="w-4 h-4 animate-pulse" />
+                    Welcome back! Ready to build something amazing?
+                    <Zap className="w-4 h-4" />
+                  </div>
+                </div>
+              )}
+              
+              <h1 className={`text-4xl lg:text-5xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent mb-4 transition-all duration-1000 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
                 Developer Tools
               </h1>
-              <p className="text-lg text-slate-600 dark:text-slate-300 max-w-2xl mx-auto">
+              <p className={`text-lg text-slate-600 dark:text-slate-300 max-w-2xl mx-auto transition-all duration-1000 delay-200 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
                 Powerful tools designed to streamline your development workflow and boost productivity
               </p>
             </div>
@@ -116,7 +131,7 @@ export default function ToolsPage() {
         {/* Tools Grid */}
         <section className="relative z-10 px-6 pb-20">
           <div className="max-w-6xl mx-auto">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 transition-all duration-1000 delay-400 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
               {tools.map((tool, index) => {
                 const IconComponent = tool.icon
                 const isActive = tool.status === "Active"
@@ -124,8 +139,11 @@ export default function ToolsPage() {
                 return (
                   <div
                     key={tool.name}
-                    className="group cursor-pointer h-full"
-                    style={{ animationDelay: `${index * 100}ms` }}
+                    className="group cursor-pointer h-full animate-fade-in-up"
+                    style={{ 
+                      animationDelay: `${index * 100 + 600}ms`,
+                      animationFillMode: 'both'
+                    }}
                   >
                     <Card className="h-full flex flex-col bg-white/70 dark:bg-slate-800/40 backdrop-blur-sm border-slate-200/50 dark:border-slate-700/30 hover:border-blue-300 dark:hover:border-blue-500/50 transition-all duration-500 hover:shadow-2xl hover:shadow-blue-500/10 dark:hover:shadow-blue-500/30 group overflow-hidden relative hover:-translate-y-2 dark:shadow-2xl dark:shadow-slate-900/20">
                       <div

@@ -13,11 +13,14 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 import { useAuth } from "@/lib/auth-context"
 import { Eye, EyeOff, MessageCircle, Lock, CheckCircle, XCircle, LogIn, Clock, AlertTriangle, Sparkles, Shield, Zap } from "lucide-react"
 import AuthThemeToggle from "@/components/auth-theme-toggle"
+import { useNetwork } from "@/contexts/network-context"
+import NoInternet from "@/components/no-internet"
 
 export default function LoginPage() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const { login } = useAuth()
+  const { isOnline, retryConnection, isReconnecting } = useNetwork()
 
   const [formData, setFormData] = useState({
     telegram_username: "",
@@ -42,6 +45,11 @@ export default function LoginPage() {
       setIpChangeLogout(true)
     }
   }, [searchParams])
+
+  // Show no internet page if offline
+  if (!isOnline) {
+    return <NoInternet onRetry={retryConnection} isReconnecting={isReconnecting} />
+  }
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
@@ -78,15 +86,18 @@ export default function LoginPage() {
       const validationErrors = validateForm()
       if (validationErrors.length > 0) {
         setErrors(validationErrors)
+        setLoading(false)
         return
       }
 
-      await login(formData.telegram_username.trim(), formData.password)
-
-      // Wait a bit for the auth context to update
-      await new Promise((resolve) => setTimeout(resolve, 100))
-      
+      // Optimize login process
+      const loginPromise = login(formData.telegram_username.trim(), formData.password)
       const redirectTo = searchParams.get("redirect") || "/tool"
+      
+      // Start login and redirect simultaneously
+      await loginPromise
+      
+      // Immediate redirect without waiting
       router.push(redirectTo)
     } catch (error: any) {
       console.error("[v0] Login error:", error)
@@ -97,13 +108,12 @@ export default function LoginPage() {
       } else {
         setErrors([error.message || "Login failed. Please try again."])
       }
-    } finally {
       setLoading(false)
     }
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
+    <div className="h-screen flex items-center justify-center p-4 relative overflow-hidden bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
       {/* Theme Toggle Button */}
       <div className="absolute top-6 right-6 z-20">
         <AuthThemeToggle />
@@ -123,27 +133,63 @@ export default function LoginPage() {
         <div className="absolute bottom-20 right-20 w-1 h-1 bg-cyan-400/60 rounded-full animate-bounce" style={{ animationDelay: "3s" }} />
       </div>
 
-      <div className="w-full max-w-md relative z-10">
-        {/* Main Login Card */}
-        <Card className="glass-card p-8 rounded-3xl shadow-2xl border-0 backdrop-blur-xl bg-white/10 dark:bg-gray-900/10">
-          {/* Header with Icon */}
-          <CardHeader className="text-center space-y-4 pb-8">
-            <div className="w-20 h-20 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center shadow-lg relative overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent" />
-              <Shield className="w-10 h-10 text-white relative z-10" />
-              <div className="absolute -top-1 -right-1">
-                <Sparkles className="w-4 h-4 text-yellow-400 animate-pulse" />
+      <div className="w-full max-w-6xl relative z-10">
+        <div className="grid lg:grid-cols-2 gap-8 items-center">
+          {/* Left Side - Branding */}
+          <div className="hidden lg:block space-y-8">
+            <div className="space-y-4">
+              <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center shadow-lg relative overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent" />
+                <Shield className="w-10 h-10 text-white relative z-10" />
+                <div className="absolute -top-1 -right-1">
+                  <Sparkles className="w-4 h-4 text-yellow-400 animate-pulse" />
+                </div>
+              </div>
+              <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                Welcome Back
+              </h1>
+              <p className="text-xl text-muted-foreground">
+                Sign in to your account to continue your journey with our powerful tools and services.
+              </p>
+            </div>
+            
+            <div className="space-y-4">
+              <div className="flex items-center space-x-3">
+                <div className="w-8 h-8 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
+                  <Zap className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                </div>
+                <span className="text-muted-foreground">Fast and secure authentication</span>
+              </div>
+              <div className="flex items-center space-x-3">
+                <div className="w-8 h-8 rounded-lg bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
+                  <Shield className="w-4 h-4 text-green-600 dark:text-green-400" />
+                </div>
+                <span className="text-muted-foreground">Your data is always protected</span>
+              </div>
+              <div className="flex items-center space-x-3">
+                <div className="w-8 h-8 rounded-lg bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center">
+                  <Sparkles className="w-4 h-4 text-purple-600 dark:text-purple-400" />
+                </div>
+                <span className="text-muted-foreground">Modern and intuitive interface</span>
               </div>
             </div>
-            <CardTitle className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-              Welcome Back
+          </div>
+
+          {/* Right Side - Login Form */}
+          <div className="w-full max-w-md mx-auto lg:mx-0">
+            {/* Main Login Card */}
+            <Card className="glass-card p-6 rounded-3xl shadow-2xl border-0 backdrop-blur-xl bg-white/10 dark:bg-gray-900/10">
+          {/* Header */}
+          <CardHeader className="text-center space-y-2 pb-4">
+            <CardTitle className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+              Sign In
             </CardTitle>
-            <CardDescription className="text-muted-foreground text-lg">
-              Sign in to your account to continue
+            <CardDescription className="text-muted-foreground">
+              Enter your credentials to access your account
             </CardDescription>
           </CardHeader>
 
-          <CardContent className="space-y-6">
+          <CardContent className="space-y-4">
             {/* Success Message */}
             {successMessage && (
               <Alert className="border-green-500/30 bg-green-500/10 backdrop-blur-sm rounded-xl">
@@ -207,8 +253,8 @@ export default function LoginPage() {
             </Alert>
 
             {/* Login Form */}
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="space-y-3">
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="space-y-2">
                 <Label htmlFor="telegram_username" className="text-sm font-semibold text-foreground flex items-center gap-2">
                   <MessageCircle className="w-4 h-4" />
                   Telegram Username
@@ -292,11 +338,13 @@ export default function LoginPage() {
           </CardContent>
         </Card>
 
-        {/* Footer */}
-        <div className="text-center mt-8">
-          <p className="text-sm text-muted-foreground/70">
-            © 2025 User Agent Generator. All rights reserved.
-          </p>
+            {/* Footer */}
+            <div className="text-center mt-4">
+              <p className="text-xs text-muted-foreground/70">
+                © 2025 User Agent Generator. All rights reserved.
+              </p>
+            </div>
+          </div>
         </div>
       </div>
     </div>

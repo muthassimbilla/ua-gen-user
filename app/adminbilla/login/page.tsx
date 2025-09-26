@@ -9,6 +9,9 @@ import { Label } from "@/components/ui/label"
 import { AdminAuthService } from "@/lib/admin-auth-service"
 import { useAdminAuth } from "@/lib/admin-auth-context"
 import { Shield, Lock, User, Eye, EyeOff, AlertCircle } from "lucide-react"
+import AuthThemeToggle from "@/components/auth-theme-toggle"
+import { useNetwork } from "@/contexts/network-context"
+import NoInternet from "@/components/no-internet"
 
 export default function AdminLoginPage() {
   const [credentials, setCredentials] = useState({
@@ -20,6 +23,7 @@ export default function AdminLoginPage() {
   const [showPassword, setShowPassword] = useState(false)
   const router = useRouter()
   const { admin, login } = useAdminAuth()
+  const { isOnline, retryConnection, isReconnecting } = useNetwork()
 
   useEffect(() => {
     if (admin) {
@@ -32,6 +36,11 @@ export default function AdminLoginPage() {
     return null
   }
 
+  // Show no internet page if offline
+  if (!isOnline) {
+    return <NoInternet onRetry={retryConnection} isReconnecting={isReconnecting} />
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
@@ -42,20 +51,23 @@ export default function AdminLoginPage() {
       console.log("[v0] Login successful, calling login function")
       login(result.admin, result.sessionToken)
 
-      setTimeout(() => {
-        router.replace("/adminbilla")
-      }, 100)
+      // Immediate redirect without delay
+      router.replace("/adminbilla")
     } catch (error: any) {
       console.log("[v0] Login failed:", error.message)
       setError(error.message)
-    } finally {
       setIsLoading(false)
     }
   }
 
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
+    <div className="h-screen flex items-center justify-center p-4 bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 relative overflow-hidden">
+      {/* Theme Toggle Button */}
+      <div className="absolute top-6 right-6 z-20">
+        <AuthThemeToggle />
+      </div>
+
       {/* Background decorative elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-red-500/10 rounded-full blur-3xl animate-pulse" />
@@ -67,11 +79,17 @@ export default function AdminLoginPage() {
           className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-32 h-32 bg-blue-500/5 rounded-full blur-xl animate-pulse"
           style={{ animationDelay: "1s" }}
         />
+        
+        {/* Floating particles */}
+        <div className="absolute top-20 left-20 w-2 h-2 bg-red-400/60 rounded-full animate-bounce" style={{ animationDelay: "0.5s" }} />
+        <div className="absolute top-40 right-32 w-1.5 h-1.5 bg-orange-400/60 rounded-full animate-bounce" style={{ animationDelay: "1.5s" }} />
+        <div className="absolute bottom-32 left-16 w-2.5 h-2.5 bg-red-400/60 rounded-full animate-bounce" style={{ animationDelay: "2.5s" }} />
+        <div className="absolute bottom-20 right-20 w-1 h-1 bg-orange-400/60 rounded-full animate-bounce" style={{ animationDelay: "3s" }} />
       </div>
 
-      <div className="w-full max-w-md relative">
+      <div className="w-full max-w-md relative z-10">
         {/* Main Login Card */}
-        <div className="glass-card p-8 rounded-3xl shadow-2xl">
+        <div className="glass-card p-8 rounded-3xl shadow-2xl border-0 backdrop-blur-xl bg-white/10 dark:bg-gray-900/10">
           {/* Header */}
           <div className="text-center mb-8">
             <div className="w-20 h-20 mx-auto mb-6 rounded-2xl bg-gradient-to-br from-red-500 to-orange-600 flex items-center justify-center shadow-lg relative overflow-hidden">

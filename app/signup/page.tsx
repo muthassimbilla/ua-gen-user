@@ -13,9 +13,12 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 import { AuthService, ValidationUtils, PasswordUtils } from "@/lib/auth-client"
 import { Eye, EyeOff, User, MessageCircle, Lock, CheckCircle, XCircle, AlertTriangle, Sparkles, Shield, Zap, UserPlus } from "lucide-react"
 import AuthThemeToggle from "@/components/auth-theme-toggle"
+import { useNetwork } from "@/contexts/network-context"
+import NoInternet from "@/components/no-internet"
 
 export default function SignupPage() {
   const router = useRouter()
+  const { isOnline, retryConnection, isReconnecting } = useNetwork()
   const [formData, setFormData] = useState({
     full_name: "",
     telegram_username: "",
@@ -76,6 +79,11 @@ export default function SignupPage() {
     return newErrors
   }
 
+  // Show no internet page if offline
+  if (!isOnline) {
+    return <NoInternet onRetry={retryConnection} isReconnecting={isReconnecting} />
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
@@ -100,7 +108,7 @@ export default function SignupPage() {
 
       console.log("[v0] Signup successful, redirecting to login")
 
-      // Redirect to login page with success message
+      // Immediate redirect to login page with success message
       router.push("/login?message=Account created successfully! You can login after admin approval.")
     } catch (error: any) {
       console.error("[v0] Signup error:", error)
@@ -113,13 +121,12 @@ export default function SignupPage() {
       } else {
         setErrors([error.message || "Failed to create account"])
       }
-    } finally {
       setLoading(false)
     }
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
+    <div className="h-screen flex items-center justify-center p-4 relative overflow-hidden bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
       {/* Theme Toggle Button */}
       <div className="absolute top-6 right-6 z-20">
         <AuthThemeToggle />
@@ -139,33 +146,69 @@ export default function SignupPage() {
         <div className="absolute bottom-20 right-20 w-1 h-1 bg-cyan-400/60 rounded-full animate-bounce" style={{ animationDelay: "3s" }} />
       </div>
 
-      <div className="w-full max-w-md relative z-10">
-        {/* Main Signup Card */}
-        <Card className="glass-card p-8 rounded-3xl shadow-2xl border-0 backdrop-blur-xl bg-white/10 dark:bg-gray-900/10">
-          {/* Header with Icon */}
-          <CardHeader className="text-center space-y-4 pb-8">
-            <div className="w-20 h-20 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center shadow-lg relative overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent" />
-              <UserPlus className="w-10 h-10 text-white relative z-10" />
-              <div className="absolute -top-1 -right-1">
-                <Sparkles className="w-4 h-4 text-yellow-400 animate-pulse" />
+      <div className="w-full max-w-6xl relative z-10">
+        <div className="grid lg:grid-cols-2 gap-8 items-center">
+          {/* Left Side - Branding */}
+          <div className="hidden lg:block space-y-8">
+            <div className="space-y-4">
+              <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center shadow-lg relative overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent" />
+                <UserPlus className="w-10 h-10 text-white relative z-10" />
+                <div className="absolute -top-1 -right-1">
+                  <Sparkles className="w-4 h-4 text-yellow-400 animate-pulse" />
+                </div>
+              </div>
+              <h1 className="text-4xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
+                Join Our Community
+              </h1>
+              <p className="text-xl text-muted-foreground">
+                Create your account and unlock access to powerful tools and exclusive features.
+              </p>
+            </div>
+            
+            <div className="space-y-4">
+              <div className="flex items-center space-x-3">
+                <div className="w-8 h-8 rounded-lg bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
+                  <UserPlus className="w-4 h-4 text-green-600 dark:text-green-400" />
+                </div>
+                <span className="text-muted-foreground">Quick and easy registration</span>
+              </div>
+              <div className="flex items-center space-x-3">
+                <div className="w-8 h-8 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
+                  <Shield className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                </div>
+                <span className="text-muted-foreground">Secure account protection</span>
+              </div>
+              <div className="flex items-center space-x-3">
+                <div className="w-8 h-8 rounded-lg bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center">
+                  <Zap className="w-4 h-4 text-purple-600 dark:text-purple-400" />
+                </div>
+                <span className="text-muted-foreground">Instant access to all features</span>
               </div>
             </div>
-            <CardTitle className="text-3xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
+          </div>
+
+          {/* Right Side - Signup Form */}
+          <div className="w-full max-w-md mx-auto lg:mx-0">
+            {/* Main Signup Card */}
+            <Card className="glass-card p-6 rounded-3xl shadow-2xl border-0 backdrop-blur-xl bg-white/10 dark:bg-gray-900/10">
+          {/* Header */}
+          <CardHeader className="text-center space-y-2 pb-4">
+            <CardTitle className="text-2xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
               Create Account
             </CardTitle>
-            <CardDescription className="text-muted-foreground text-lg">
-              Join us and start your journey
+            <CardDescription className="text-muted-foreground">
+              Fill in your details to get started
             </CardDescription>
           </CardHeader>
 
-          <CardContent className="space-y-6">
+          <CardContent className="space-y-3">
             {/* Error Messages */}
             {errors.length > 0 && (
               <Alert variant="destructive" className="backdrop-blur-sm rounded-xl">
-                <AlertTriangle className="h-5 w-5" />
+                <AlertTriangle className="h-4 w-4" />
                 <AlertDescription>
-                  <ul className="list-disc list-inside space-y-1">
+                  <ul className="list-disc list-inside space-y-1 text-sm">
                     {errors.map((error, index) => (
                       <li key={index} className="font-medium">{error}</li>
                     ))}
@@ -174,18 +217,11 @@ export default function SignupPage() {
               </Alert>
             )}
 
-            {/* Info Alert */}
-            <Alert className="border-blue-500/30 bg-blue-500/10 backdrop-blur-sm rounded-xl">
-              <Zap className="h-5 w-5 text-blue-500" />
-              <AlertDescription className="text-blue-600">
-                <strong className="font-semibold">Note:</strong> Supabase database integration is required to create an account.
-              </AlertDescription>
-            </Alert>
 
             {/* Signup Form */}
-            <form onSubmit={handleSubmit} className="space-y-6">
+            <form onSubmit={handleSubmit} className="space-y-4">
               {/* Full Name Field */}
-              <div className="space-y-3">
+              <div className="space-y-2">
                 <Label htmlFor="full_name" className="text-sm font-semibold text-foreground flex items-center gap-2">
                   <User className="w-4 h-4" />
                   Full Name
@@ -206,7 +242,7 @@ export default function SignupPage() {
               </div>
 
               {/* Telegram Username Field */}
-              <div className="space-y-3">
+              <div className="space-y-2">
                 <Label htmlFor="telegram_username" className="text-sm font-semibold text-foreground flex items-center gap-2">
                   <MessageCircle className="w-4 h-4" />
                   Telegram Username
@@ -228,7 +264,7 @@ export default function SignupPage() {
               </div>
 
               {/* Password Field */}
-              <div className="space-y-3">
+              <div className="space-y-2">
                 <Label htmlFor="password" className="text-sm font-semibold text-foreground flex items-center gap-2">
                   <Lock className="w-4 h-4" />
                   Password
@@ -256,22 +292,22 @@ export default function SignupPage() {
 
                 {/* Password Validation Indicators */}
                 {formData.password && (
-                  <div className="space-y-2 p-3 rounded-lg bg-background/30 backdrop-blur-sm border border-border/30">
-                    <div className="flex items-center space-x-2 text-sm">
+                  <div className="space-y-1 p-2 rounded-lg bg-background/30 backdrop-blur-sm border border-border/30">
+                    <div className="flex items-center space-x-2 text-xs">
                       {passwordValidation.isValid ? (
-                        <CheckCircle className="h-4 w-4 text-green-500" />
+                        <CheckCircle className="h-3 w-3 text-green-500" />
                       ) : (
-                        <XCircle className="h-4 w-4 text-red-500" />
+                        <XCircle className="h-3 w-3 text-red-500" />
                       )}
                       <span className={`font-medium ${passwordValidation.isValid ? "text-green-500" : "text-red-500"}`}>
                         Password is {passwordValidation.isValid ? "strong" : "weak"}
                       </span>
                     </div>
                     {passwordValidation.errors.length > 0 && (
-                      <ul className="text-xs text-red-400 space-y-1">
+                      <ul className="text-xs text-red-400 space-y-0.5">
                         {passwordValidation.errors.map((error, index) => (
-                          <li key={index} className="flex items-center space-x-2">
-                            <XCircle className="h-3 w-3 flex-shrink-0" />
+                          <li key={index} className="flex items-center space-x-1">
+                            <XCircle className="h-2 w-2 flex-shrink-0" />
                             <span>{error}</span>
                           </li>
                         ))}
@@ -282,7 +318,7 @@ export default function SignupPage() {
               </div>
 
               {/* Confirm Password Field */}
-              <div className="space-y-3">
+              <div className="space-y-2">
                 <Label htmlFor="confirmPassword" className="text-sm font-semibold text-foreground flex items-center gap-2">
                   <Shield className="w-4 h-4" />
                   Confirm Password
@@ -310,15 +346,15 @@ export default function SignupPage() {
                 
                 {/* Password Match Indicators */}
                 {formData.confirmPassword && (
-                  <div className="flex items-center space-x-2 text-sm">
+                  <div className="flex items-center space-x-2 text-xs">
                     {formData.password === formData.confirmPassword ? (
                       <>
-                        <CheckCircle className="h-4 w-4 text-green-500" />
+                        <CheckCircle className="h-3 w-3 text-green-500" />
                         <span className="text-green-500 font-medium">Passwords match</span>
                       </>
                     ) : (
                       <>
-                        <XCircle className="h-4 w-4 text-red-500" />
+                        <XCircle className="h-3 w-3 text-red-500" />
                         <span className="text-red-500 font-medium">Passwords do not match</span>
                       </>
                     )}
@@ -329,7 +365,7 @@ export default function SignupPage() {
               {/* Submit Button */}
               <Button 
                 type="submit" 
-                className="w-full h-12 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100" 
+                className="w-full h-10 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100" 
                 disabled={loading}
               >
                 {loading ? (
@@ -347,7 +383,7 @@ export default function SignupPage() {
             </form>
 
             {/* Login Link */}
-            <div className="text-center pt-4">
+            <div className="text-center pt-2">
               <p className="text-sm text-muted-foreground">
                 Already have an account?{" "}
                 <Link 
@@ -361,11 +397,13 @@ export default function SignupPage() {
           </CardContent>
         </Card>
 
-        {/* Footer */}
-        <div className="text-center mt-8">
-          <p className="text-sm text-muted-foreground/70">
-            © 2025 User Agent Generator. All rights reserved.
-          </p>
+            {/* Footer */}
+            <div className="text-center mt-4">
+              <p className="text-xs text-muted-foreground/70">
+                © 2025 User Agent Generator. All rights reserved.
+              </p>
+            </div>
+          </div>
         </div>
       </div>
     </div>

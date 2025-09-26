@@ -3,14 +3,13 @@
 import { useState } from "react"
 import { usePathname } from "next/navigation"
 import Link from "next/link"
-import { Code, Settings, Smartphone, Menu, X, Clock, Home } from "lucide-react"
+import { Settings, Smartphone, Menu, X, Clock, Home, Code } from "lucide-react"
 import ThemeToggle from "./theme-toggle"
 
 const navItems = [
   { name: "Home", href: "/tool", icon: Home, status: "Active" },
   { name: "User Agent Generator", href: "/tool/user-agent-generator", icon: Smartphone, status: "Active" },
-  { name: "Duplicate Checker", href: "/tool/api-tester", icon: Code, status: "Coming Soon" },
-  { name: "Address Generator", href: "/tool/config-generator", icon: Settings, status: "Coming Soon" },
+  { name: "Address Generator", href: "/tool/address-generator", icon: Settings, status: "Active" },
 ]
 
 export default function SidebarNavigation() {
