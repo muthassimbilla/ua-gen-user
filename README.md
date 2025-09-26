@@ -1,30 +1,12 @@
-# Code review request
+# Maintenance Page 🚧
 
-*Automatically synced with your [v0.dev](https://v0.dev) deployments*
+A simple animated "Under Maintenance" page built with **TailwindCSS** and deployable on **Vercel**.
 
-[![Deployed on Vercel](https://img.shields.io/badge/Deployed%20on-Vercel-black?style=for-the-badge&logo=vercel)](https://vercel.com/muthassim16s-projects/v0-code-review-request)
-[![Built with v0](https://img.shields.io/badge/Built%20with-v0.dev-black?style=for-the-badge)](https://v0.dev/chat/projects/zFZXltNjgVJ)
+## Deploy to Vercel
 
-## Overview
+1. Fork this repo / push to your GitHub
+2. Go to [Vercel](https://vercel.com)
+3. Import the project
+4. Done ✅
 
-This repository will stay in sync with your deployed chats on [v0.dev](https://v0.dev).
-Any changes you make to your deployed app will be automatically pushed to this repository from [v0.dev](https://v0.dev).
-
-## Deployment
-
-Your project is live at:
-
-**[https://vercel.com/muthassim16s-projects/v0-code-review-request](https://vercel.com/muthassim16s-projects/v0-code-review-request)**
-
-## Build your app
-
-Continue building your app on:
-
-**[https://v0.dev/chat/projects/zFZXltNjgVJ](https://v0.dev/chat/projects/zFZXltNjgVJ)**
-
-## How It Works
-
-1. Create and modify your project using [v0.dev](https://v0.dev)
-2. Deploy your chats from the v0 interface
-3. Changes are automatically pushed to this repository
-4. Vercel deploys the latest version from this repository
+---
