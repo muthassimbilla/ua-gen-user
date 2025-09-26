@@ -112,32 +112,55 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next()
   }
 
+  // Early return for login page with session_invalid to prevent loops
+  if (pathname === "/login" && request.nextUrl.searchParams.get("reason") === "session_invalid") {
+    console.log("[v0] Early return for login page with session_invalid")
+    return NextResponse.next()
+  }
+
   const sessionToken = request.cookies.get("session_token")?.value
   let isAuthenticated = !!sessionToken
 
   if (isAuthenticated && sessionToken) {
-    const sessionValid = await handleIPChangeWithMigration(request, sessionToken)
-    if (!sessionValid) {
+    try {
+      const sessionValid = await handleIPChangeWithMigration(request, sessionToken)
+      if (!sessionValid) {
+        isAuthenticated = false
+        console.log("[v0] Session invalid, redirecting to login")
+        // Clear the invalid session cookie (Vercel optimized)
+        const response = NextResponse.redirect(new URL("/login?reason=session_invalid", request.url))
+        response.cookies.delete("session_token")
+        response.cookies.set("session_token", "", {
+          path: "/",
+          expires: new Date(0),
+          domain: request.nextUrl.hostname,
+          secure: true,
+          sameSite: "strict"
+        })
+        // Add redirect count header
+        response.headers.set("x-redirect-count", (parseInt(redirectCount) + 1).toString())
+        return response
+      }
+    } catch (error) {
+      console.error("[v0] Session validation error:", error)
+      // If session validation fails, treat as unauthenticated
       isAuthenticated = false
-      // Clear the invalid session cookie (Vercel optimized)
-      const response = NextResponse.redirect(new URL("/login?reason=session_invalid", request.url))
-      response.cookies.delete("session_token")
-      response.cookies.set("session_token", "", {
-        path: "/",
-        expires: new Date(0),
-        domain: request.nextUrl.hostname,
-        secure: true,
-        sameSite: "strict"
-      })
-      // Add redirect count header
-      response.headers.set("x-redirect-count", (parseInt(redirectCount) + 1).toString())
-      return response
     }
   }
 
-  // Prevent redirect loops by checking if we're already on login page with session_invalid
-  if (pathname === "/login" && request.nextUrl.searchParams.get("reason") === "session_invalid") {
+
+  // Additional safety: if we're on login page and no session token, just proceed
+  if (pathname === "/login" && !sessionToken) {
+    console.log("[v0] On login page without session token, proceeding")
     return NextResponse.next()
+  }
+
+  // Skip middleware for login page if already authenticated (to prevent loops)
+  if (pathname === "/login" && isAuthenticated) {
+    console.log("[v0] On login page with valid session, redirecting to tool")
+    const response = NextResponse.redirect(new URL("/tool", request.url))
+    response.headers.set("x-redirect-count", (parseInt(redirectCount) + 1).toString())
+    return response
   }
 
   // Handle protected routes
@@ -178,5 +201,18 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!api|_next/static|_next/image|favicon.ico|robots.txt|sitemap.xml|sw.js|manifest.json).*)"],
+  matcher: [
+    /*
+     * Match all request paths except for the ones starting with:
+     * - api (API routes)
+     * - _next/static (static files)
+     * - _next/image (image optimization files)
+     * - favicon.ico (favicon file)
+     * - robots.txt (robots file)
+     * - sitemap.xml (sitemap file)
+     * - sw.js (service worker)
+     * - manifest.json (web app manifest)
+     */
+    "/((?!api|_next/static|_next/image|favicon.ico|robots.txt|sitemap.xml|sw.js|manifest.json).*)",
+  ],
 }
