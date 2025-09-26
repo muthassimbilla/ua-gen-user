@@ -8,7 +8,7 @@ const protectedRoutes = ["/profile", "/tool"]
 // Routes that should redirect to /tool if already authenticated
 const authRoutes = ["/login", "/signup"]
 
-async function checkIPChangeAndLogout(request: NextRequest, sessionToken: string) {
+async function handleIPChangeWithMigration(request: NextRequest, sessionToken: string) {
   try {
     const supabase = createServerSupabaseClient()
     const currentIP =
@@ -27,27 +27,44 @@ async function checkIPChangeAndLogout(request: NextRequest, sessionToken: string
       return false // Session invalid
     }
 
-    // Check if IP has changed
     if (session.ip_address && currentIP !== session.ip_address && currentIP !== "unknown") {
       // Skip IP change check for localhost/development environment
-      const isLocalhost = currentIP === "::1" || currentIP === "127.0.0.1" || currentIP.startsWith("192.168.") || currentIP.startsWith("10.") || currentIP.startsWith("172.")
-      const isOldLocalhost = session.ip_address === "::1" || session.ip_address === "127.0.0.1" || session.ip_address.startsWith("192.168.") || session.ip_address.startsWith("10.") || session.ip_address.startsWith("172.")
-      
+      const isLocalhost =
+        currentIP === "::1" ||
+        currentIP === "127.0.0.1" ||
+        currentIP.startsWith("192.168.") ||
+        currentIP.startsWith("10.") ||
+        currentIP.startsWith("172.")
+      const isOldLocalhost =
+        session.ip_address === "::1" ||
+        session.ip_address === "127.0.0.1" ||
+        session.ip_address.startsWith("192.168.") ||
+        session.ip_address.startsWith("10.") ||
+        session.ip_address.startsWith("172.")
+
       if (isLocalhost || isOldLocalhost) {
         console.log(`[v0] Skipping IP change check for localhost: ${session.ip_address} -> ${currentIP}`)
         return true // Allow localhost IP changes
       }
 
-      console.log(`[v0] IP changed for user ${session.user_id}: ${session.ip_address} -> ${currentIP}`)
+      console.log(`[v0] IP address changed for user ${session.user_id}: ${session.ip_address} -> ${currentIP}`)
 
-      // Auto-logout due to IP change
-      await supabase.rpc("logout_due_to_ip_change", {
+      const { data: migrationResult, error: migrationError } = await supabase.rpc("handle_ip_change_with_migration", {
         p_user_id: session.user_id,
         p_old_ip: session.ip_address,
         p_new_ip: currentIP,
+        p_session_token: sessionToken,
       })
 
-      return false // Session invalidated
+      if (migrationError) {
+        console.error("[v0] IP migration error:", migrationError)
+        return false
+      }
+
+      console.log(
+        `[v0] IP migration successful for user ${session.user_id}. Old IP sessions logged out, current session migrated to new IP.`,
+      )
+      return true // Session migrated successfully
     }
 
     return true // Session still valid
@@ -78,11 +95,11 @@ export async function middleware(request: NextRequest) {
   let isAuthenticated = !!sessionToken
 
   if (isAuthenticated && sessionToken) {
-    const sessionValid = await checkIPChangeAndLogout(request, sessionToken)
+    const sessionValid = await handleIPChangeWithMigration(request, sessionToken)
     if (!sessionValid) {
       isAuthenticated = false
       // Clear the invalid session cookie
-      const response = NextResponse.redirect(new URL("/login?reason=ip_changed", request.url))
+      const response = NextResponse.redirect(new URL("/login?reason=session_invalid", request.url))
       response.cookies.delete("session_token")
       return response
     }

@@ -1,7 +1,6 @@
 import { createBrowserClient } from "@supabase/ssr"
 import bcrypt from "bcryptjs"
 import { v4 as uuidv4 } from "uuid"
-import { IPDetection } from "./device-fingerprint"
 
 // Function to validate environment variables
 function validateEnvironment(): { isValid: boolean; error?: string } {
@@ -353,14 +352,9 @@ export class AuthService {
 
       if (currentIP && currentIP !== "127.0.0.1") {
         try {
-          const ipInfo = await IPDetection.getIPInfo(currentIP)
-
           const { error: ipHistoryError } = await supabase.from("user_ip_history").insert({
             user_id: user.id,
             ip_address: currentIP,
-            country: ipInfo?.country,
-            city: ipInfo?.city,
-            isp: ipInfo?.isp,
             is_current: true,
           })
 
@@ -470,7 +464,6 @@ export class AuthService {
         return null
       }
 
-      // Get current IP for security check
       const currentIP = await this.getUserCurrentIP()
 
       if (currentIP && session.ip_address && currentIP !== session.ip_address) {
@@ -491,7 +484,7 @@ export class AuthService {
         if (isLocalhost || isOldLocalhost) {
           console.log("[v0] Skipping IP change check for localhost:", session.ip_address, "->", currentIP)
         } else {
-          console.log("[v0] IP changed from", session.ip_address, "to", currentIP)
+          console.log("[v0] IP address changed from", session.ip_address, "to", currentIP)
 
           // Logout due to IP change
           await supabase.rpc("logout_due_to_ip_change", {
@@ -500,7 +493,7 @@ export class AuthService {
             p_new_ip: currentIP,
           })
 
-          console.log("[v0] Auto-logged out due to IP change")
+          console.log("[v0] Auto-logged out due to IP address change")
           return null
         }
       }

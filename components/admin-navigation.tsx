@@ -5,7 +5,7 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { useAdminAuth } from "@/lib/admin-auth-context"
 import { Button } from "@/components/ui/button"
-import { Home, Users, Settings, BarChart3, Shield, LogOut, User, Menu, X, UserCheck } from "lucide-react"
+import { Home, Users, Settings, BarChart3, Shield, LogOut, User, Menu, X } from "lucide-react"
 
 export function AdminNavigation() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
@@ -14,7 +14,6 @@ export function AdminNavigation() {
 
   const navigationItems = [
     { name: "Dashboard", href: "/adminbilla", icon: Home },
-    { name: "Pending Users", href: "/adminbilla/pending-users", icon: UserCheck },
     { name: "User Management", href: "/adminbilla/users", icon: Users },
     { name: "Settings", href: "/adminbilla/settings", icon: Settings },
     { name: "Analytics", href: "/adminbilla/analytics", icon: BarChart3 },

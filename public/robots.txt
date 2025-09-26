@@ -1,4 +1,0 @@
-User-agent: *
-Allow: /
-
-Sitemap: https://uagen-pro.vercel.app/sitemap.xml

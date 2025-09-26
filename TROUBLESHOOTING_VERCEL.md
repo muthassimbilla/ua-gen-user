@@ -12,13 +12,13 @@
 #### **Solutions:**
 
 ##### **Step 1: Check Environment Variables**
-```bash
+\`\`\`bash
 # Test environment variables
 curl https://your-app.vercel.app/api/check-env
-```
+\`\`\`
 
 **Expected Response:**
-```json
+\`\`\`json
 {
   "success": true,
   "data": {
@@ -31,7 +31,7 @@ curl https://your-app.vercel.app/api/check-env
     "platform": "Vercel"
   }
 }
-```
+\`\`\`
 
 **If `isConfigured: false`:**
 1. Vercel Dashboard → Settings → Environment Variables
@@ -46,20 +46,20 @@ curl https://your-app.vercel.app/api/check-env
 
 ##### **Step 3: Check Database Tables**
 Run in Supabase SQL Editor:
-```sql
+\`\`\`sql
 -- Check if tables exist
 SELECT table_name FROM information_schema.tables 
 WHERE table_schema = 'public' 
 AND table_name IN ('users', 'user_sessions', 'user_ip_history', 'admin_users');
-```
+\`\`\`
 
 ##### **Step 4: Check RLS Policies**
-```sql
+\`\`\`sql
 -- Check RLS policies
 SELECT schemaname, tablename, policyname, permissive, roles, cmd, qual 
 FROM pg_policies 
 WHERE tablename IN ('users', 'user_sessions', 'user_ip_history');
-```
+\`\`\`
 
 ### 2. Database Connection Issues
 
@@ -76,11 +76,11 @@ WHERE tablename IN ('users', 'user_sessions', 'user_ip_history');
 3. Check if billing is up to date
 
 ##### **Step 2: Verify Database URL Format**
-```
+\`\`\`
 Correct: https://your-project-id.supabase.co
 Wrong: https://your-project.supabase.co
 Wrong: your-project-id.supabase.co
-```
+\`\`\`
 
 ##### **Step 3: Check API Key Permissions**
 1. Supabase Dashboard → Settings → API
@@ -97,15 +97,15 @@ Wrong: your-project-id.supabase.co
 #### **Solutions:**
 
 ##### **Step 1: Disable RLS Temporarily (for testing)**
-```sql
+\`\`\`sql
 -- Disable RLS for testing
 ALTER TABLE users DISABLE ROW LEVEL SECURITY;
 ALTER TABLE user_sessions DISABLE ROW LEVEL SECURITY;
 ALTER TABLE user_ip_history DISABLE ROW LEVEL SECURITY;
-```
+\`\`\`
 
 ##### **Step 2: Create Proper RLS Policies**
-```sql
+\`\`\`sql
 -- Enable RLS
 ALTER TABLE users ENABLE ROW LEVEL SECURITY;
 ALTER TABLE user_sessions ENABLE ROW LEVEL SECURITY;
@@ -115,7 +115,7 @@ ALTER TABLE user_ip_history ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Allow all operations on users" ON users FOR ALL USING (true);
 CREATE POLICY "Allow all operations on user_sessions" ON user_sessions FOR ALL USING (true);
 CREATE POLICY "Allow all operations on user_ip_history" ON user_ip_history FOR ALL USING (true);
-```
+\`\`\`
 
 ### 4. Build Errors on Vercel
 
@@ -132,19 +132,19 @@ CREATE POLICY "Allow all operations on user_ip_history" ON user_ip_history FOR A
 3. Check build logs for specific errors
 
 ##### **Step 2: Fix TypeScript Errors**
-```bash
+\`\`\`bash
 # Run locally to check for errors
 npm run build
-```
+\`\`\`
 
 ##### **Step 3: Update Dependencies**
-```bash
+\`\`\`bash
 # Update all dependencies
 npm update
 
 # Or install specific versions
 npm install @supabase/supabase-js@latest
-```
+\`\`\`
 
 ### 5. Environment Variables Not Loading
 
@@ -164,12 +164,6 @@ In Vercel Dashboard:
 - Production: ✅
 - Preview: ✅  
 - Development: ✅
-
-##### **Step 3: Redeploy After Changes**
-After adding environment variables:
-1. Go to Deployments
-2. Click "Redeploy" on latest deployment
-3. Or push a new commit
 
 ### 6. CORS Issues
 
@@ -197,21 +191,21 @@ Create API routes for external API calls to avoid CORS issues.
 #### **Solutions:**
 
 ##### **Step 1: Check Database Performance**
-```sql
+\`\`\`sql
 -- Check slow queries
 SELECT query, mean_time, calls 
 FROM pg_stat_statements 
 ORDER BY mean_time DESC 
 LIMIT 10;
-```
+\`\`\`
 
 ##### **Step 2: Add Database Indexes**
-```sql
+\`\`\`sql
 -- Add indexes for frequently queried columns
 CREATE INDEX idx_users_telegram_username ON users(telegram_username);
 CREATE INDEX idx_user_sessions_token ON user_sessions(session_token);
 CREATE INDEX idx_user_sessions_user_id ON user_sessions(user_id);
-```
+\`\`\`
 
 ##### **Step 3: Optimize Queries**
 - Use `select()` to limit returned columns
@@ -221,14 +215,9 @@ CREATE INDEX idx_user_sessions_user_id ON user_sessions(user_id);
 ### 8. Debugging Tools
 
 #### **Environment Check API**
-```bash
+\`\`\`bash
 curl https://your-app.vercel.app/api/check-env
-```
-
-#### **Database Connection Test**
-```bash
-curl https://your-app.vercel.app/api/debug-smarty
-```
+\`\`\`
 
 #### **Vercel Function Logs**
 1. Vercel Dashboard → Functions

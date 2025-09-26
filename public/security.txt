@@ -1,7 +1,0 @@
-Contact: mailto:security@uagen-pro.vercel.app
-Expires: 2025-12-31T23:59:59.000Z
-Encryption: https://uagen-pro.vercel.app/pgp-key.txt
-Preferred-Languages: en, bn
-Canonical: https://uagen-pro.vercel.app/.well-known/security.txt
-Policy: https://uagen-pro.vercel.app/security-policy
-Acknowledgments: https://uagen-pro.vercel.app/security-acknowledgments

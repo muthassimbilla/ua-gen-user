@@ -51,15 +51,6 @@ export default function AdminDashboard() {
       textColor: "text-blue-600 dark:text-blue-400",
     },
     {
-      title: "Pending Approval",
-      description: "Approve new user registrations",
-      icon: Clock,
-      href: "/adminbilla/pending-users",
-      gradient: "from-yellow-500 to-orange-600",
-      bgColor: "bg-yellow-500/10",
-      textColor: "text-yellow-600 dark:text-yellow-400",
-    },
-    {
       title: "Device Monitoring",
       description: "Track user devices and IP addresses",
       icon: Smartphone,
@@ -90,13 +81,11 @@ export default function AdminDashboard() {
 
   const totalUsers = users.length
   const activeUsers = users.filter((user) => user.current_status === "active").length
-  const pendingUsers = users.filter((user) => user.current_status === "pending").length
   const suspendedUsers = users.filter((user) => user.current_status === "suspended").length
   const expiredUsers = users.filter((user) => user.current_status === "expired").length
 
   const totalGrowth = totalUsers > 0 ? "+12%" : "0%"
   const activeGrowth = activeUsers > 0 ? "+8%" : "0%"
-  const pendingGrowth = pendingUsers > 0 ? `+${pendingUsers}` : "0"
 
   const stats = [
     {
@@ -116,15 +105,6 @@ export default function AdminDashboard() {
       gradient: "from-green-500 to-emerald-600",
       bgColor: "bg-green-500/10",
       textColor: "text-green-600 dark:text-green-400",
-    },
-    {
-      title: "Pending Approval",
-      value: pendingUsers.toString(),
-      change: pendingGrowth,
-      icon: Clock,
-      gradient: "from-yellow-500 to-orange-600",
-      bgColor: "bg-yellow-500/10",
-      textColor: "text-yellow-600 dark:text-yellow-400",
     },
     {
       title: "System Status",

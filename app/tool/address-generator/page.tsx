@@ -1,31 +1,39 @@
 "use client"
 
+import type React from "react"
+
 import { useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Badge } from "@/components/ui/badge"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { 
-  MapPin, 
-  Globe, 
-  Building, 
-  Navigation, 
-  Clock, 
-  Shield, 
-  Copy, 
-  Check,
+import {
+  MapPin,
+  Globe,
+  Building,
+  Navigation,
+  Clock,
+  Shield,
   AlertCircle,
   Loader2,
   Search,
-  Clipboard
+  Clipboard,
 } from "lucide-react"
 import { ProtectedRoute } from "@/components/protected-route"
-import { SmartyAPI, SmartyAddressData } from "@/lib/smarty-api"
 
-// Use the same interface from SmartyAPI
-type AddressData = SmartyAddressData
+interface AddressData {
+  ip: string
+  full_address: string
+  street_address: string
+  city: string
+  region: string
+  country: string
+  postal_code: string
+  timezone: string
+  isp: string
+  organization: string
+}
 
 export default function AddressGeneratorPage() {
   const [ipAddress, setIpAddress] = useState("")
@@ -33,6 +41,38 @@ export default function AddressGeneratorPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
   const [copied, setCopied] = useState(false)
+
+  const getAddressFromIP = async (ip: string): Promise<AddressData> => {
+    try {
+      const response = await fetch(`https://ipwho.is/${ip}`)
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
+      }
+
+      const data = await response.json()
+
+      if (!data.success) {
+        throw new Error(data.message || "Failed to get location data")
+      }
+
+      return {
+        ip: data.ip,
+        full_address: `${data.city}, ${data.region}, ${data.country}`,
+        street_address: `${data.city}, ${data.region}`,
+        city: data.city,
+        region: data.region,
+        country: data.country,
+        postal_code: data.postal || "N/A",
+        timezone: data.timezone?.id || "N/A",
+        isp: data.connection?.isp || "N/A",
+        organization: data.connection?.org || "N/A",
+      }
+    } catch (error: any) {
+      console.error("IP Geolocation API Error:", error)
+      throw new Error("Failed to fetch location data. Please try again.")
+    }
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -47,65 +87,7 @@ export default function AddressGeneratorPage() {
         throw new Error("Please enter a valid IP address format (e.g., 8.8.8.8)")
       }
 
-      // Use proxy API with retry mechanism
-      let result: AddressData
-      let lastError: any = null
-
-      // Try up to 3 times
-      for (let attempt = 1; attempt <= 3; attempt++) {
-        try {
-          console.log(`Attempt ${attempt}: Using proxy API for IP geocoding`)
-          result = await SmartyAPI.getAddressFromIP(ipAddress)
-          console.log('Proxy API success:', result)
-          break // Success, exit retry loop
-        } catch (proxyError: any) {
-          console.error(`Attempt ${attempt} failed:`, proxyError)
-          lastError = proxyError
-          
-          // If it's the last attempt, don't retry
-          if (attempt === 3) {
-            // Check if it's a network error
-            if (proxyError.message && (
-              proxyError.message.includes('Network error') ||
-              proxyError.message.includes('fetch') ||
-              proxyError.message.includes('Failed to fetch') ||
-              proxyError.message.includes('timeout') ||
-              proxyError.message.includes('connection')
-            )) {
-              throw new Error('Network connection error. Please check your internet connection and try again.')
-            }
-            
-            // Try direct fallback as last resort
-            try {
-              console.log('Trying direct fallback API as last resort...')
-              result = await SmartyAPI.getAddressFromIPFallback(ipAddress)
-              console.log('Fallback API success:', result)
-              break
-            } catch (fallbackError: any) {
-              console.error('All APIs failed:', fallbackError)
-              
-              if (fallbackError.message && (
-                fallbackError.message.includes('Network error') ||
-                fallbackError.message.includes('fetch') ||
-                fallbackError.message.includes('Failed to fetch') ||
-                fallbackError.message.includes('connection')
-              )) {
-                throw new Error('Network connection error. Please check your internet connection and try again.')
-              } else if (fallbackError.message && fallbackError.message.includes('timeout')) {
-                throw new Error('Request timeout. Please try again.')
-              } else if (fallbackError.message && fallbackError.message.includes('JSON')) {
-                throw new Error('API response format error. Please try again or contact support.')
-              } else {
-                throw new Error('Unable to fetch location data. Please try again later.')
-              }
-            }
-          } else {
-            // Wait before retry (exponential backoff)
-            await new Promise(resolve => setTimeout(resolve, attempt * 1000))
-          }
-        }
-      }
-
+      const result = await getAddressFromIP(ipAddress)
       setAddressData(result)
     } catch (err: any) {
       setError(err.message || "Failed to fetch address data")
@@ -123,7 +105,7 @@ export default function AddressGeneratorPage() {
   const getCurrentIP = async () => {
     setLoading(true)
     setError("")
-    
+
     try {
       const response = await fetch("https://api.ipify.org?format=json")
       const data = await response.json()
@@ -139,13 +121,13 @@ export default function AddressGeneratorPage() {
     try {
       const text = await navigator.clipboard.readText()
       setIpAddress(text.trim())
-      
+
       // Auto-generate if valid IP
       const ipRegex = /^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/
       if (ipRegex.test(text.trim())) {
         // Auto-generate after a short delay
         setTimeout(() => {
-          handleSubmit(new Event('submit') as any)
+          handleSubmit(new Event("submit") as any)
         }, 500)
       }
     } catch (err) {
@@ -153,28 +135,39 @@ export default function AddressGeneratorPage() {
     }
   }
 
-
   return (
     <ProtectedRoute>
       <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
         <div className="fixed inset-0 -z-10">
           {/* Light mode background */}
           <div className="absolute inset-0 bg-gradient-to-br from-purple-50/50 via-transparent to-pink-50/50 dark:hidden" />
-          
+
           {/* Dark mode enhanced background */}
           <div className="hidden dark:block absolute inset-0">
             <div className="absolute inset-0 bg-gradient-to-br from-purple-900/25 via-transparent to-pink-900/25" />
             <div className="absolute inset-0 bg-gradient-to-tr from-violet-900/15 via-transparent to-rose-900/15" />
           </div>
-          
+
           {/* Animated orbs */}
           <div className="absolute top-1/4 -left-64 w-96 h-96 bg-purple-200/30 dark:bg-purple-500/20 rounded-full blur-3xl animate-pulse" />
-          <div className="absolute bottom-1/4 -right-64 w-96 h-96 bg-pink-200/30 dark:bg-pink-500/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: "1s" }} />
-          
+          <div
+            className="absolute bottom-1/4 -right-64 w-96 h-96 bg-pink-200/30 dark:bg-pink-500/20 rounded-full blur-3xl animate-pulse"
+            style={{ animationDelay: "1s" }}
+          />
+
           {/* Floating particles */}
-          <div className="absolute top-20 left-20 w-2 h-2 bg-purple-400/60 rounded-full animate-bounce" style={{ animationDelay: "0.5s" }} />
-          <div className="absolute top-40 right-32 w-1.5 h-1.5 bg-pink-400/60 rounded-full animate-bounce" style={{ animationDelay: "1.5s" }} />
-          <div className="absolute bottom-32 left-16 w-2.5 h-2.5 bg-violet-400/60 rounded-full animate-bounce" style={{ animationDelay: "2.5s" }} />
+          <div
+            className="absolute top-20 left-20 w-2 h-2 bg-purple-400/60 rounded-full animate-bounce"
+            style={{ animationDelay: "0.5s" }}
+          />
+          <div
+            className="absolute top-40 right-32 w-1.5 h-1.5 bg-pink-400/60 rounded-full animate-bounce"
+            style={{ animationDelay: "1.5s" }}
+          />
+          <div
+            className="absolute bottom-32 left-16 w-2.5 h-2.5 bg-violet-400/60 rounded-full animate-bounce"
+            style={{ animationDelay: "2.5s" }}
+          />
         </div>
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 relative z-10">
@@ -190,15 +183,12 @@ export default function AddressGeneratorPage() {
                     <CardTitle className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
                       Address Generator
                     </CardTitle>
-                    <p className="text-muted-foreground">
-                      Enter an IP address to get its location information
-                    </p>
+                    <p className="text-muted-foreground">Enter an IP address to get its location information</p>
                   </div>
                 </div>
               </CardHeader>
 
               <CardContent className="space-y-6">
-                {/* API Notice */}
                 <div className="p-3 rounded-lg border bg-blue-50/50 dark:bg-blue-900/20 border-blue-200/50 dark:border-blue-800/50">
                   <div className="flex items-center gap-2">
                     <div className="w-2 h-2 rounded-full bg-blue-500" />
@@ -206,9 +196,7 @@ export default function AddressGeneratorPage() {
                       Using ipwho.is API for location data
                     </span>
                   </div>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Reliable and accurate IP geolocation service
-                  </p>
+                  <p className="text-xs text-muted-foreground mt-1">Free and reliable IP geolocation service</p>
                 </div>
 
                 <form onSubmit={handleSubmit} className="space-y-4">
@@ -292,9 +280,7 @@ export default function AddressGeneratorPage() {
                     <CardTitle className="text-2xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
                       Location Found
                     </CardTitle>
-                    <p className="text-muted-foreground">
-                      Address information for {addressData.ip}
-                    </p>
+                    <p className="text-muted-foreground">Address information for {addressData.ip}</p>
                   </CardHeader>
 
                   <CardContent className="space-y-6">
@@ -363,7 +349,6 @@ export default function AddressGeneratorPage() {
                       </div>
                     </div>
 
-
                     {/* ISP Information */}
                     <div className="p-4 rounded-xl bg-gradient-to-r from-blue-500/10 to-cyan-500/10 border border-blue-500/20">
                       <h4 className="font-semibold text-foreground mb-3 flex items-center gap-2">
@@ -389,18 +374,13 @@ export default function AddressGeneratorPage() {
                     <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-slate-500 to-slate-600 flex items-center justify-center shadow-lg">
                       <MapPin className="w-8 h-8 text-white" />
                     </div>
-                    <h3 className="text-xl font-semibold text-foreground mb-2">
-                      No Address Data
-                    </h3>
-                    <p className="text-muted-foreground">
-                      Enter an IP address to see its location information
-                    </p>
+                    <h3 className="text-xl font-semibold text-foreground mb-2">No Address Data</h3>
+                    <p className="text-muted-foreground">Enter an IP address to see its location information</p>
                   </CardContent>
                 </Card>
               )}
             </div>
           </div>
-
         </div>
       </div>
     </ProtectedRoute>

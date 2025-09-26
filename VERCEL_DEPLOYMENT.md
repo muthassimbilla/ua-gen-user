@@ -8,20 +8,10 @@ Vercel dashboard এ যান এবং আপনার project এ environment
 
 #### **Required Environment Variables:**
 
-```bash
+\`\`\`bash
 NEXT_PUBLIC_SUPABASE_URL=https://your-project-id.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key-here
-```
-
-#### **Optional Environment Variables (Address Generator এর জন্য):**
-
-```bash
-SMARTY_AUTH_ID=your-smarty-auth-id
-SMARTY_AUTH_TOKEN=your-smarty-auth-token
-NEXT_PUBLIC_SMARTY_AUTH_ID=your-smarty-auth-id
-NEXT_PUBLIC_SMARTY_AUTH_TOKEN=your-smarty-auth-token
-NEXT_PUBLIC_ENABLE_FALLBACK_API=true
-```
+\`\`\`
 
 ### 2. Vercel Dashboard এ Environment Variables Add করা
 
@@ -42,7 +32,7 @@ NEXT_PUBLIC_ENABLE_FALLBACK_API=true
 
 আপনার Supabase SQL Editor এ নিচের scripts run করুন:
 
-```sql
+\`\`\`sql
 -- 1. Users table
 CREATE TABLE IF NOT EXISTS users (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
@@ -118,19 +108,19 @@ CREATE POLICY "Users can manage own IP history" ON user_ip_history
 -- Admin policies
 CREATE POLICY "Admin access" ON admin_users
   FOR ALL USING (true);
-```
+\`\`\`
 
 #### **Admin User Create করুন:**
 
-```sql
+\`\`\`sql
 -- Admin user create করুন (password: admin123)
 INSERT INTO admin_users (username, password_hash) VALUES 
 ('admin', '$2a$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewdBPj4J/8KjK8K2');
-```
+\`\`\`
 
 ### 4. Database Functions Create করুন
 
-```sql
+\`\`\`sql
 -- IP change logout function
 CREATE OR REPLACE FUNCTION logout_due_to_ip_change(
   p_user_id UUID,
@@ -170,7 +160,7 @@ BEGIN
     AND ip_address = p_old_ip;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
-```
+\`\`\`
 
 ### 5. Vercel Deployment
 
@@ -182,9 +172,9 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 ### 6. Post-Deployment Testing
 
 #### **Environment Check:**
-```bash
+\`\`\`bash
 curl https://your-app.vercel.app/api/check-env
-```
+\`\`\`
 
 #### **Account Creation Test:**
 1. `https://your-app.vercel.app/signup` এ যান
@@ -251,8 +241,8 @@ curl https://your-app.vercel.app/api/check-env
 4. **Database Connection** test করুন
 
 **API Endpoint for Debugging:**
-```
+\`\`\`
 GET https://your-app.vercel.app/api/check-env
-```
+\`\`\`
 
 এই endpoint environment variables এর status return করবে।
