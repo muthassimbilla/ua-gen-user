@@ -11,8 +11,21 @@ const authRoutes = ["/login", "/signup"]
 async function handleIPChangeWithMigration(request: NextRequest, sessionToken: string) {
   try {
     const supabase = createServerSupabaseClient()
-    const currentIP =
-      request.ip || request.headers.get("x-forwarded-for") || request.headers.get("x-real-ip") || "unknown"
+    
+    // Vercel-specific IP detection
+    const forwardedFor = request.headers.get("x-forwarded-for")
+    const realIP = request.headers.get("x-real-ip")
+    const clientIP = request.ip
+    
+    let currentIP = "unknown"
+    if (forwardedFor) {
+      // x-forwarded-for can contain multiple IPs, take the first one
+      currentIP = forwardedFor.split(",")[0].trim()
+    } else if (realIP) {
+      currentIP = realIP
+    } else if (clientIP) {
+      currentIP = clientIP
+    }
 
     // Get session with IP info
     const { data: session, error } = await supabase
@@ -77,6 +90,7 @@ async function handleIPChangeWithMigration(request: NextRequest, sessionToken: s
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
 
+  // Skip middleware for static files and API routes
   if (
     pathname.startsWith("/_next/") ||
     pathname.startsWith("/api/") ||
@@ -88,6 +102,13 @@ export async function middleware(request: NextRequest) {
     pathname === "/sw.js" ||
     pathname === "/manifest.json"
   ) {
+    return NextResponse.next()
+  }
+
+  // Prevent infinite redirects by checking redirect count
+  const redirectCount = request.headers.get("x-redirect-count") || "0"
+  if (parseInt(redirectCount) > 3) {
+    console.error("[v0] Too many redirects detected, stopping middleware")
     return NextResponse.next()
   }
 
@@ -108,8 +129,15 @@ export async function middleware(request: NextRequest) {
         secure: true,
         sameSite: "strict"
       })
+      // Add redirect count header
+      response.headers.set("x-redirect-count", (parseInt(redirectCount) + 1).toString())
       return response
     }
+  }
+
+  // Prevent redirect loops by checking if we're already on login page with session_invalid
+  if (pathname === "/login" && request.nextUrl.searchParams.get("reason") === "session_invalid") {
+    return NextResponse.next()
   }
 
   // Handle protected routes
@@ -118,23 +146,31 @@ export async function middleware(request: NextRequest) {
       // Redirect to login page
       const loginUrl = new URL("/login", request.url)
       loginUrl.searchParams.set("redirect", pathname)
-      return NextResponse.redirect(loginUrl)
+      const response = NextResponse.redirect(loginUrl)
+      response.headers.set("x-redirect-count", (parseInt(redirectCount) + 1).toString())
+      return response
     }
   }
 
   // Handle auth routes (login, signup)
   if (authRoutes.some((route) => pathname.startsWith(route))) {
     if (isAuthenticated) {
-      return NextResponse.redirect(new URL("/tool", request.url))
+      const response = NextResponse.redirect(new URL("/tool", request.url))
+      response.headers.set("x-redirect-count", (parseInt(redirectCount) + 1).toString())
+      return response
     }
   }
 
   // Handle root route
   if (pathname === "/") {
     if (isAuthenticated) {
-      return NextResponse.redirect(new URL("/tool", request.url))
+      const response = NextResponse.redirect(new URL("/tool", request.url))
+      response.headers.set("x-redirect-count", (parseInt(redirectCount) + 1).toString())
+      return response
     } else {
-      return NextResponse.redirect(new URL("/login", request.url))
+      const response = NextResponse.redirect(new URL("/login", request.url))
+      response.headers.set("x-redirect-count", (parseInt(redirectCount) + 1).toString())
+      return response
     }
   }
 

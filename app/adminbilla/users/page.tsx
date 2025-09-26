@@ -474,21 +474,9 @@ export default function UserManagementPage() {
                     <Eye className="h-3 w-3 lg:h-4 lg:w-4 mr-1.5" />
                     <span className="hidden sm:inline">View</span>
                   </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => {
-                      console.log("[v0] View devices button clicked for user:", user.id)
-                      handleViewDevices(user)
-                    }}
-                    className="bg-green-50 border-green-200 text-green-700 hover:bg-green-100 hover:border-green-300 hover:text-green-800 flex-1 text-xs lg:text-sm font-medium shadow-sm"
-                  >
-                    <Smartphone className="h-3 w-3 lg:h-4 lg:w-4 mr-1.5" />
-                    <span className="hidden sm:inline">Sessions</span>
-                  </Button>
                 </div>
 
-                {/* Bottom row: Secondary actions (Edit, Security, Toggle, Delete) */}
+                {/* Bottom row: Secondary actions (Edit, Security, Sessions, Toggle, Delete) */}
                 <div className="flex items-center gap-1.5 lg:gap-2">
                   <Button
                     variant="outline"
@@ -500,6 +488,17 @@ export default function UserManagementPage() {
                     className="bg-indigo-50 border-indigo-200 text-indigo-700 hover:bg-indigo-100 hover:border-indigo-300 hover:text-indigo-800 p-2 shadow-sm"
                   >
                     <Edit className="h-3 w-3 lg:h-4 lg:w-4" />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      console.log("[v0] View devices button clicked for user:", user.id)
+                      handleViewDevices(user)
+                    }}
+                    className="bg-green-50 border-green-200 text-green-700 hover:bg-green-100 hover:border-green-300 hover:text-green-800 p-2 shadow-sm"
+                  >
+                    <Smartphone className="h-3 w-3 lg:h-4 lg:w-4" />
                   </Button>
                   <Button
                     variant="outline"
