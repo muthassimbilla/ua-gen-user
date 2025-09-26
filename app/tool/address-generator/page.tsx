@@ -19,12 +19,10 @@ import {
   AlertCircle,
   Loader2,
   Search,
-  Map,
   Clipboard
 } from "lucide-react"
 import { ProtectedRoute } from "@/components/protected-route"
 import { SmartyAPI, SmartyAddressData } from "@/lib/smarty-api"
-import { testSmartyAPI } from "@/lib/test-smarty-api"
 
 // Use the same interface from SmartyAPI
 type AddressData = SmartyAddressData
@@ -35,11 +33,6 @@ export default function AddressGeneratorPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
   const [copied, setCopied] = useState(false)
-  const [apiStatus, setApiStatus] = useState<{
-    success: boolean
-    message: string
-    hasCredentials: boolean
-  } | null>(null)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -160,65 +153,6 @@ export default function AddressGeneratorPage() {
     }
   }
 
-  const testAPI = async () => {
-    setLoading(true)
-    setError("")
-    
-    try {
-      const result = await testSmartyAPI()
-      setApiStatus(result)
-    } catch (err: any) {
-      setError(err.message || "Failed to test API")
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const debugAPI = async () => {
-    setLoading(true)
-    setError("")
-    
-    try {
-      const response = await fetch('/api/debug-smarty')
-      const data = await response.json()
-      
-      if (data.success) {
-        console.log('Debug Info:', data.data)
-        setApiStatus({
-          success: true,
-          message: `Debug: ${JSON.stringify(data.data, null, 2)}`,
-          hasCredentials: data.data.resolvedCredentials.authId && data.data.resolvedCredentials.authToken
-        })
-      } else {
-        setApiStatus({
-          success: false,
-          message: data.error || "Debug failed",
-          hasCredentials: false
-        })
-      }
-    } catch (err: any) {
-      setError(err.message || "Failed to debug API")
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const testSpecificIP = async () => {
-    setLoading(true)
-    setError("")
-    setIpAddress("172.58.126.143")
-    
-    try {
-      // Auto-generate after setting IP
-      setTimeout(() => {
-        handleSubmit(new Event('submit') as any)
-      }, 500)
-    } catch (err: any) {
-      setError(err.message || "Failed to test specific IP")
-    } finally {
-      setLoading(false)
-    }
-  }
 
   return (
     <ProtectedRoute>
@@ -260,73 +194,10 @@ export default function AddressGeneratorPage() {
                       Enter an IP address to get its location information
                     </p>
                   </div>
-                  <div className="flex gap-2 flex-wrap">
-                    <Button
-                      type="button"
-                      onClick={testAPI}
-                      variant="outline"
-                      size="sm"
-                      className="h-8 px-3 rounded-lg border-border/50 bg-background/50 backdrop-blur-sm hover:bg-background/80 transition-all duration-200"
-                      disabled={loading}
-                      title="Test Smarty API connection"
-                    >
-                      <Search className="w-3 h-3 mr-1" />
-                      Test API
-                    </Button>
-                    <Button
-                      type="button"
-                      onClick={debugAPI}
-                      variant="outline"
-                      size="sm"
-                      className="h-8 px-3 rounded-lg border-border/50 bg-background/50 backdrop-blur-sm hover:bg-background/80 transition-all duration-200"
-                      disabled={loading}
-                      title="Debug API credentials"
-                    >
-                      <Globe className="w-3 h-3 mr-1" />
-                      Debug
-                    </Button>
-                    <Button
-                      type="button"
-                      onClick={testSpecificIP}
-                      variant="outline"
-                      size="sm"
-                      className="h-8 px-3 rounded-lg border-border/50 bg-background/50 backdrop-blur-sm hover:bg-background/80 transition-all duration-200"
-                      disabled={loading}
-                      title="Test with IP 172.58.126.143"
-                    >
-                      <Map className="w-3 h-3 mr-1" />
-                      Test IP
-                    </Button>
-                  </div>
                 </div>
               </CardHeader>
 
               <CardContent className="space-y-6">
-                {/* API Status */}
-                {apiStatus && (
-                  <div className={`p-3 rounded-lg border ${
-                    apiStatus.success 
-                      ? 'bg-green-50/50 dark:bg-green-900/20 border-green-200/50 dark:border-green-800/50' 
-                      : 'bg-red-50/50 dark:bg-red-900/20 border-red-200/50 dark:border-red-800/50'
-                  }`}>
-                    <div className="flex items-center gap-2">
-                      <div className={`w-2 h-2 rounded-full ${
-                        apiStatus.success ? 'bg-green-500' : 'bg-red-500'
-                      }`} />
-                      <span className={`text-sm font-medium ${
-                        apiStatus.success ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'
-                      }`}>
-                        {apiStatus.message}
-                      </span>
-                    </div>
-                    {apiStatus.hasCredentials && (
-                      <p className="text-xs text-muted-foreground mt-1">
-                        Smarty API credentials are configured
-                      </p>
-                    )}
-                  </div>
-                )}
-
                 {/* API Notice */}
                 <div className="p-3 rounded-lg border bg-blue-50/50 dark:bg-blue-900/20 border-blue-200/50 dark:border-blue-800/50">
                   <div className="flex items-center gap-2">
