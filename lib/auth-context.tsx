@@ -83,11 +83,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         console.log("[v0] Session invalid, clearing...")
         setUser(null)
         setSessionToken(null)
+        // Clear any cached session data (Vercel optimized)
+        if (typeof window !== "undefined") {
+          localStorage.removeItem("session_token")
+          localStorage.removeItem("current_user")
+          document.cookie = "session_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; domain=" + window.location.hostname
+          document.cookie = "session_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT"
+        }
       }
     } catch (error) {
       console.error("[v0] Auth check failed:", error)
       setUser(null)
       setSessionToken(null)
+      // Clear any cached session data on error (Vercel optimized)
+      if (typeof window !== "undefined") {
+        localStorage.removeItem("session_token")
+        localStorage.removeItem("current_user")
+        document.cookie = "session_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; domain=" + window.location.hostname
+        document.cookie = "session_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT"
+      }
     } finally {
       setLoading(false)
     }

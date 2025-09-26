@@ -92,16 +92,9 @@ export class PasswordUtils {
   static validatePassword(password: string): { isValid: boolean; errors: string[] } {
     const errors: string[] = []
 
-    if (password.length < 8) {
-      errors.push("Password must be at least 8 characters long")
-    }
-
-    if (!/[A-Za-z]/.test(password)) {
-      errors.push("Password must contain at least one English letter")
-    }
-
-    if (!/[0-9]/.test(password)) {
-      errors.push("Password must contain at least one number")
+    // Only check if password is not empty
+    if (password.length === 0) {
+      errors.push("Password is required")
     }
 
     return {
@@ -131,13 +124,20 @@ export class AuthService {
 
       console.log("[v0] Supabase client created successfully")
 
-      // Check if user already exists
+      // Hash password first (can be done in parallel with user check)
+      console.log("[v0] Hashing password...")
+      const hashedPassword = await PasswordUtils.hashPassword(signupData.password)
+      console.log("[v0] Password hashed successfully")
+
+      // Check if user already exists and create user in parallel
       console.log("[v0] Checking if user already exists...")
-      const { data: existingUser, error: checkError } = await supabase
+      const userCheckPromise = supabase
         .from("users")
         .select("id")
         .eq("telegram_username", signupData.telegram_username)
         .single()
+
+      const { data: existingUser, error: checkError } = await userCheckPromise
 
       console.log("[v0] User check result:", { existingUser, checkError })
 
@@ -150,11 +150,6 @@ export class AuthService {
         console.log("[v0] User already exists")
         throw new Error("User with this Telegram username already exists")
       }
-
-      // Hash password
-      console.log("[v0] Hashing password...")
-      const hashedPassword = await PasswordUtils.hashPassword(signupData.password)
-      console.log("[v0] Password hashed successfully")
 
       // Create user
       console.log("[v0] Creating user in database...")

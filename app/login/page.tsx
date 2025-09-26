@@ -11,6 +11,7 @@ import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { useAuth } from "@/lib/auth-context"
+import { getClientFlashMessage, clearClientFlashMessage, FlashMessage } from "@/lib/flash-messages"
 import {
   Eye,
   EyeOff,
@@ -23,7 +24,6 @@ import {
   AlertTriangle,
   Sparkles,
   Shield,
-  Zap,
 } from "lucide-react"
 import AuthThemeToggle from "@/components/auth-theme-toggle"
 import { useNetwork } from "@/contexts/network-context"
@@ -41,6 +41,8 @@ export default function LoginPage() {
   })
   const [errors, setErrors] = useState<string[]>([])
   const [successMessage, setSuccessMessage] = useState("")
+  const [showSuccessMessage, setShowSuccessMessage] = useState(false)
+  const [flashMessage, setFlashMessage] = useState<FlashMessage | null>(null)
   const [pendingApproval, setPendingApproval] = useState(false)
   const [loading, setLoading] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -48,12 +50,58 @@ export default function LoginPage() {
   const [ipChangeLogout, setIpChangeLogout] = useState(false)
   const [sessionInvalidReason, setSessionInvalidReason] = useState(false)
 
+  // Clear session data when session expired (Vercel optimized)
+  const clearSessionData = () => {
+    try {
+      // Clear localStorage
+      if (typeof window !== "undefined") {
+        localStorage.removeItem("session_token")
+        localStorage.removeItem("current_user")
+        
+        // Clear cookies with Vercel-compatible settings
+        document.cookie = "session_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; domain=" + window.location.hostname
+        document.cookie = "session_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT"
+        
+        // Force reload to clear any cached state
+        setTimeout(() => {
+          window.location.reload()
+        }, 100)
+      }
+      console.log("[v0] Session data cleared for Vercel")
+    } catch (error) {
+      console.error("[v0] Error clearing session data:", error)
+    }
+  }
+
   useEffect(() => {
     const message = searchParams.get("message")
     const reason = searchParams.get("reason")
+    const success = searchParams.get("success")
+
+    // Check for flash messages first
+    const flash = getClientFlashMessage()
+    if (flash) {
+      setFlashMessage(flash)
+      clearClientFlashMessage()
+      // Smooth animation for flash message
+      setTimeout(() => {
+        setShowSuccessMessage(true)
+      }, 100)
+      return
+    }
 
     if (message) {
       setSuccessMessage(message)
+      // Smooth animation for success message
+      setTimeout(() => {
+        setShowSuccessMessage(true)
+      }, 100)
+    } else if (success === "signup") {
+      setSuccessMessage("Account created successfully! Please wait for admin approval.")
+      // Smooth animation for success message
+      setTimeout(() => {
+        setShowSuccessMessage(true)
+      }, 100)
     }
 
     if (reason === "ip_changed") {
@@ -62,10 +110,21 @@ export default function LoginPage() {
 
     if (reason === "session_invalid") {
       setSessionInvalidReason(true)
-      // Clear the URL parameters to prevent interference with login
-      const newUrl = new URL(window.location.href)
-      newUrl.searchParams.delete("reason")
-      window.history.replaceState({}, "", newUrl.toString())
+      // Clear session data and URL parameters to prevent interference
+      clearSessionData()
+      
+      // Vercel-specific URL cleanup
+      if (typeof window !== "undefined") {
+        const newUrl = new URL(window.location.href)
+        newUrl.searchParams.delete("reason")
+        newUrl.searchParams.delete("message")
+        window.history.replaceState({}, "", newUrl.toString())
+        
+        // Force a small delay for Vercel edge runtime
+        setTimeout(() => {
+          console.log("[v0] Vercel session cleanup completed")
+        }, 50)
+      }
     }
   }, [searchParams])
 
@@ -104,13 +163,21 @@ export default function LoginPage() {
     // Prevent multiple submissions
     if (isSubmitting) return
     
+    // Clear any session expired state before starting login (Vercel optimized)
+    if (sessionInvalidReason) {
+      setSessionInvalidReason(false)
+      clearSessionData()
+      
+      // Vercel-specific: Wait for cleanup to complete
+      await new Promise(resolve => setTimeout(resolve, 200))
+    }
+    
     // Immediate UI feedback - no freeze
     setIsSubmitting(true)
     setLoading(true)
     setErrors([])
     setSuccessMessage("")
     setPendingApproval(false)
-    setSessionInvalidReason(false)
 
     // Use requestAnimationFrame to ensure UI updates before heavy operations
     requestAnimationFrame(async () => {
@@ -199,7 +266,7 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="h-screen flex items-center justify-center p-4 relative overflow-hidden bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
+    <div className="h-screen flex items-center justify-center p-4 relative overflow-hidden bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 page-enter">
       {/* Theme Toggle Button */}
       <div className="absolute top-6 right-6 z-20">
         <AuthThemeToggle />
@@ -260,7 +327,7 @@ export default function LoginPage() {
             <div className="space-y-4">
               <div className="flex items-center space-x-3">
                 <div className="w-8 h-8 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
-                  <Zap className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                  <Shield className="w-4 h-4 text-blue-600 dark:text-blue-400" />
                 </div>
                 <span className="text-muted-foreground">Fast and secure authentication</span>
               </div>
@@ -294,9 +361,25 @@ export default function LoginPage() {
               </CardHeader>
 
               <CardContent className="space-y-4">
+                {/* Flash Message */}
+                {flashMessage && (
+                  <Alert className={`border-green-500/30 bg-green-500/10 backdrop-blur-sm rounded-xl transition-all duration-500 ease-out ${
+                    showSuccessMessage 
+                      ? 'opacity-100 translate-y-0 scale-100' 
+                      : 'opacity-0 translate-y-4 scale-95'
+                  }`}>
+                    <CheckCircle className="h-5 w-5 text-green-500" />
+                    <AlertDescription className="text-green-400 font-medium">{flashMessage.message}</AlertDescription>
+                  </Alert>
+                )}
+
                 {/* Success Message */}
-                {successMessage && (
-                  <Alert className="border-green-500/30 bg-green-500/10 backdrop-blur-sm rounded-xl">
+                {successMessage && !flashMessage && (
+                  <Alert className={`border-green-500/30 bg-green-500/10 backdrop-blur-sm rounded-xl transition-all duration-500 ease-out ${
+                    showSuccessMessage 
+                      ? 'opacity-100 translate-y-0 scale-100' 
+                      : 'opacity-0 translate-y-4 scale-95'
+                  }`}>
                     <CheckCircle className="h-5 w-5 text-green-500" />
                     <AlertDescription className="text-green-400 font-medium">{successMessage}</AlertDescription>
                   </Alert>
@@ -309,6 +392,9 @@ export default function LoginPage() {
                       <div className="space-y-2">
                         <p className="font-semibold">Session Expired</p>
                         <p className="text-sm">Your previous session has expired. Please log in again to continue.</p>
+                        <p className="text-xs text-orange-500 font-medium">
+                          Session data has been cleared for security.
+                        </p>
                       </div>
                     </AlertDescription>
                   </Alert>
@@ -366,14 +452,6 @@ export default function LoginPage() {
                   </Alert>
                 )}
 
-                {/* Info Alert */}
-                <Alert className="border-blue-500/30 bg-blue-500/10 backdrop-blur-sm rounded-xl">
-                  <Zap className="h-5 w-5 text-blue-500" />
-                  <AlertDescription className="text-blue-600">
-                    <strong className="font-semibold">Note:</strong> New accounts require admin approval after
-                    registration.
-                  </AlertDescription>
-                </Alert>
 
                 {/* Login Form */}
                 <form onSubmit={handleSubmit} className="space-y-4">
@@ -442,9 +520,9 @@ export default function LoginPage() {
                     {/* Immediate loading overlay */}
                     {loading && (
                       <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center">
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 bg-black/20 backdrop-blur-sm px-4 py-2 rounded-lg">
                           <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                          <span className="text-white font-semibold">Signing in...</span>
+                          <span className="text-white font-semibold drop-shadow-lg">Signing in...</span>
                         </div>
                       </div>
                     )}

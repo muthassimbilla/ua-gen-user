@@ -98,9 +98,16 @@ export async function middleware(request: NextRequest) {
     const sessionValid = await handleIPChangeWithMigration(request, sessionToken)
     if (!sessionValid) {
       isAuthenticated = false
-      // Clear the invalid session cookie
+      // Clear the invalid session cookie (Vercel optimized)
       const response = NextResponse.redirect(new URL("/login?reason=session_invalid", request.url))
       response.cookies.delete("session_token")
+      response.cookies.set("session_token", "", {
+        path: "/",
+        expires: new Date(0),
+        domain: request.nextUrl.hostname,
+        secure: true,
+        sameSite: "strict"
+      })
       return response
     }
   }

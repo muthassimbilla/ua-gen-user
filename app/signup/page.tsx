@@ -11,6 +11,7 @@ import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { AuthService, ValidationUtils, PasswordUtils } from "@/lib/auth-client"
+import { setClientFlashMessage } from "@/lib/flash-messages"
 import { Eye, EyeOff, User, MessageCircle, Lock, CheckCircle, XCircle, AlertTriangle, Sparkles, Shield, Zap, UserPlus } from "lucide-react"
 import AuthThemeToggle from "@/components/auth-theme-toggle"
 import { useNetwork } from "@/contexts/network-context"
@@ -27,22 +28,13 @@ export default function SignupPage() {
   })
   const [errors, setErrors] = useState<string[]>([])
   const [loading, setLoading] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
-  const [passwordValidation, setPasswordValidation] = useState({
-    isValid: false,
-    errors: [] as string[],
-  })
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
     setFormData((prev) => ({ ...prev, [name]: value }))
-
-    // Real-time password validation
-    if (name === "password") {
-      const validation = PasswordUtils.validatePassword(value)
-      setPasswordValidation(validation)
-    }
 
     // Clear errors when user starts typing
     if (errors.length > 0) {
@@ -86,43 +78,73 @@ export default function SignupPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    
+    // Prevent multiple submissions
+    if (isSubmitting) return
+    
+    // Immediate UI feedback - no freeze
+    setIsSubmitting(true)
     setLoading(true)
     setErrors([])
 
-    try {
-      // Validate form
-      const validationErrors = validateForm()
-      if (validationErrors.length > 0) {
-        setErrors(validationErrors)
-        return
+    // Use requestAnimationFrame to ensure UI updates before heavy operations
+    requestAnimationFrame(async () => {
+      try {
+        // Validate form
+        const validationErrors = validateForm()
+        if (validationErrors.length > 0) {
+          setErrors(validationErrors)
+          setLoading(false)
+          setIsSubmitting(false)
+          return
+        }
+
+        // Add timeout to prevent infinite loading
+        const signupTimeout = setTimeout(() => {
+          setLoading(false)
+          setIsSubmitting(false)
+          setErrors(["Signup is taking longer than expected. Please try again."])
+        }, 15000) // 15 second timeout
+
+        try {
+          console.log("[v0] Starting signup process")
+
+          // Create account
+          await AuthService.signup({
+            full_name: formData.full_name.trim(),
+            telegram_username: formData.telegram_username.trim(),
+            password: formData.password,
+          })
+
+          clearTimeout(signupTimeout)
+          console.log("[v0] Signup successful, redirecting to login")
+
+          // Set flash message and redirect
+          setClientFlashMessage('success', 'Account created successfully! Please wait for admin approval.')
+          
+          // Smooth transition to login page
+          setTimeout(() => {
+            router.push("/login")
+          }, 500) // Small delay for smooth transition
+        } catch (signupError) {
+          clearTimeout(signupTimeout)
+          throw signupError
+        }
+      } catch (error: any) {
+        console.error("[v0] Signup error:", error)
+
+        if (error.message.includes("Supabase")) {
+          setErrors([
+            error.message,
+            "Solution: Click the gear icon in the top right of the project and add Supabase integration.",
+          ])
+        } else {
+          setErrors([error.message || "Failed to create account"])
+        }
+        setLoading(false)
+        setIsSubmitting(false)
       }
-
-      console.log("[v0] Starting signup process")
-
-      // Create account
-      await AuthService.signup({
-        full_name: formData.full_name.trim(),
-        telegram_username: formData.telegram_username.trim(),
-        password: formData.password,
-      })
-
-      console.log("[v0] Signup successful, redirecting to login")
-
-      // Immediate redirect to login page with success message
-      router.push("/login?message=Account created successfully! Your account is pending admin approval. You will be able to login once approved.")
-    } catch (error: any) {
-      console.error("[v0] Signup error:", error)
-
-      if (error.message.includes("Supabase")) {
-        setErrors([
-          error.message,
-          "Solution: Click the gear icon in the top right of the project and add Supabase integration.",
-        ])
-      } else {
-        setErrors([error.message || "Failed to create account"])
-      }
-      setLoading(false)
-    }
+    })
   }
 
   return (
@@ -274,7 +296,7 @@ export default function SignupPage() {
                     id="password"
                     name="password"
                     type={showPassword ? "text" : "password"}
-                    placeholder="Create a strong password"
+                    placeholder="Enter your password"
                     value={formData.password}
                     onChange={handleInputChange}
                     className="h-12 pl-12 pr-12 rounded-xl border-border/50 bg-background/50 backdrop-blur-sm focus:bg-background/80 transition-all duration-200 group-hover:border-green-300/50 focus:border-green-500/50 focus:ring-2 focus:ring-green-500/20"
@@ -290,31 +312,6 @@ export default function SignupPage() {
                   </button>
                 </div>
 
-                {/* Password Validation Indicators */}
-                {formData.password && (
-                  <div className="space-y-1 p-2 rounded-lg bg-background/30 backdrop-blur-sm border border-border/30">
-                    <div className="flex items-center space-x-2 text-xs">
-                      {passwordValidation.isValid ? (
-                        <CheckCircle className="h-3 w-3 text-green-500" />
-                      ) : (
-                        <XCircle className="h-3 w-3 text-red-500" />
-                      )}
-                      <span className={`font-medium ${passwordValidation.isValid ? "text-green-500" : "text-red-500"}`}>
-                        Password is {passwordValidation.isValid ? "strong" : "weak"}
-                      </span>
-                    </div>
-                    {passwordValidation.errors.length > 0 && (
-                      <ul className="text-xs text-red-400 space-y-0.5">
-                        {passwordValidation.errors.map((error, index) => (
-                          <li key={index} className="flex items-center space-x-1">
-                            <XCircle className="h-2 w-2 flex-shrink-0" />
-                            <span>{error}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    )}
-                  </div>
-                )}
               </div>
 
               {/* Confirm Password Field */}
@@ -365,20 +362,28 @@ export default function SignupPage() {
               {/* Submit Button */}
               <Button 
                 type="submit" 
-                className="w-full h-10 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100" 
-                disabled={loading}
+                className="w-full h-12 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 relative overflow-hidden active:scale-[0.98] active:shadow-md" 
+                disabled={loading || isSubmitting}
+                style={{
+                  transform: isSubmitting ? 'scale(0.98)' : undefined,
+                  transition: 'transform 0.1s ease-in-out'
+                }}
               >
-                {loading ? (
-                  <div className="flex items-center gap-2">
-                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                    Creating Account...
-                  </div>
-                ) : (
-                  <div className="flex items-center gap-2">
-                    <UserPlus className="h-5 w-5" />
-                    Create Account
+                {/* Immediate loading overlay */}
+                {loading && (
+                  <div className="absolute inset-0 bg-gradient-to-r from-green-500 to-emerald-600 flex items-center justify-center">
+                    <div className="flex items-center gap-2 bg-black/20 backdrop-blur-sm px-4 py-2 rounded-lg">
+                      <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                      <span className="text-white font-semibold drop-shadow-lg">Creating Account...</span>
+                    </div>
                   </div>
                 )}
+                
+                {/* Button content */}
+                <div className={`flex items-center gap-2 transition-opacity duration-200 ${loading ? 'opacity-0' : 'opacity-100'}`}>
+                  <UserPlus className="h-5 w-5" />
+                  Create Account
+                </div>
               </Button>
             </form>
 
