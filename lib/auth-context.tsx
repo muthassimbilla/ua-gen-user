@@ -96,41 +96,54 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const login = async (telegram_username: string, password: string) => {
     try {
       console.log("[v0] Starting login for:", telegram_username)
+      
+      // Immediate UI feedback - no freeze
       setIsLoginInProgress(true)
       setLoading(true)
 
-      // Add timeout to prevent infinite loading (reduced for faster feedback)
-      const loginTimeout = setTimeout(() => {
-        console.error("[v0] Login timeout - taking too long")
-        setLoading(false)
-        setIsLoginInProgress(false)
-        throw new Error("Login is taking longer than expected. Please try again.")
-      }, 10000) // 10 second timeout
+      // Use requestAnimationFrame to ensure UI updates before heavy operations
+      return new Promise<void>((resolve, reject) => {
+        requestAnimationFrame(async () => {
+          try {
+            // Add timeout to prevent infinite loading (reduced for faster feedback)
+            const loginTimeout = setTimeout(() => {
+              console.error("[v0] Login timeout - taking too long")
+              setLoading(false)
+              setIsLoginInProgress(false)
+              reject(new Error("Login is taking longer than expected. Please try again."))
+            }, 10000) // 10 second timeout
 
-      try {
-        const { user: loggedInUser, sessionToken } = await AuthService.login({
-          telegram_username,
-          password,
+            try {
+              const { user: loggedInUser, sessionToken } = await AuthService.login({
+                telegram_username,
+                password,
+              })
+
+              clearTimeout(loginTimeout)
+              console.log("[v0] Login successful, setting user and token")
+
+              setSessionToken(sessionToken)
+              setUser(loggedInUser)
+
+              // Remove unnecessary delay for faster login
+              console.log("[v0] User and session set successfully")
+              resolve()
+            } catch (loginError) {
+              clearTimeout(loginTimeout)
+              reject(loginError)
+            }
+          } catch (error) {
+            console.error("[v0] Login failed:", error)
+            reject(error)
+          } finally {
+            setLoading(false)
+            setIsLoginInProgress(false)
+          }
         })
-
-        clearTimeout(loginTimeout)
-        console.log("[v0] Login successful, setting user and token")
-
-        setSessionToken(sessionToken)
-        setUser(loggedInUser)
-
-        // Remove unnecessary delay for faster login
-        console.log("[v0] User and session set successfully")
-      } catch (loginError) {
-        clearTimeout(loginTimeout)
-        throw loginError
-      }
+      })
     } catch (error) {
       console.error("[v0] Login failed:", error)
       throw error
-    } finally {
-      setLoading(false)
-      setIsLoginInProgress(false)
     }
   }
 

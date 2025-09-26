@@ -43,6 +43,7 @@ export default function LoginPage() {
   const [successMessage, setSuccessMessage] = useState("")
   const [pendingApproval, setPendingApproval] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
   const [ipChangeLogout, setIpChangeLogout] = useState(false)
   const [sessionInvalidReason, setSessionInvalidReason] = useState(false)
@@ -99,92 +100,102 @@ export default function LoginPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    
+    // Prevent multiple submissions
+    if (isSubmitting) return
+    
+    // Immediate UI feedback - no freeze
+    setIsSubmitting(true)
     setLoading(true)
     setErrors([])
     setSuccessMessage("")
     setPendingApproval(false)
     setSessionInvalidReason(false)
 
-    try {
-      const validationErrors = validateForm()
-      if (validationErrors.length > 0) {
-        setErrors(validationErrors)
-        setLoading(false)
-        return
-      }
-
-      // Add timeout to prevent infinite loading (reduced for faster feedback)
-      const loginTimeout = setTimeout(() => {
-        setLoading(false)
-        setErrors(["Login is taking longer than expected. Please try again."])
-      }, 10000) // 10 second timeout
-
+    // Use requestAnimationFrame to ensure UI updates before heavy operations
+    requestAnimationFrame(async () => {
       try {
-        // Optimize login process
-        const loginPromise = login(formData.telegram_username.trim(), formData.password)
-        const redirectTo = searchParams.get("redirect") || "/tool"
+        const validationErrors = validateForm()
+        if (validationErrors.length > 0) {
+          setErrors(validationErrors)
+          setLoading(false)
+          return
+        }
 
-        // Start login and redirect simultaneously
-        await loginPromise
+        // Add timeout to prevent infinite loading (reduced for faster feedback)
+        const loginTimeout = setTimeout(() => {
+          setLoading(false)
+          setErrors(["Login is taking longer than expected. Please try again."])
+        }, 10000) // 10 second timeout
 
-        clearTimeout(loginTimeout)
-        setTimeout(() => {
-          router.push(redirectTo)
-        }, 100)
-      } catch (loginError) {
-        clearTimeout(loginTimeout)
-        throw loginError
+        try {
+          // Optimize login process
+          const loginPromise = login(formData.telegram_username.trim(), formData.password)
+          const redirectTo = searchParams.get("redirect") || "/tool"
+
+          // Start login and redirect simultaneously
+          await loginPromise
+
+          clearTimeout(loginTimeout)
+          setTimeout(() => {
+            router.push(redirectTo)
+          }, 100)
+        } catch (loginError) {
+          clearTimeout(loginTimeout)
+          throw loginError
+        }
+      } catch (error: any) {
+        console.error("[v0] Login error:", error)
+
+        console.log("[v0] Error message:", error.message)
+        console.log("[v0] Error type:", typeof error.message)
+        console.log("[v0] Error includes pending approval:", error.message?.includes("pending approval"))
+        console.log("[v0] Full error object:", error)
+
+        // Check for specific error messages (case insensitive)
+        const errorMsg = error.message?.toLowerCase() || ""
+
+        console.log("[v0] Checking error message:", errorMsg)
+        console.log("[v0] Contains 'pending approval':", errorMsg.includes("pending approval"))
+        console.log("[v0] Contains 'not been approved':", errorMsg.includes("not been approved"))
+        console.log("[v0] Contains 'account is pending approval':", errorMsg.includes("account is pending approval"))
+
+        if (
+          errorMsg.includes("pending approval") ||
+          errorMsg.includes("not been approved") ||
+          errorMsg.includes("account is pending approval") ||
+          errorMsg.includes("is pending approval") ||
+          errorMsg.includes("waiting for admin approval") ||
+          errorMsg.includes("requires admin approval")
+        ) {
+          console.log("[v0] Setting pending approval error")
+          setPendingApproval(true)
+          setErrors([]) // Clear other errors when showing pending approval
+        } else if (errorMsg.includes("deactivated") || errorMsg.includes("account is deactivated")) {
+          console.log("[v0] Setting deactivated error")
+          setErrors(["Your account has been deactivated. Please contact support."])
+        } else if (
+          errorMsg.includes("invalid telegram") ||
+          errorMsg.includes("invalid password") ||
+          errorMsg.includes("invalid username") ||
+          errorMsg.includes("invalid credentials")
+        ) {
+          console.log("[v0] Setting invalid credentials error")
+          setErrors(["Invalid username or password. Please check your credentials and try again."])
+        } else if (errorMsg.includes("database error") || errorMsg.includes("database")) {
+          console.log("[v0] Setting database error")
+          setErrors(["Database connection error. Please try again later."])
+        } else if (errorMsg.includes("network error") || errorMsg.includes("connection")) {
+          console.log("[v0] Setting network error")
+          setErrors(["Network connection error. Please check your internet connection and try again."])
+        } else {
+          console.log("[v0] Setting generic error:", error.message)
+          setErrors([error.message || "Login failed. Please try again."])
+        }
+        setLoading(false)
+        setIsSubmitting(false)
       }
-    } catch (error: any) {
-      console.error("[v0] Login error:", error)
-
-      console.log("[v0] Error message:", error.message)
-      console.log("[v0] Error type:", typeof error.message)
-      console.log("[v0] Error includes pending approval:", error.message?.includes("pending approval"))
-      console.log("[v0] Full error object:", error)
-
-      // Check for specific error messages (case insensitive)
-      const errorMsg = error.message?.toLowerCase() || ""
-
-      console.log("[v0] Checking error message:", errorMsg)
-      console.log("[v0] Contains 'pending approval':", errorMsg.includes("pending approval"))
-      console.log("[v0] Contains 'not been approved':", errorMsg.includes("not been approved"))
-      console.log("[v0] Contains 'account is pending approval':", errorMsg.includes("account is pending approval"))
-
-      if (
-        errorMsg.includes("pending approval") ||
-        errorMsg.includes("not been approved") ||
-        errorMsg.includes("account is pending approval") ||
-        errorMsg.includes("is pending approval") ||
-        errorMsg.includes("waiting for admin approval") ||
-        errorMsg.includes("requires admin approval")
-      ) {
-        console.log("[v0] Setting pending approval error")
-        setPendingApproval(true)
-        setErrors([]) // Clear other errors when showing pending approval
-      } else if (errorMsg.includes("deactivated") || errorMsg.includes("account is deactivated")) {
-        console.log("[v0] Setting deactivated error")
-        setErrors(["Your account has been deactivated. Please contact support."])
-      } else if (
-        errorMsg.includes("invalid telegram") ||
-        errorMsg.includes("invalid password") ||
-        errorMsg.includes("invalid username") ||
-        errorMsg.includes("invalid credentials")
-      ) {
-        console.log("[v0] Setting invalid credentials error")
-        setErrors(["Invalid username or password. Please check your credentials and try again."])
-      } else if (errorMsg.includes("database error") || errorMsg.includes("database")) {
-        console.log("[v0] Setting database error")
-        setErrors(["Database connection error. Please try again later."])
-      } else if (errorMsg.includes("network error") || errorMsg.includes("connection")) {
-        console.log("[v0] Setting network error")
-        setErrors(["Network connection error. Please check your internet connection and try again."])
-      } else {
-        console.log("[v0] Setting generic error:", error.message)
-        setErrors([error.message || "Login failed. Please try again."])
-      }
-      setLoading(false)
-    }
+    })
   }
 
   return (
@@ -421,20 +432,28 @@ export default function LoginPage() {
 
                   <Button
                     type="submit"
-                    className="w-full h-12 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
-                    disabled={loading}
+                    className="w-full h-12 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 relative overflow-hidden active:scale-[0.98] active:shadow-md"
+                    disabled={loading || isSubmitting}
+                    style={{
+                      transform: isSubmitting ? 'scale(0.98)' : undefined,
+                      transition: 'transform 0.1s ease-in-out'
+                    }}
                   >
-                    {loading ? (
-                      <div className="flex items-center gap-2">
-                        <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                        Signing in...
-                      </div>
-                    ) : (
-                      <div className="flex items-center gap-2">
-                        <LogIn className="h-5 w-5" />
-                        Sign In
+                    {/* Immediate loading overlay */}
+                    {loading && (
+                      <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center">
+                        <div className="flex items-center gap-2">
+                          <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                          <span className="text-white font-semibold">Signing in...</span>
+                        </div>
                       </div>
                     )}
+                    
+                    {/* Button content */}
+                    <div className={`flex items-center gap-2 transition-opacity duration-200 ${loading ? 'opacity-0' : 'opacity-100'}`}>
+                      <LogIn className="h-5 w-5" />
+                      Sign In
+                    </div>
                   </Button>
                 </form>
 
