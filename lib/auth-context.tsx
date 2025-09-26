@@ -99,13 +99,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setIsLoginInProgress(true)
       setLoading(true)
 
-      // Add timeout to prevent infinite loading
+      // Add timeout to prevent infinite loading (reduced for faster feedback)
       const loginTimeout = setTimeout(() => {
         console.error("[v0] Login timeout - taking too long")
         setLoading(false)
         setIsLoginInProgress(false)
         throw new Error("Login is taking longer than expected. Please try again.")
-      }, 30000) // 30 second timeout
+      }, 10000) // 10 second timeout
 
       try {
         const { user: loggedInUser, sessionToken } = await AuthService.login({
@@ -119,8 +119,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setSessionToken(sessionToken)
         setUser(loggedInUser)
 
-        await new Promise((resolve) => setTimeout(resolve, 200))
-
+        // Remove unnecessary delay for faster login
         console.log("[v0] User and session set successfully")
       } catch (loginError) {
         clearTimeout(loginTimeout)

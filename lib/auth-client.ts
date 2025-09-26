@@ -278,54 +278,45 @@ export class AuthService {
 
       console.log("[v0] User authenticated, implementing IP-only security...")
 
-      // Get current IP
+      // Get current IP (optimized with timeout)
       let currentIP: string | null = null
       try {
-        currentIP = await this.getUserCurrentIP()
+        // Add timeout to IP detection to prevent slow login
+        const ipPromise = this.getUserCurrentIP()
+        const timeoutPromise = new Promise<string>((_, reject) => 
+          setTimeout(() => reject(new Error("IP detection timeout")), 3000)
+        )
+        
+        currentIP = await Promise.race([ipPromise, timeoutPromise])
         console.log("[v0] Current IP:", currentIP)
       } catch (error) {
-        console.error("[v0] IP detection error:", error)
+        console.warn("[v0] IP detection failed, using fallback:", error.message)
         currentIP = "unknown"
       }
 
-      // IP-based security: logout all other sessions when IP changes
-      try {
-        if (currentIP) {
-          // Check if this IP is different from any active session
-          const { data: activeSessions, error: sessionError } = await supabase
+      // IP-based security: logout all other sessions when IP changes (optimized)
+      if (currentIP && currentIP !== "unknown") {
+        try {
+          // Use a single query to check and logout other sessions
+          const { error: logoutError } = await supabase
             .from("user_sessions")
-            .select("ip_address")
+            .update({
+              is_active: false,
+              logout_reason: "ip_changed",
+            })
             .eq("user_id", user.id)
             .eq("is_active", true)
+            .neq("ip_address", currentIP)
 
-          if (!sessionError && activeSessions && activeSessions.length > 0) {
-            const hasDifferentIP = activeSessions.some(
-              (session: any) => session.ip_address && session.ip_address !== currentIP,
-            )
-
-            if (hasDifferentIP) {
-              console.log("[v0] IP change detected, logging out other sessions")
-
-              // Logout all other sessions (keep only current IP)
-              const { error: logoutError } = await supabase
-                .from("user_sessions")
-                .update({
-                  is_active: false,
-                  logout_reason: "ip_changed",
-                })
-                .eq("user_id", user.id)
-                .eq("is_active", true)
-                .neq("ip_address", currentIP)
-
-              if (logoutError) {
-                console.error("[v0] Error logging out other IPs:", logoutError)
-              }
-            }
+          if (logoutError) {
+            console.warn("[v0] Error logging out other IPs:", logoutError)
+          } else {
+            console.log("[v0] Other IP sessions logged out")
           }
+        } catch (error) {
+          console.warn("[v0] IP security check failed:", error)
+          // Continue with login even if IP check fails
         }
-      } catch (error) {
-        console.error("[v0] IP security check failed:", error)
-        // Continue with login even if IP check fails
       }
 
       // Generate session token
@@ -334,7 +325,8 @@ export class AuthService {
 
       console.log("[v0] Creating session...")
 
-      const { error: sessionError } = await supabase.from("user_sessions").insert({
+      // Create session and IP history in parallel for faster login
+      const sessionPromise = supabase.from("user_sessions").insert({
         user_id: user.id,
         session_token: sessionToken,
         expires_at: expiresAt.toISOString(),
@@ -343,6 +335,16 @@ export class AuthService {
         is_active: true,
       })
 
+      const ipHistoryPromise = currentIP && currentIP !== "127.0.0.1" && currentIP !== "unknown" 
+        ? supabase.from("user_ip_history").insert({
+            user_id: user.id,
+            ip_address: currentIP,
+            is_current: true,
+          })
+        : Promise.resolve({ error: null })
+
+      // Wait for session creation (critical)
+      const { error: sessionError } = await sessionPromise
       if (sessionError) {
         console.error("[v0] Session creation error:", sessionError)
         throw new Error("Failed to create session")
@@ -350,27 +352,23 @@ export class AuthService {
 
       console.log("[v0] Session created successfully")
 
-      if (currentIP && currentIP !== "127.0.0.1") {
-        try {
-          const { error: ipHistoryError } = await supabase.from("user_ip_history").insert({
-            user_id: user.id,
-            ip_address: currentIP,
-            is_current: true,
-          })
-
-          if (ipHistoryError) {
-            console.error("[v0] IP history tracking error:", ipHistoryError)
-          }
-
-          // Mark other IPs as not current
-          await supabase
+      // Handle IP history in background (non-critical)
+      try {
+        const { error: ipHistoryError } = await ipHistoryPromise
+        if (ipHistoryError) {
+          console.warn("[v0] IP history tracking error:", ipHistoryError)
+        } else if (currentIP && currentIP !== "127.0.0.1" && currentIP !== "unknown") {
+          // Mark other IPs as not current (background operation)
+          supabase
             .from("user_ip_history")
             .update({ is_current: false })
             .eq("user_id", user.id)
             .neq("ip_address", currentIP)
-        } catch (error) {
-          console.error("[v0] IP tracking failed:", error)
+            .then(() => console.log("[v0] IP history updated"))
+            .catch(error => console.warn("[v0] IP history update failed:", error))
         }
+      } catch (error) {
+        console.warn("[v0] IP tracking failed:", error)
       }
 
       // Store session token
@@ -525,11 +523,27 @@ export class AuthService {
 
   static async getUserCurrentIP(): Promise<string | null> {
     try {
-      const response = await fetch("https://api.ipify.org?format=json")
+      // Use a faster IP detection service with timeout
+      const controller = new AbortController()
+      const timeoutId = setTimeout(() => controller.abort(), 2000) // 2 second timeout
+      
+      const response = await fetch("https://api.ipify.org?format=json", {
+        signal: controller.signal,
+        headers: {
+          'Accept': 'application/json',
+        }
+      })
+      
+      clearTimeout(timeoutId)
+      
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`)
+      }
+      
       const data = await response.json()
       return data.ip
     } catch (error) {
-      console.error("[v0] IP detection error:", error)
+      console.warn("[v0] IP detection error:", error.message)
       return null
     }
   }

@@ -113,11 +113,11 @@ export default function LoginPage() {
         return
       }
 
-      // Add timeout to prevent infinite loading
+      // Add timeout to prevent infinite loading (reduced for faster feedback)
       const loginTimeout = setTimeout(() => {
         setLoading(false)
         setErrors(["Login is taking longer than expected. Please try again."])
-      }, 30000) // 30 second timeout
+      }, 10000) // 10 second timeout
 
       try {
         // Optimize login process
