@@ -117,10 +117,10 @@ export class AuthService {
   static async signup(signupData: SignupData): Promise<User> {
     try {
       console.log("[v0] Starting signup process...")
-      console.log("[v0] Signup data:", { 
-        full_name: signupData.full_name, 
+      console.log("[v0] Signup data:", {
+        full_name: signupData.full_name,
         telegram_username: signupData.telegram_username,
-        password_length: signupData.password.length 
+        password_length: signupData.password.length,
       })
 
       const supabase = createBrowserSupabaseClient()
@@ -167,14 +167,10 @@ export class AuthService {
         account_status: "active", // Use existing enum value
         is_active: true,
       }
-      
+
       console.log("[v0] User data to insert:", { ...userData, password_hash: "[HIDDEN]" })
 
-      const { data: user, error: userError } = await supabase
-        .from("users")
-        .insert(userData)
-        .select()
-        .single()
+      const { data: user, error: userError } = await supabase.from("users").insert(userData).select().single()
 
       console.log("[v0] User creation result:", { user, userError })
 
@@ -212,9 +208,9 @@ export class AuthService {
   static async login(credentials: LoginCredentials): Promise<{ user: User; sessionToken: string }> {
     try {
       console.log("[v0] Starting login process...")
-      console.log("[v0] Login credentials:", { 
+      console.log("[v0] Login credentials:", {
         telegram_username: credentials.telegram_username,
-        password_length: credentials.password.length 
+        password_length: credentials.password.length,
       })
 
       const supabase = createBrowserSupabaseClient()
@@ -234,7 +230,17 @@ export class AuthService {
         .eq("telegram_username", credentials.telegram_username)
         .single()
 
-      console.log("[v0] User lookup result:", { user: user ? { id: user.id, telegram_username: user.telegram_username, is_active: user.is_active, is_approved: user.is_approved } : null, userError })
+      console.log("[v0] User lookup result:", {
+        user: user
+          ? {
+              id: user.id,
+              telegram_username: user.telegram_username,
+              is_active: user.is_active,
+              is_approved: user.is_approved,
+            }
+          : null,
+        userError,
+      })
 
       if (userError) {
         console.error("[v0] User lookup error:", userError)
@@ -256,14 +262,16 @@ export class AuthService {
 
       if (!user.is_approved) {
         console.error("[v0] Account is not approved")
-        throw new Error("Account is pending approval")
+        throw new Error(
+          "Account Pending Approval - Your account has been created successfully but is still waiting for admin approval. You will be able to login once approved. Approval is usually granted within 24 hours. Please be patient.",
+        )
       }
 
       // Verify password
       console.log("[v0] Verifying password...")
       const isPasswordValid = await PasswordUtils.verifyPassword(credentials.password, user.password_hash)
       console.log("[v0] Password verification result:", isPasswordValid)
-      
+
       if (!isPasswordValid) {
         console.error("[v0] Invalid password")
         throw new Error("Invalid Telegram username or password")
@@ -292,13 +300,13 @@ export class AuthService {
             .eq("is_active", true)
 
           if (!sessionError && activeSessions && activeSessions.length > 0) {
-            const hasDifferentIP = activeSessions.some((session: any) => 
-              session.ip_address && session.ip_address !== currentIP
+            const hasDifferentIP = activeSessions.some(
+              (session: any) => session.ip_address && session.ip_address !== currentIP,
             )
 
             if (hasDifferentIP) {
               console.log("[v0] IP change detected, logging out other sessions")
-              
+
               // Logout all other sessions (keep only current IP)
               const { error: logoutError } = await supabase
                 .from("user_sessions")
@@ -385,6 +393,7 @@ export class AuthService {
         error.message.includes("Supabase") ||
         error.message.includes("Invalid Telegram") ||
         error.message.includes("approved") ||
+        error.message.includes("Pending Approval") ||
         error.message.includes("deactivated") ||
         error.message.includes("Database error")
       ) {
@@ -466,9 +475,19 @@ export class AuthService {
 
       if (currentIP && session.ip_address && currentIP !== session.ip_address) {
         // Skip IP change check for localhost/development environment
-        const isLocalhost = currentIP === "::1" || currentIP === "127.0.0.1" || currentIP.startsWith("192.168.") || currentIP.startsWith("10.") || currentIP.startsWith("172.")
-        const isOldLocalhost = session.ip_address === "::1" || session.ip_address === "127.0.0.1" || session.ip_address.startsWith("192.168.") || session.ip_address.startsWith("10.") || session.ip_address.startsWith("172.")
-        
+        const isLocalhost =
+          currentIP === "::1" ||
+          currentIP === "127.0.0.1" ||
+          currentIP.startsWith("192.168.") ||
+          currentIP.startsWith("10.") ||
+          currentIP.startsWith("172.")
+        const isOldLocalhost =
+          session.ip_address === "::1" ||
+          session.ip_address === "127.0.0.1" ||
+          session.ip_address.startsWith("192.168.") ||
+          session.ip_address.startsWith("10.") ||
+          session.ip_address.startsWith("172.")
+
         if (isLocalhost || isOldLocalhost) {
           console.log("[v0] Skipping IP change check for localhost:", session.ip_address, "->", currentIP)
         } else {
