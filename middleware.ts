@@ -8,11 +8,11 @@ const protectedRoutes = ["/profile", "/tool"]
 // Routes that should redirect to /tool if already authenticated
 const authRoutes = ["/login", "/signup"]
 
-async function handleIPChangeWithMigration(request: NextRequest, sessionToken: string) {
+async function handleSessionValidation(request: NextRequest, sessionToken: string) {
   try {
     const supabase = createServerSupabaseClient()
     
-    // Vercel-specific IP detection
+    // Get current IP for tracking (no security enforcement)
     const forwardedFor = request.headers.get("x-forwarded-for")
     const realIP = request.headers.get("x-real-ip")
     const clientIP = request.ip
@@ -30,7 +30,7 @@ async function handleIPChangeWithMigration(request: NextRequest, sessionToken: s
     // Get session with IP info
     const { data: session, error } = await supabase
       .from("user_sessions")
-      .select("id, user_id, ip_address, is_active")
+      .select("id, user_id, ip_address, user_agent, is_active")
       .eq("session_token", sessionToken)
       .eq("is_active", true)
       .gt("expires_at", new Date().toISOString())
@@ -40,44 +40,41 @@ async function handleIPChangeWithMigration(request: NextRequest, sessionToken: s
       return false // Session invalid
     }
 
-    if (session.ip_address && currentIP !== session.ip_address && currentIP !== "unknown") {
-      // Skip IP change check for localhost/development environment
-      const isLocalhost =
-        currentIP === "::1" ||
-        currentIP === "127.0.0.1" ||
-        currentIP.startsWith("192.168.") ||
-        currentIP.startsWith("10.") ||
-        currentIP.startsWith("172.")
-      const isOldLocalhost =
-        session.ip_address === "::1" ||
-        session.ip_address === "127.0.0.1" ||
-        session.ip_address.startsWith("192.168.") ||
-        session.ip_address.startsWith("10.") ||
-        session.ip_address.startsWith("172.")
-
-      if (isLocalhost || isOldLocalhost) {
-        console.log(`[v0] Skipping IP change check for localhost: ${session.ip_address} -> ${currentIP}`)
-        return true // Allow localhost IP changes
+    // Track IP and User Agent changes for analytics (no logout enforcement)
+    const userAgent = request.headers.get("user-agent") || "Unknown"
+    const needsUpdate = (session.ip_address && currentIP !== session.ip_address && currentIP !== "unknown") ||
+                       (session.user_agent && session.user_agent !== userAgent)
+    
+    if (needsUpdate) {
+      console.log(`[v0] Session data changed for user ${session.user_id}:`)
+      if (session.ip_address && currentIP !== session.ip_address) {
+        console.log(`  IP: ${session.ip_address} -> ${currentIP}`)
       }
-
-      console.log(`[v0] IP address changed for user ${session.user_id}: ${session.ip_address} -> ${currentIP}`)
-
-      // Logout due to IP change - this is the correct behavior
-      const { data: logoutResult, error: logoutError } = await supabase.rpc("logout_due_to_ip_change", {
-        p_user_id: session.user_id,
-        p_old_ip: session.ip_address,
-        p_new_ip: currentIP,
-      })
-
-      if (logoutError) {
-        console.error("[v0] IP logout error:", logoutError)
-        return false
+      if (session.user_agent && session.user_agent !== userAgent) {
+        console.log(`  User Agent: ${session.user_agent} -> ${userAgent}`)
       }
-
-      console.log(
-        `[v0] Session expired due to IP address change for user ${session.user_id}. User needs to login again.`,
-      )
-      return false // Session expired due to IP change
+      
+      // Update session data for tracking purposes
+      try {
+        const updateData: any = {
+          last_accessed: new Date().toISOString()
+        }
+        
+        if (currentIP !== "unknown") {
+          updateData.ip_address = currentIP
+        }
+        if (userAgent !== "Unknown") {
+          updateData.user_agent = userAgent
+        }
+        
+        await supabase
+          .from("user_sessions")
+          .update(updateData)
+          .eq("id", session.id)
+        console.log(`[v0] Updated session data for tracking`)
+      } catch (updateError) {
+        console.warn("[v0] Failed to update session data:", updateError)
+      }
     }
 
     return true // Session still valid
@@ -123,7 +120,7 @@ export async function middleware(request: NextRequest) {
 
   if (isAuthenticated && sessionToken) {
     try {
-      const sessionValid = await handleIPChangeWithMigration(request, sessionToken)
+      const sessionValid = await handleSessionValidation(request, sessionToken)
       if (!sessionValid) {
         isAuthenticated = false
         console.log("[v0] Session invalid, redirecting to login")

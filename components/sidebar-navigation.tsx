@@ -3,13 +3,12 @@
 import { useState } from "react"
 import { usePathname } from "next/navigation"
 import Link from "next/link"
-import { Settings, Smartphone, Menu, X, Clock, Home, Code } from "lucide-react"
+import { Smartphone, Menu, X, Clock, Home, Code } from "lucide-react"
 import ThemeToggle from "./theme-toggle"
 
 const navItems = [
   { name: "Home", href: "/tool", icon: Home, status: "Active" },
   { name: "User Agent Generator", href: "/tool/user-agent-generator", icon: Smartphone, status: "Active" },
-  { name: "Address Generator", href: "/tool/address-generator", icon: Settings, status: "Active" },
 ]
 
 export default function SidebarNavigation() {
@@ -105,11 +104,13 @@ export default function SidebarNavigation() {
                       <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/15 to-transparent animate-pulse" />
                     )}
 
-                    <div className={`p-2 rounded-xl transition-all duration-300 ${
-                      itemIsActive 
-                        ? "bg-blue-500/20 dark:bg-blue-500/30" 
-                        : "bg-slate-100/50 dark:bg-slate-800/50 group-hover:bg-blue-500/20"
-                    }`}>
+                    <div
+                      className={`p-2 rounded-xl transition-all duration-300 ${
+                        itemIsActive
+                          ? "bg-blue-500/20 dark:bg-blue-500/30"
+                          : "bg-slate-100/50 dark:bg-slate-800/50 group-hover:bg-blue-500/20"
+                      }`}
+                    >
                       <IconComponent
                         className={`w-5 h-5 relative z-10 transition-all duration-300 ${
                           itemIsActive

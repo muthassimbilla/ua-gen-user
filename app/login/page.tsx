@@ -317,6 +317,16 @@ export default function LoginPage() {
       </div>
 
       <div className="w-full max-w-6xl relative z-10">
+        {/* Header with Home Link */}
+        <div className="mb-8 text-center lg:text-left">
+          <Link 
+            href="/landing" 
+            className="inline-flex items-center space-x-2 text-blue-600 hover:text-blue-700 transition-colors"
+          >
+            <span className="text-sm font-medium">← হোমে ফিরে যান</span>
+          </Link>
+        </div>
+        
         <div className="grid lg:grid-cols-2 gap-8 items-center">
           {/* Left Side - Branding */}
           <div className="hidden lg:block space-y-8">

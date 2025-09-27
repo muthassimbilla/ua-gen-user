@@ -3,7 +3,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Smartphone, ArrowRight, Settings, Shield, Star, Clock, Users, Sparkles, Zap } from "lucide-react"
+import { Smartphone, ArrowRight, Shield, Star, Clock, Users, Sparkles, Zap, MapPin } from "lucide-react"
 import Link from "next/link"
 import { ProtectedRoute } from "@/components/protected-route"
 import { useEffect, useState } from "react"
@@ -29,19 +29,19 @@ const tools = [
   {
     name: "Address Generator",
     features: [
-      "Convert IP address to physical location",
-      "Get detailed address information",
-      "Country, city, and postal code lookup",
-      "Real-time geolocation data",
+      "Generate real addresses from IP addresses",
+      "Create addresses from ZIP codes",
+      "Multiple address options with navigation",
+      "Copy addresses to clipboard",
     ],
     href: "/tool/address-generator",
-    icon: Settings,
-    category: "Location Services",
+    icon: MapPin,
+    category: "Location Tools",
     status: "Active",
-    color: "from-purple-500 to-pink-600",
+    color: "from-green-500 to-emerald-600",
     users: "8.2K+",
     rating: 4.7,
-    tags: ["IP Geolocation", "Address Lookup", "Location Data"],
+    tags: ["IP Geolocation", "ZIP Codes", "Mapbox API"],
   },
 ]
 
@@ -72,7 +72,7 @@ export default function ToolsPage() {
         <div className="fixed inset-0 -z-10">
           {/* Light mode background */}
           <div className="absolute inset-0 bg-gradient-to-br from-blue-50/50 via-transparent to-indigo-50/50 dark:hidden" />
-          
+
           {/* Dark mode enhanced background */}
           <div className="hidden dark:block absolute inset-0">
             {/* Multiple gradient layers for depth */}
@@ -81,26 +81,62 @@ export default function ToolsPage() {
             <div className="absolute inset-0 bg-gradient-to-bl from-emerald-900/8 via-transparent to-orange-900/8" />
             <div className="absolute inset-0 bg-gradient-to-tl from-violet-900/5 via-transparent to-rose-900/5" />
           </div>
-          
+
           {/* Animated orbs - Light mode */}
           <div className="absolute top-1/4 -left-64 w-96 h-96 bg-blue-200/30 dark:hidden rounded-full blur-3xl animate-pulse" />
-          <div className="absolute bottom-1/4 -right-64 w-96 h-96 bg-indigo-200/30 dark:hidden rounded-full blur-3xl animate-pulse" style={{ animationDelay: "1s" }} />
-          
+          <div
+            className="absolute bottom-1/4 -right-64 w-96 h-96 bg-indigo-200/30 dark:hidden rounded-full blur-3xl animate-pulse"
+            style={{ animationDelay: "1s" }}
+          />
+
           {/* Enhanced animated orbs - Dark mode */}
           <div className="hidden dark:block absolute top-1/6 -left-48 w-80 h-80 bg-gradient-to-r from-blue-500/20 to-cyan-500/15 rounded-full blur-3xl animate-pulse" />
-          <div className="hidden dark:block absolute top-1/3 right-1/4 w-64 h-64 bg-gradient-to-r from-purple-500/25 to-pink-500/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: "2s" }} />
-          <div className="hidden dark:block absolute bottom-1/4 -right-32 w-72 h-72 bg-gradient-to-r from-indigo-500/20 to-blue-500/15 rounded-full blur-3xl animate-pulse" style={{ animationDelay: "1s" }} />
-          <div className="hidden dark:block absolute bottom-1/6 left-1/3 w-56 h-56 bg-gradient-to-r from-emerald-500/15 to-teal-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: "3s" }} />
-          <div className="hidden dark:block absolute top-1/2 left-1/2 w-48 h-48 bg-gradient-to-r from-violet-500/12 to-rose-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: "4s" }} />
-          
+          <div
+            className="hidden dark:block absolute top-1/3 right-1/4 w-64 h-64 bg-gradient-to-r from-purple-500/25 to-pink-500/20 rounded-full blur-3xl animate-pulse"
+            style={{ animationDelay: "2s" }}
+          />
+          <div
+            className="hidden dark:block absolute bottom-1/4 -right-32 w-72 h-72 bg-gradient-to-r from-indigo-500/20 to-blue-500/15 rounded-full blur-3xl animate-pulse"
+            style={{ animationDelay: "1s" }}
+          />
+          <div
+            className="hidden dark:block absolute bottom-1/6 left-1/3 w-56 h-56 bg-gradient-to-r from-emerald-500/15 to-teal-500/10 rounded-full blur-3xl animate-pulse"
+            style={{ animationDelay: "3s" }}
+          />
+          <div
+            className="hidden dark:block absolute top-1/2 left-1/2 w-48 h-48 bg-gradient-to-r from-violet-500/12 to-rose-500/10 rounded-full blur-3xl animate-pulse"
+            style={{ animationDelay: "4s" }}
+          />
+
           {/* Floating particles - Dark mode only */}
-          <div className="hidden dark:block absolute top-20 left-20 w-2 h-2 bg-blue-400/50 rounded-full animate-bounce" style={{ animationDelay: "0.5s" }} />
-          <div className="hidden dark:block absolute top-40 right-32 w-1.5 h-1.5 bg-purple-400/50 rounded-full animate-bounce" style={{ animationDelay: "1.5s" }} />
-          <div className="hidden dark:block absolute bottom-32 left-16 w-2.5 h-2.5 bg-cyan-400/50 rounded-full animate-bounce" style={{ animationDelay: "2.5s" }} />
-          <div className="hidden dark:block absolute bottom-20 right-20 w-1 h-1 bg-pink-400/50 rounded-full animate-bounce" style={{ animationDelay: "3s" }} />
-          <div className="hidden dark:block absolute top-1/2 left-1/2 w-1.5 h-1.5 bg-emerald-400/50 rounded-full animate-bounce" style={{ animationDelay: "4s" }} />
-          <div className="hidden dark:block absolute top-1/3 left-1/4 w-1 h-1 bg-violet-400/50 rounded-full animate-bounce" style={{ animationDelay: "5s" }} />
-          <div className="hidden dark:block absolute bottom-1/3 right-1/4 w-2 h-2 bg-rose-400/50 rounded-full animate-bounce" style={{ animationDelay: "6s" }} />
+          <div
+            className="hidden dark:block absolute top-20 left-20 w-2 h-2 bg-blue-400/50 rounded-full animate-bounce"
+            style={{ animationDelay: "0.5s" }}
+          />
+          <div
+            className="hidden dark:block absolute top-40 right-32 w-1.5 h-1.5 bg-purple-400/50 rounded-full animate-bounce"
+            style={{ animationDelay: "1.5s" }}
+          />
+          <div
+            className="hidden dark:block absolute bottom-32 left-16 w-2.5 h-2.5 bg-cyan-400/50 rounded-full animate-bounce"
+            style={{ animationDelay: "2.5s" }}
+          />
+          <div
+            className="hidden dark:block absolute bottom-20 right-20 w-1 h-1 bg-pink-400/50 rounded-full animate-bounce"
+            style={{ animationDelay: "3s" }}
+          />
+          <div
+            className="hidden dark:block absolute top-1/2 left-1/2 w-1.5 h-1.5 bg-emerald-400/50 rounded-full animate-bounce"
+            style={{ animationDelay: "4s" }}
+          />
+          <div
+            className="hidden dark:block absolute top-1/3 left-1/4 w-1 h-1 bg-violet-400/50 rounded-full animate-bounce"
+            style={{ animationDelay: "5s" }}
+          />
+          <div
+            className="hidden dark:block absolute bottom-1/3 right-1/4 w-2 h-2 bg-rose-400/50 rounded-full animate-bounce"
+            style={{ animationDelay: "6s" }}
+          />
         </div>
 
         {/* Header Section */}
@@ -117,7 +153,6 @@ export default function ToolsPage() {
                   </div>
                 </div>
               )}
-              
             </div>
           </div>
         </section>
@@ -125,7 +160,9 @@ export default function ToolsPage() {
         {/* Tools Grid */}
         <section className="relative z-10 px-6 pb-20">
           <div className="max-w-6xl mx-auto">
-            <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 transition-all duration-1000 delay-400 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
+            <div
+              className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 transition-all duration-1000 delay-400 ${isLoaded ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}
+            >
               {tools.map((tool, index) => {
                 const IconComponent = tool.icon
                 const isActive = tool.status === "Active"
@@ -134,9 +171,9 @@ export default function ToolsPage() {
                   <div
                     key={tool.name}
                     className="group cursor-pointer h-full animate-fade-in-up"
-                    style={{ 
+                    style={{
                       animationDelay: `${index * 100 + 600}ms`,
-                      animationFillMode: 'both'
+                      animationFillMode: "both",
                     }}
                   >
                     <Card className="h-full flex flex-col bg-white/70 dark:bg-slate-800/40 backdrop-blur-sm border-slate-200/50 dark:border-slate-700/30 hover:border-blue-300 dark:hover:border-blue-500/50 transition-all duration-500 hover:shadow-2xl hover:shadow-blue-500/10 dark:hover:shadow-blue-500/30 group overflow-hidden relative hover:-translate-y-2 dark:shadow-2xl dark:shadow-slate-900/20">
@@ -242,7 +279,6 @@ export default function ToolsPage() {
                 )
               })}
             </div>
-
           </div>
         </section>
       </div>

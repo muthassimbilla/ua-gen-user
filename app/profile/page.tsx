@@ -341,8 +341,8 @@ export default function ProfilePage() {
                       </div>
                       <div className="text-xs font-medium text-muted-foreground">Account Duration</div>
                       <div className="text-sm font-semibold text-orange-600">Lifetime</div>
-                    </div>
-                    
+                  </div>
+
                   </div>
 
                 </CardContent>

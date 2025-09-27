@@ -296,28 +296,28 @@ export class AuthService {
         currentIP = "unknown"
       }
 
-      // IP-based security: logout all other sessions when IP changes (optimized)
+      // IP tracking for analytics (no auto logout)
       if (currentIP && currentIP !== "unknown") {
         try {
-          // Use a single query to check and logout other sessions
-          const { error: logoutError } = await supabase
-            .from("user_sessions")
-            .update({
-              is_active: false,
-              logout_reason: "ip_changed",
+          console.log("[v0] Tracking IP for analytics:", currentIP)
+          
+          // Update IP history for tracking
+          const { error: ipHistoryError } = await supabase
+            .from("user_ip_history")
+            .insert({
+              user_id: user.id,
+              ip_address: currentIP,
+              is_current: true,
             })
-            .eq("user_id", user.id)
-            .eq("is_active", true)
-            .neq("ip_address", currentIP)
-
-          if (logoutError) {
-            console.warn("[v0] Error logging out other IPs:", logoutError)
+          
+          if (ipHistoryError) {
+            console.warn("[v0] IP history tracking failed:", ipHistoryError)
           } else {
-            console.log("[v0] Other IP sessions logged out")
+            console.log("[v0] IP history updated for tracking")
           }
         } catch (error) {
-          console.warn("[v0] IP security check failed:", error)
-          // Continue with login even if IP check fails
+          console.warn("[v0] IP tracking failed:", error)
+          // Continue with login even if IP tracking fails
         }
       }
 
@@ -327,7 +327,7 @@ export class AuthService {
 
       console.log("[v0] Creating session...")
 
-      // Create session and IP history in parallel for faster login
+      // Create session with IP and User Agent tracking
       const sessionPromise = supabase.from("user_sessions").insert({
         user_id: user.id,
         session_token: sessionToken,
@@ -335,6 +335,8 @@ export class AuthService {
         ip_address: currentIP,
         user_agent: navigator.userAgent || "Unknown",
         is_active: true,
+        created_at: new Date().toISOString(),
+        last_accessed: new Date().toISOString(),
       })
 
       const ipHistoryPromise =

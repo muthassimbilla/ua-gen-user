@@ -1,388 +1,559 @@
-"use client"
+"use client";
 
-import type React from "react"
-
-import { useState } from "react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Alert, AlertDescription } from "@/components/ui/alert"
-import {
-  MapPin,
-  Globe,
-  Building,
-  Navigation,
-  Clock,
-  Shield,
-  AlertCircle,
-  Loader2,
-  Search,
-  Clipboard,
-} from "lucide-react"
-import { ProtectedRoute } from "@/components/protected-route"
+import { useState, useEffect } from "react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Badge } from "@/components/ui/badge";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Loader2, MapPin, Navigation, RotateCcw, Copy, Check } from "lucide-react";
+import { toast } from "sonner";
 
 interface AddressData {
-  ip: string
-  full_address: string
-  street_address: string
-  city: string
-  region: string
-  country: string
-  postal_code: string
-  timezone: string
-  isp: string
-  organization: string
+  addresses: string[];
+  currentIndex: number;
+  totalCount: number;
 }
 
 export default function AddressGeneratorPage() {
-  const [ipAddress, setIpAddress] = useState("")
-  const [addressData, setAddressData] = useState<AddressData | null>(null)
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState("")
-  const [copied, setCopied] = useState(false)
+  const [ipAddress, setIpAddress] = useState("");
+  const [zipCode, setZipCode] = useState("");
+  const [addressData, setAddressData] = useState<AddressData>({
+    addresses: [],
+    currentIndex: 0,
+    totalCount: 0
+  });
+  const [isLoading, setIsLoading] = useState(false);
+  const [activeTab, setActiveTab] = useState("ip");
+  const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
 
-  const getAddressFromIP = async (ip: string): Promise<AddressData> => {
+  // Paste from clipboard function
+  const pasteFromClipboard = async () => {
     try {
-      const response = await fetch(`https://ipwho.is/${ip}`)
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`)
+      const text = await navigator.clipboard.readText();
+      if (activeTab === "ip") {
+        setIpAddress(text.trim());
+      } else {
+        setZipCode(text.trim());
       }
+      toast.success("Pasted from clipboard");
+    } catch (err) {
+      toast.error("Cannot access clipboard");
+    }
+  };
 
-      const data = await response.json()
+  // Generate addresses from IP
+  const generateFromIP = async () => {
+    if (!ipAddress.trim()) {
+      toast.error("Please enter an IP address");
+      return;
+    }
 
-      if (!data.success) {
-        throw new Error(data.message || "Failed to get location data")
+    setIsLoading(true);
+    try {
+      const response = await fetch("/api/address-generator/ip", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ip: ipAddress.trim() })
+      });
+
+      const data = await response.json();
+      
+      if (data.success) {
+        setAddressData({
+          addresses: data.addresses,
+          currentIndex: 0,
+          totalCount: data.addresses.length
+        });
+        toast.success(`Found ${data.addresses.length} addresses`);
+      } else {
+        setAddressData({ addresses: [], currentIndex: 0, totalCount: 0 });
+        toast.error(data.error || "Could not resolve IP address");
       }
+    } catch (error) {
+      toast.error("API call failed");
+      setAddressData({ addresses: [], currentIndex: 0, totalCount: 0 });
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
+  // Generate addresses from ZIP
+  const generateFromZIP = async () => {
+    if (!zipCode.trim()) {
+      toast.error("Please enter a ZIP code");
+      return;
+    }
+
+    if (!/^\d+$/.test(zipCode.trim())) {
+      toast.error("ZIP code must be numeric only");
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const response = await fetch("/api/address-generator/zip", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ zip: zipCode.trim() })
+      });
+
+      const data = await response.json();
+      
+      if (data.success) {
+        setAddressData({
+          addresses: data.addresses,
+          currentIndex: 0,
+          totalCount: data.addresses.length
+        });
+        toast.success(`Found ${data.addresses.length} addresses`);
+      } else {
+        setAddressData({ addresses: [], currentIndex: 0, totalCount: 0 });
+        toast.error(data.error || "Could not resolve ZIP code");
+      }
+    } catch (error) {
+      toast.error("API call failed");
+      setAddressData({ addresses: [], currentIndex: 0, totalCount: 0 });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Navigation functions
+  const showNext = () => {
+    if (addressData.currentIndex < addressData.addresses.length - 1) {
+      setAddressData(prev => ({
+        ...prev,
+        currentIndex: prev.currentIndex + 1
+      }));
+    }
+  };
+
+  const showPrevious = () => {
+    if (addressData.currentIndex > 0) {
+      setAddressData(prev => ({
+        ...prev,
+        currentIndex: prev.currentIndex - 1
+      }));
+    }
+  };
+
+  // Copy address to clipboard
+  const copyAddress = async (address: string, index: number) => {
+    try {
+      await navigator.clipboard.writeText(address);
+      setCopiedIndex(index);
+      toast.success("Address copied to clipboard");
+      setTimeout(() => setCopiedIndex(null), 2000);
+    } catch (err) {
+      toast.error("Failed to copy");
+    }
+  };
+
+  // Copy specific address part
+  const copyAddressPart = async (part: string, partName: string) => {
+    try {
+      await navigator.clipboard.writeText(part);
+      toast.success(`${partName} copied to clipboard`);
+    } catch (err) {
+      toast.error("Failed to copy");
+    }
+  };
+
+  // Reset function
+  const reset = () => {
+    setIpAddress("");
+    setZipCode("");
+    setAddressData({ addresses: [], currentIndex: 0, totalCount: 0 });
+    toast.info("Reset successfully");
+  };
+
+  // Address parsing function
+  const parseAddress = (address: string) => {
+    const parts = address.split(', ');
+    if (parts.length >= 4) {
+      // Full address format: "123 Main St, New York, NY 10001, United States"
+      const street = parts[0];
+      const city = parts[1];
+      const stateZip = parts[2];
+      const country = parts[3];
+      
+      // Extract state and ZIP from "NY 10001" format
+      const stateZipMatch = stateZip.match(/^([A-Z]{2})\s+(\d{5}(?:-\d{4})?)$/);
+      const state = stateZipMatch ? stateZipMatch[1] : stateZip;
+      const zip = stateZipMatch ? stateZipMatch[2] : '';
+      
       return {
-        ip: data.ip,
-        full_address: `${data.city}, ${data.region}, ${data.country}`,
-        street_address: `${data.city}, ${data.region}`,
-        city: data.city,
-        region: data.region,
-        country: data.country,
-        postal_code: data.postal || "N/A",
-        timezone: data.timezone?.id || "N/A",
-        isp: data.connection?.isp || "N/A",
-        organization: data.connection?.org || "N/A",
-      }
-    } catch (error: any) {
-      console.error("IP Geolocation API Error:", error)
-      throw new Error("Failed to fetch location data. Please try again.")
+        street,
+        city,
+        state,
+        zip,
+        country,
+        fullAddress: address
+      };
+    } else if (parts.length >= 3) {
+      // Format: "123 Main St, New York, NY 10001"
+      const street = parts[0];
+      const city = parts[1];
+      const stateZip = parts[2];
+      
+      const stateZipMatch = stateZip.match(/^([A-Z]{2})\s+(\d{5}(?:-\d{4})?)$/);
+      const state = stateZipMatch ? stateZipMatch[1] : stateZip;
+      const zip = stateZipMatch ? stateZipMatch[2] : '';
+      
+      return {
+        street,
+        city,
+        state,
+        zip,
+        country: 'United States',
+        fullAddress: address
+      };
     }
-  }
+    return {
+      street: address,
+      city: '',
+      state: '',
+      zip: '',
+      country: '',
+      fullAddress: address
+    };
+  };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setLoading(true)
-    setError("")
-    setAddressData(null)
-
-    try {
-      // Validate IP address format
-      const ipRegex = /^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/
-      if (!ipRegex.test(ipAddress)) {
-        throw new Error("Please enter a valid IP address format (e.g., 8.8.8.8)")
-      }
-
-      const result = await getAddressFromIP(ipAddress)
-      setAddressData(result)
-    } catch (err: any) {
-      setError(err.message || "Failed to fetch address data")
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const copyToClipboard = (text: string) => {
-    navigator.clipboard.writeText(text)
-    setCopied(true)
-    setTimeout(() => setCopied(false), 2000)
-  }
-
-  const getCurrentIP = async () => {
-    setLoading(true)
-    setError("")
-
-    try {
-      const response = await fetch("https://api.ipify.org?format=json")
-      const data = await response.json()
-      setIpAddress(data.ip)
-    } catch (err) {
-      setError("Failed to get current IP address")
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const handlePaste = async () => {
-    try {
-      const text = await navigator.clipboard.readText()
-      setIpAddress(text.trim())
-
-      // Auto-generate if valid IP
-      const ipRegex = /^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/
-      if (ipRegex.test(text.trim())) {
-        // Auto-generate after a short delay
-        setTimeout(() => {
-          handleSubmit(new Event("submit") as any)
-        }, 500)
-      }
-    } catch (err) {
-      setError("Failed to paste from clipboard")
-    }
-  }
+  const currentAddress = addressData.addresses.length > 0 
+    ? parseAddress(addressData.addresses[addressData.currentIndex])
+    : null;
 
   return (
-    <ProtectedRoute>
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
-        <div className="fixed inset-0 -z-10">
-          {/* Light mode background */}
-          <div className="absolute inset-0 bg-gradient-to-br from-purple-50/50 via-transparent to-pink-50/50 dark:hidden" />
-
-          {/* Dark mode enhanced background */}
-          <div className="hidden dark:block absolute inset-0">
-            <div className="absolute inset-0 bg-gradient-to-br from-purple-900/25 via-transparent to-pink-900/25" />
-            <div className="absolute inset-0 bg-gradient-to-tr from-violet-900/15 via-transparent to-rose-900/15" />
-          </div>
-
-          {/* Animated orbs */}
-          <div className="absolute top-1/4 -left-64 w-96 h-96 bg-purple-200/30 dark:bg-purple-500/20 rounded-full blur-3xl animate-pulse" />
-          <div
-            className="absolute bottom-1/4 -right-64 w-96 h-96 bg-pink-200/30 dark:bg-pink-500/20 rounded-full blur-3xl animate-pulse"
-            style={{ animationDelay: "1s" }}
-          />
-
-          {/* Floating particles */}
-          <div
-            className="absolute top-20 left-20 w-2 h-2 bg-purple-400/60 rounded-full animate-bounce"
-            style={{ animationDelay: "0.5s" }}
-          />
-          <div
-            className="absolute top-40 right-32 w-1.5 h-1.5 bg-pink-400/60 rounded-full animate-bounce"
-            style={{ animationDelay: "1.5s" }}
-          />
-          <div
-            className="absolute bottom-32 left-16 w-2.5 h-2.5 bg-violet-400/60 rounded-full animate-bounce"
-            style={{ animationDelay: "2.5s" }}
-          />
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
+      <div className="container mx-auto px-4 py-8">
+        <div className="text-center mb-8">
+          <h1 className="text-4xl font-bold mb-2 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+            Address Generator
+          </h1>
+          <p className="text-muted-foreground text-lg">
+            Generate real addresses from IP addresses or ZIP codes
+          </p>
         </div>
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 relative z-10">
-          <div className="grid lg:grid-cols-2 gap-8">
-            {/* Input Section */}
-            <Card className="glass-card p-8 rounded-3xl shadow-2xl border-0 backdrop-blur-xl bg-white/10 dark:bg-gray-900/10">
-              <CardHeader className="text-center pb-6">
-                <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center shadow-lg">
-                  <Search className="w-8 h-8 text-white" />
-                </div>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <CardTitle className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-                      Address Generator
+        <div className="grid grid-cols-1 xl:grid-cols-5 gap-6 lg:gap-8 min-h-[600px]">
+          {/* Left Side - Input Section (2/5) */}
+          <div className="xl:col-span-2 space-y-6">
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+              <TabsList className="grid w-full grid-cols-2 mb-6">
+                <TabsTrigger value="ip" className="text-sm">IP → Address</TabsTrigger>
+                <TabsTrigger value="zip" className="text-sm">ZIP → Address</TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="ip" className="space-y-0">
+                <Card className="h-full">
+                  <CardHeader className="pb-4">
+                    <CardTitle className="flex items-center gap-2 text-lg">
+                      <MapPin className="h-5 w-5 text-blue-500" />
+                      Generate from IP Address
                     </CardTitle>
-                    <p className="text-muted-foreground">Enter an IP address to get its location information</p>
-                  </div>
-                </div>
-              </CardHeader>
-
-              <CardContent className="space-y-6">
-                <div className="p-3 rounded-lg border bg-blue-50/50 dark:bg-blue-900/20 border-blue-200/50 dark:border-blue-800/50">
-                  <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 rounded-full bg-blue-500" />
-                    <span className="text-sm font-medium text-blue-600 dark:text-blue-400">
-                      Using ipwho.is API for location data
-                    </span>
-                  </div>
-                  <p className="text-xs text-muted-foreground mt-1">Free and reliable IP geolocation service</p>
-                </div>
-
-                <form onSubmit={handleSubmit} className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="ip" className="text-sm font-semibold text-foreground flex items-center gap-2">
-                      <Globe className="w-4 h-4" />
-                      IP Address
-                    </Label>
-                    <div className="flex gap-2">
-                      <Input
-                        id="ip"
-                        type="text"
-                        value={ipAddress}
-                        onChange={(e) => setIpAddress(e.target.value)}
-                        placeholder="Enter IP address"
-                        className="flex-1 h-12 rounded-xl border-border/50 bg-background/50 backdrop-blur-sm focus:bg-background/80 transition-all duration-200"
-                        required
-                      />
-                      <Button
-                        type="button"
-                        onClick={handlePaste}
-                        variant="outline"
-                        className="h-12 px-4 rounded-xl border-border/50 bg-background/50 backdrop-blur-sm hover:bg-background/80 transition-all duration-200"
-                        disabled={loading}
-                        title="Paste IP address from clipboard"
-                      >
-                        <Clipboard className="w-4 h-4" />
-                      </Button>
-                      <Button
-                        type="button"
-                        onClick={getCurrentIP}
-                        variant="outline"
-                        className="h-12 px-4 rounded-xl border-border/50 bg-background/50 backdrop-blur-sm hover:bg-background/80 transition-all duration-200"
-                        disabled={loading}
-                        title="Use current IP address"
-                      >
-                        <Navigation className="w-4 h-4" />
-                      </Button>
-                    </div>
-                    <p className="text-xs text-muted-foreground">
-                      Click the clipboard icon to paste IP address, or navigation icon to use your current IP
-                    </p>
-                  </div>
-
-                  <Button
-                    type="submit"
-                    className="w-full h-12 bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed"
-                    disabled={loading}
-                  >
-                    {loading ? (
-                      <div className="flex items-center gap-2">
-                        <Loader2 className="w-5 h-5 animate-spin" />
-                        Looking up address...
-                      </div>
-                    ) : (
-                      <div className="flex items-center gap-2">
-                        <MapPin className="w-5 h-5" />
-                        Generate Address
-                      </div>
-                    )}
-                  </Button>
-                </form>
-
-                {error && (
-                  <Alert variant="destructive" className="backdrop-blur-sm rounded-xl">
-                    <AlertCircle className="h-4 w-4" />
-                    <AlertDescription className="text-sm">{error}</AlertDescription>
-                  </Alert>
-                )}
-              </CardContent>
-            </Card>
-
-            {/* Results Section */}
-            <div className="space-y-6">
-              {addressData ? (
-                <Card className="glass-card p-8 rounded-3xl shadow-2xl border-0 backdrop-blur-xl bg-white/10 dark:bg-gray-900/10">
-                  <CardHeader className="text-center pb-6">
-                    <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center shadow-lg">
-                      <MapPin className="w-8 h-8 text-white" />
-                    </div>
-                    <CardTitle className="text-2xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
-                      Location Found
-                    </CardTitle>
-                    <p className="text-muted-foreground">Address information for {addressData.ip}</p>
+                    <CardDescription>
+                      Enter an IP address and get real addresses from that area
+                    </CardDescription>
                   </CardHeader>
-
                   <CardContent className="space-y-6">
-                    {/* Full Address */}
-                    <div className="p-4 rounded-xl bg-gradient-to-r from-green-500/10 to-emerald-500/10 border border-green-500/20">
-                      <h4 className="font-semibold text-foreground mb-3 flex items-center gap-2">
-                        <MapPin className="w-4 h-4" />
-                        Complete Address
-                      </h4>
-                      <div className="p-3 rounded-lg bg-background/50 backdrop-blur-sm">
-                        <p className="text-foreground font-medium">{addressData.full_address}</p>
+                    <div className="space-y-3">
+                      <Label htmlFor="ip-input" className="text-sm font-medium">IP Address</Label>
+                      <div className="flex gap-2">
+                        <Input
+                          id="ip-input"
+                          placeholder="e.g., 8.8.8.8"
+                          value={ipAddress}
+                          onChange={(e) => setIpAddress(e.target.value)}
+                          className="flex-1"
+                        />
+                        <Button variant="outline" size="sm" onClick={pasteFromClipboard}>
+                          <Copy className="h-4 w-4" />
+                        </Button>
                       </div>
                     </div>
 
-                    {/* Street Address */}
-                    <div className="p-4 rounded-xl bg-gradient-to-r from-blue-500/10 to-cyan-500/10 border border-blue-500/20">
-                      <h4 className="font-semibold text-foreground mb-3 flex items-center gap-2">
-                        <Building className="w-4 h-4" />
-                        Street Address
-                      </h4>
-                      <div className="p-3 rounded-lg bg-background/50 backdrop-blur-sm">
-                        <p className="text-foreground font-medium">{addressData.street_address}</p>
+                    <div className="space-y-3">
+                      <Button 
+                        onClick={generateFromIP} 
+                        disabled={isLoading || !ipAddress.trim()}
+                        className="w-full"
+                        size="lg"
+                      >
+                        {isLoading ? (
+                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        ) : (
+                          <MapPin className="h-4 w-4 mr-2" />
+                        )}
+                        Generate from IP
+                      </Button>
+                      <Button variant="outline" onClick={reset} className="w-full">
+                        <RotateCcw className="h-4 w-4 mr-2" />
+                        Reset
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+
+              <TabsContent value="zip" className="space-y-0">
+                <Card className="h-full">
+                  <CardHeader className="pb-4">
+                    <CardTitle className="flex items-center gap-2 text-lg">
+                      <MapPin className="h-5 w-5 text-green-500" />
+                      Generate from ZIP Code
+                    </CardTitle>
+                    <CardDescription>
+                      Enter a ZIP code and get random addresses from that area
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-6">
+                    <div className="space-y-3">
+                      <Label htmlFor="zip-input" className="text-sm font-medium">ZIP Code</Label>
+                      <div className="flex gap-2">
+                        <Input
+                          id="zip-input"
+                          placeholder="e.g., 10001"
+                          value={zipCode}
+                          onChange={(e) => setZipCode(e.target.value)}
+                          className="flex-1"
+                        />
+                        <Button variant="outline" size="sm" onClick={pasteFromClipboard}>
+                          <Copy className="h-4 w-4" />
+                        </Button>
                       </div>
                     </div>
 
-                    {/* Address Details */}
-                    <div className="space-y-4">
-                      <div className="flex items-center justify-between p-4 rounded-xl bg-background/30 backdrop-blur-sm border border-border/30">
-                        <div className="flex items-center gap-3">
-                          <Building className="w-5 h-5 text-purple-500" />
-                          <span className="font-medium">City</span>
-                        </div>
-                        <span className="text-foreground">{addressData.city}</span>
-                      </div>
-
-                      <div className="flex items-center justify-between p-4 rounded-xl bg-background/30 backdrop-blur-sm border border-border/30">
-                        <div className="flex items-center gap-3">
-                          <Globe className="w-5 h-5 text-blue-500" />
-                          <span className="font-medium">Country</span>
-                        </div>
-                        <span className="text-foreground">{addressData.country}</span>
-                      </div>
-
-                      <div className="flex items-center justify-between p-4 rounded-xl bg-background/30 backdrop-blur-sm border border-border/30">
-                        <div className="flex items-center gap-3">
-                          <MapPin className="w-5 h-5 text-green-500" />
-                          <span className="font-medium">Region</span>
-                        </div>
-                        <span className="text-foreground">{addressData.region}</span>
-                      </div>
-
-                      <div className="flex items-center justify-between p-4 rounded-xl bg-background/30 backdrop-blur-sm border border-border/30">
-                        <div className="flex items-center gap-3">
-                          <Navigation className="w-5 h-5 text-orange-500" />
-                          <span className="font-medium">Postal Code</span>
-                        </div>
-                        <span className="text-foreground">{addressData.postal_code}</span>
-                      </div>
-
-                      <div className="flex items-center justify-between p-4 rounded-xl bg-background/30 backdrop-blur-sm border border-border/30">
-                        <div className="flex items-center gap-3">
-                          <Clock className="w-5 h-5 text-purple-500" />
-                          <span className="font-medium">Timezone</span>
-                        </div>
-                        <span className="text-foreground">{addressData.timezone}</span>
-                      </div>
+                    <div className="space-y-3">
+                      <Button 
+                        onClick={generateFromZIP} 
+                        disabled={isLoading || !zipCode.trim()}
+                        className="w-full"
+                        size="lg"
+                      >
+                        {isLoading ? (
+                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        ) : (
+                          <MapPin className="h-4 w-4 mr-2" />
+                        )}
+                        Generate from ZIP
+                      </Button>
+                      <Button variant="outline" onClick={reset} className="w-full">
+                        <RotateCcw className="h-4 w-4 mr-2" />
+                        Reset
+                      </Button>
                     </div>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+            </Tabs>
+          </div>
 
-                    {/* ISP Information */}
-                    <div className="p-4 rounded-xl bg-gradient-to-r from-blue-500/10 to-cyan-500/10 border border-blue-500/20">
-                      <h4 className="font-semibold text-foreground mb-3 flex items-center gap-2">
-                        <Shield className="w-4 h-4" />
-                        Network Information
-                      </h4>
+          {/* Right Side - Output Section (3/5) */}
+          <div className="xl:col-span-3">
+            {addressData.addresses.length > 0 && currentAddress ? (
+              <Card className="h-full">
+                <CardHeader className="pb-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <CardTitle className="flex items-center gap-2 text-xl">
+                        <Navigation className="h-6 w-6 text-purple-500" />
+                        Found: {addressData.totalCount} addresses
+                      </CardTitle>
+                      <CardDescription className="text-base">
+                        Address {addressData.currentIndex + 1} / {addressData.totalCount}
+                      </CardDescription>
+                    </div>
+                    <Badge variant="secondary" className="text-sm">
+                      {activeTab === "ip" ? "From IP" : "From ZIP"}
+                    </Badge>
+                  </div>
+                </CardHeader>
+                <CardContent className="space-y-6 h-full">
+                  {/* Address Parts */}
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                       <div className="space-y-2">
-                        <div className="flex justify-between">
-                          <span className="text-sm text-muted-foreground">ISP</span>
-                          <span className="text-sm text-foreground">{addressData.isp}</span>
+                        <div className="flex items-center justify-between">
+                          <Label className="text-sm font-medium text-muted-foreground">Street Address</Label>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => copyAddressPart(currentAddress.street, "Street Address")}
+                            className="h-6 w-6 p-0"
+                          >
+                            <Copy className="h-3 w-3" />
+                          </Button>
                         </div>
-                        <div className="flex justify-between">
-                          <span className="text-sm text-muted-foreground">Organization</span>
-                          <span className="text-sm text-foreground">{addressData.organization}</span>
+                        <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                          <p className="text-blue-900 dark:text-blue-100 font-medium">
+                            {currentAddress.street}
+                          </p>
+                        </div>
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between">
+                          <Label className="text-sm font-medium text-muted-foreground">City</Label>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => copyAddressPart(currentAddress.city, "City")}
+                            className="h-6 w-6 p-0"
+                          >
+                            <Copy className="h-3 w-3" />
+                          </Button>
+                        </div>
+                        <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
+                          <p className="text-green-900 dark:text-green-100 font-medium">
+                            {currentAddress.city || "N/A"}
+                          </p>
+                        </div>
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between">
+                          <Label className="text-sm font-medium text-muted-foreground">State</Label>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => copyAddressPart(currentAddress.state, "State")}
+                            className="h-6 w-6 p-0"
+                          >
+                            <Copy className="h-3 w-3" />
+                          </Button>
+                        </div>
+                        <div className="p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg border border-purple-200 dark:border-purple-800">
+                          <p className="text-purple-900 dark:text-purple-100 font-medium">
+                            {currentAddress.state || "N/A"}
+                          </p>
                         </div>
                       </div>
                     </div>
-                  </CardContent>
-                </Card>
-              ) : (
-                <Card className="glass-card p-8 rounded-3xl shadow-2xl border-0 backdrop-blur-xl bg-white/10 dark:bg-gray-900/10">
-                  <CardContent className="text-center py-12">
-                    <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-slate-500 to-slate-600 flex items-center justify-center shadow-lg">
-                      <MapPin className="w-8 h-8 text-white" />
+
+                    {/* ZIP Code and Country Row */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between">
+                          <Label className="text-sm font-medium text-muted-foreground">ZIP Code</Label>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => copyAddressPart(currentAddress.zip, "ZIP Code")}
+                            className="h-6 w-6 p-0"
+                          >
+                            <Copy className="h-3 w-3" />
+                          </Button>
+                        </div>
+                        <div className="p-4 bg-orange-50 dark:bg-orange-900/20 rounded-lg border border-orange-200 dark:border-orange-800">
+                          <p className="text-orange-900 dark:text-orange-100 font-medium">
+                            {currentAddress.zip || "N/A"}
+                          </p>
+                        </div>
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between">
+                          <Label className="text-sm font-medium text-muted-foreground">Country</Label>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => copyAddressPart(currentAddress.country, "Country")}
+                            className="h-6 w-6 p-0"
+                          >
+                            <Copy className="h-3 w-3" />
+                          </Button>
+                        </div>
+                        <div className="p-4 bg-cyan-50 dark:bg-cyan-900/20 rounded-lg border border-cyan-200 dark:border-cyan-800">
+                          <p className="text-cyan-900 dark:text-cyan-100 font-medium">
+                            {currentAddress.country || "N/A"}
+                          </p>
+                        </div>
+                      </div>
                     </div>
-                    <h3 className="text-xl font-semibold text-foreground mb-2">No Address Data</h3>
-                    <p className="text-muted-foreground">Enter an IP address to see its location information</p>
-                  </CardContent>
-                </Card>
-              )}
-            </div>
+
+                    {/* Full Address */}
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <Label className="text-sm font-medium text-muted-foreground">Full Address</Label>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => copyAddressPart(currentAddress.fullAddress, "Full Address")}
+                          className="h-6 w-6 p-0"
+                        >
+                          <Copy className="h-3 w-3" />
+                        </Button>
+                      </div>
+                      <Alert className="border-2 border-orange-200 dark:border-orange-800 bg-orange-50 dark:bg-orange-900/20">
+                        <MapPin className="h-5 w-5 text-orange-600" />
+                        <AlertDescription className="text-lg font-medium text-orange-900 dark:text-orange-100">
+                          {currentAddress.fullAddress}
+                        </AlertDescription>
+                      </Alert>
+                    </div>
+                  </div>
+
+                  {/* Navigation and Actions */}
+                  <div className="flex flex-col sm:flex-row items-center justify-between pt-4 border-t gap-4">
+                    <div className="flex gap-2 w-full sm:w-auto">
+                      <Button
+                        variant="outline"
+                        onClick={showPrevious}
+                        disabled={addressData.currentIndex === 0}
+                        className="flex items-center gap-2 flex-1 sm:flex-none"
+                      >
+                        <Navigation className="h-4 w-4 rotate-180" />
+                        <span className="hidden sm:inline">Previous</span>
+                        <span className="sm:hidden">Prev</span>
+                      </Button>
+                      <Button
+                        variant="outline"
+                        onClick={showNext}
+                        disabled={addressData.currentIndex === addressData.addresses.length - 1}
+                        className="flex items-center gap-2 flex-1 sm:flex-none"
+                      >
+                        <span className="hidden sm:inline">Next</span>
+                        <span className="sm:hidden">Next</span>
+                        <Navigation className="h-4 w-4" />
+                      </Button>
+                    </div>
+
+                    <Button
+                      variant="default"
+                      onClick={() => copyAddress(currentAddress.fullAddress, addressData.currentIndex)}
+                      className="flex items-center gap-2 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 w-full sm:w-auto"
+                    >
+                      {copiedIndex === addressData.currentIndex ? (
+                        <Check className="h-4 w-4" />
+                      ) : (
+                        <Copy className="h-4 w-4" />
+                      )}
+                      {copiedIndex === addressData.currentIndex ? "Copied!" : "Copy All"}
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ) : (
+              <Card className="h-full">
+                <CardContent className="flex flex-col items-center justify-center h-full text-center py-12">
+                  <div className="w-24 h-24 bg-gradient-to-br from-blue-100 to-purple-100 dark:from-blue-900/30 dark:to-purple-900/30 rounded-full flex items-center justify-center mb-6">
+                    <MapPin className="h-12 w-12 text-blue-500" />
+                  </div>
+                  <h3 className="text-xl font-semibold mb-2 text-muted-foreground">
+                    Enter input to see addresses
+                  </h3>
+                  <p className="text-muted-foreground max-w-md">
+                    Use the form on the left to enter an IP address or ZIP code and get real addresses
+                  </p>
+                </CardContent>
+              </Card>
+            )}
           </div>
         </div>
       </div>
-    </ProtectedRoute>
-  )
+    </div>
+  );
 }
