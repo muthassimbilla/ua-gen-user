@@ -62,8 +62,8 @@ export function AdminConditionalLayout({ children }: AdminConditionalLayoutProps
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
       <AdminNavigation />
-      <main className="ml-0 lg:ml-64 p-4 lg:p-6 min-h-screen">
-        <div className="w-full">{children}</div>
+      <main className="ml-0 lg:ml-64 p-2 lg:p-4 min-h-screen">
+        <div className="w-full max-w-none">{children}</div>
       </main>
     </div>
   )

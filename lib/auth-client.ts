@@ -51,6 +51,7 @@ export interface User {
   is_approved: boolean
   account_status: string
   is_active: boolean
+  expiration_date?: string | null
 }
 
 export interface UserSession {
@@ -220,7 +221,7 @@ export class AuthService {
       console.log("[v0] Looking up user by telegram username...")
       const { data: user, error: userError } = await supabase
         .from("users")
-        .select("id, full_name, telegram_username, password_hash, is_approved, account_status, is_active")
+        .select("id, full_name, telegram_username, password_hash, is_approved, account_status, is_active, expiration_date")
         .eq("telegram_username", credentials.telegram_username)
         .single()
 
@@ -503,7 +504,7 @@ export class AuthService {
 
       const { data: user, error: userError } = await supabase
         .from("users")
-        .select("id, full_name, telegram_username, created_at, updated_at, is_approved, account_status, is_active")
+        .select("id, full_name, telegram_username, created_at, updated_at, is_approved, account_status, is_active, expiration_date")
         .eq("id", session.user_id)
         .single()
 

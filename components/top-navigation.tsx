@@ -1,8 +1,9 @@
 "use client"
 
 import { useState, useRef, useEffect } from "react"
-import { User, LogOut, ChevronDown } from "lucide-react"
+import { User, LogOut, ChevronDown, Settings } from "lucide-react"
 import { useAuth } from "@/lib/auth-context"
+import Link from "next/link"
 
 export default function TopNavigation() {
   const { user, logout } = useAuth()
@@ -102,8 +103,17 @@ export default function TopNavigation() {
                   </div>
                 </div>
 
-                {/* Logout button */}
-                <div className="pt-4 border-t border-slate-200/50 dark:border-slate-600/50">
+                {/* Action buttons */}
+                <div className="space-y-3">
+                  <Link
+                    href="/profile"
+                    onClick={() => setIsProfileOpen(false)}
+                    className="w-full flex items-center justify-center gap-3 px-4 py-4 bg-gradient-to-r from-blue-50 to-indigo-100 dark:from-blue-900/20 dark:to-indigo-800/20 hover:from-blue-100 hover:to-indigo-200 dark:hover:from-blue-900/30 dark:hover:to-indigo-800/30 text-blue-600 dark:text-blue-400 rounded-2xl transition-all duration-300 font-semibold hover:scale-105 active:scale-95 shadow-lg hover:shadow-xl"
+                  >
+                    <Settings className="w-5 h-5" />
+                    প্রোফাইল দেখুন
+                  </Link>
+                  
                   <button
                     onClick={handleLogout}
                     className="w-full flex items-center justify-center gap-3 px-4 py-4 bg-gradient-to-r from-red-50 to-red-100 dark:from-red-900/20 dark:to-red-800/20 hover:from-red-100 hover:to-red-200 dark:hover:from-red-900/30 dark:hover:to-red-800/30 text-red-600 dark:text-red-400 rounded-2xl transition-all duration-300 font-semibold hover:scale-105 active:scale-95 shadow-lg hover:shadow-xl"

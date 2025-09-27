@@ -33,23 +33,25 @@ export class AdminUserService {
         throw new Error("Failed to load user data")
       }
 
-      // Get active session counts instead of device counts since we removed device fingerprinting
+      // Get unique IP counts instead of session counts for device counting
       const usersWithDeviceCount = await Promise.all(
         users.map(async (user) => {
-          let sessionCount = 0
+          let uniqueIPCount = 0
           try {
-            // Count active sessions instead of devices
-            const { data: sessions, error: sessionError } = await supabase
-              .from("user_sessions")
-              .select("id")
+            // Count unique IP addresses for this user
+            const { data: ipHistory, error: ipError } = await supabase
+              .from("user_ip_history")
+              .select("ip_address")
               .eq("user_id", user.id)
-              .eq("is_active", true)
+              .eq("is_current", true)
 
-            if (!sessionError && sessions) {
-              sessionCount = sessions.length
+            if (!ipError && ipHistory) {
+              // Count unique IP addresses
+              const uniqueIPs = new Set(ipHistory.map(ip => ip.ip_address))
+              uniqueIPCount = uniqueIPs.size
             }
-          } catch (sessionError) {
-            console.error("[v0] Error getting session count for user:", user.id, sessionError)
+          } catch (ipError) {
+            console.error("[v0] Error getting IP count for user:", user.id, ipError)
           }
 
           return {
@@ -65,7 +67,7 @@ export class AdminUserService {
             current_status: this.calculateCurrentStatus(user),
             created_at: user.created_at,
             updated_at: user.updated_at || user.created_at,
-            device_count: sessionCount, // Now shows active session count
+            device_count: uniqueIPCount, // Now shows unique IP count
           }
         }),
       )

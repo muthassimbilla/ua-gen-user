@@ -22,16 +22,12 @@ export async function GET(request: NextRequest) {
       .eq("is_active", true)
       .gt("expires_at", new Date().toISOString())
 
-    // Get total devices
-    const { count: totalDevices } = await supabase
-      .from("user_devices")
-      .select("*", { count: "exact", head: true })
-      .eq("is_blocked", false)
-
-    // Get unique IPs count
+    // Get total devices (based on unique IPs)
     const { data: uniqueIPs } = await supabase.from("user_ip_history").select("ip_address").eq("is_current", true)
+    const totalDevices = new Set(uniqueIPs?.map((ip) => ip.ip_address)).size
 
-    const uniqueIPCount = new Set(uniqueIPs?.map((ip) => ip.ip_address)).size
+    // Get unique IPs count (same as total devices now)
+    const uniqueIPCount = totalDevices
 
     // Get users with multiple devices
     const { data: multiDeviceUsers } = await supabase.rpc("get_users_with_multiple_devices")

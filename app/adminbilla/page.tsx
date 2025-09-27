@@ -182,8 +182,8 @@ export default function AdminDashboard() {
   const recentActivities = getRecentActivity()
 
   return (
-    <div className="space-y-6 lg:space-y-8">
-      <div className="glass-card p-4 lg:p-6 rounded-2xl">
+    <div className="space-y-4 lg:space-y-6">
+      <div className="glass-card p-3 lg:p-4 rounded-2xl">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div>
             <h1 className="text-2xl lg:text-3xl font-bold text-foreground mb-2">Admin Dashboard</h1>
@@ -197,7 +197,7 @@ export default function AdminDashboard() {
       </div>
 
       {isLoadingData ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4">
           {[1, 2, 3, 4].map((i) => (
             <div key={i} className="glass-card p-4 lg:p-6 rounded-2xl animate-pulse">
               <div className="h-20 bg-muted/50 rounded"></div>
@@ -205,7 +205,7 @@ export default function AdminDashboard() {
           ))}
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4">
           {stats.map((stat, index) => {
             const Icon = stat.icon
             return (
@@ -235,7 +235,7 @@ export default function AdminDashboard() {
 
       <div>
         <h2 className="text-lg lg:text-xl font-semibold text-foreground mb-4 lg:mb-6">Quick Actions</h2>
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 lg:gap-4">
           {menuItems.map((item) => {
             const Icon = item.icon
             return (

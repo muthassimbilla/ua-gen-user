@@ -118,12 +118,6 @@ export default function ToolsPage() {
                 </div>
               )}
               
-              <h1 className={`text-4xl lg:text-5xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent mb-4 transition-all duration-1000 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
-                Developer Tools
-              </h1>
-              <p className={`text-lg text-slate-600 dark:text-slate-300 max-w-2xl mx-auto transition-all duration-1000 delay-200 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
-                Powerful tools designed to streamline your development workflow and boost productivity
-              </p>
             </div>
           </div>
         </section>

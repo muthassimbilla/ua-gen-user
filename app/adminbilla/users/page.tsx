@@ -266,9 +266,9 @@ export default function UserManagementPage() {
   }
 
   return (
-    <div className="space-y-6 lg:space-y-8">
+    <div className="space-y-4 lg:space-y-6">
       {/* Header Section */}
-      <div className="glass-card p-4 lg:p-6 rounded-2xl">
+      <div className="glass-card p-3 lg:p-4 rounded-2xl">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div>
             <h1 className="text-2xl lg:text-3xl font-bold text-foreground mb-2">User Management</h1>
@@ -293,7 +293,7 @@ export default function UserManagementPage() {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 lg:gap-6">
+      <div className="grid grid-cols-2 lg:grid-cols-5 gap-2 lg:gap-4">
         <div className="glass-card p-4 lg:p-6 rounded-2xl">
           <div className="flex items-center justify-between">
             <div>
@@ -387,7 +387,7 @@ export default function UserManagementPage() {
       </div>
 
       {/* Users Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 lg:gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3 lg:gap-4">
         {filteredUsers.map((user) => {
           const statusInfo = getStatusInfo(user.current_status)
           return (

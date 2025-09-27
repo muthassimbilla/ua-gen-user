@@ -1,7 +1,7 @@
-import { NextRequest, NextResponse } from "next/server"
+import { type NextRequest, NextResponse } from "next/server"
 import { createServerSupabaseClient } from "@/lib/auth-server"
 
-// Helper functions to extract device information from user agent
+// Helper function to extract device name from user agent
 function extractDeviceName(userAgent: string): string {
   if (userAgent.includes("iPhone")) return "iPhone"
   if (userAgent.includes("iPad")) return "iPad"
@@ -12,23 +12,22 @@ function extractDeviceName(userAgent: string): string {
   return "Unknown Device"
 }
 
+// Helper function to extract browser from user agent
 function extractBrowser(userAgent: string): string {
   if (userAgent.includes("Chrome")) return "Chrome"
   if (userAgent.includes("Firefox")) return "Firefox"
   if (userAgent.includes("Safari")) return "Safari"
   if (userAgent.includes("Edge")) return "Edge"
-  if (userAgent.includes("Opera")) return "Opera"
   return "Unknown Browser"
 }
 
+// Helper function to extract OS from user agent
 function extractOS(userAgent: string): string {
   if (userAgent.includes("Windows NT 10.0")) return "Windows 10"
-  if (userAgent.includes("Windows NT 6.3")) return "Windows 8.1"
   if (userAgent.includes("Windows NT 6.1")) return "Windows 7"
   if (userAgent.includes("Mac OS X")) return "macOS"
   if (userAgent.includes("Android")) return "Android"
   if (userAgent.includes("iPhone OS")) return "iOS"
-  if (userAgent.includes("Linux")) return "Linux"
   return "Unknown OS"
 }
 
@@ -42,228 +41,116 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "User ID is required" }, { status: 400 })
     }
 
-    // Get user devices
-    const { data: devices, error: devicesError } = await supabase
-      .from("user_devices")
-      .select("*")
-      .eq("user_id", userId)
-      .order("last_seen", { ascending: false })
-
-    console.log("Devices query result:", { devices, devicesError, userId })
-
-    if (devicesError) {
-      console.error("Error fetching user devices:", devicesError)
-      return NextResponse.json({ error: "Failed to fetch user devices" }, { status: 500 })
-    }
-
-    // If no devices found in user_devices table, try to get from user_sessions
+    // Get devices based on unique IP addresses instead of sessions
     let processedDevices = []
     
-    if (!devices || devices.length === 0) {
-      console.log("No devices found in user_devices table, checking user_sessions...")
-      
-      // Get sessions for this user
-      const { data: sessions, error: sessionsError } = await supabase
-        .from("user_sessions")
-        .select("*")
-        .eq("user_id", userId)
-        .order("created_at", { ascending: false })
-
-      if (sessionsError) {
-        console.error("Error fetching user sessions:", sessionsError)
-        return NextResponse.json({ error: "Failed to fetch user sessions" }, { status: 500 })
-      }
-
-      if (sessions && sessions.length > 0) {
-        // Group sessions by device fingerprint
-        const deviceMap = new Map()
-        
-        sessions.forEach(session => {
-          const fingerprint = session.device_fingerprint || "unknown-device"
-          
-          if (!deviceMap.has(fingerprint)) {
-            deviceMap.set(fingerprint, {
-              device_fingerprint: fingerprint,
-              device_name: session.user_agent ? extractDeviceName(session.user_agent) : "Unknown Device",
-              browser_info: session.user_agent ? extractBrowser(session.user_agent) : "Unknown Browser",
-              os_info: session.user_agent ? extractOS(session.user_agent) : "Unknown OS",
-              screen_resolution: "Unknown",
-              timezone: "Unknown",
-              language: "Unknown",
-              first_seen: session.created_at,
-              last_seen: session.last_accessed || session.created_at,
-              is_trusted: true,
-              is_blocked: false,
-              total_logins: 1,
-              user_id: userId,
-              sessions: [session]
-            })
-          } else {
-            const device = deviceMap.get(fingerprint)
-            device.total_logins += 1
-            device.sessions.push(session)
-            
-            // Update last_seen to the most recent session
-            if (new Date(session.last_accessed || session.created_at) > new Date(device.last_seen)) {
-              device.last_seen = session.last_accessed || session.created_at
-            }
-          }
-        })
-
-        // Convert map to array
-        processedDevices = Array.from(deviceMap.values())
-        console.log("Created devices from sessions:", processedDevices.length)
-      }
-    } else {
-      // Process existing devices
-      processedDevices = await Promise.all(
-        devices.map(async (device) => {
-          // Get current IP addresses from active sessions
-          const { data: activeSessions } = await supabase
-            .from("user_sessions")
-            .select("ip_address")
-            .eq("user_id", userId)
-            .eq("is_active", true)
-            .eq("device_fingerprint", device.device_fingerprint)
-
-          const currentIPs = activeSessions?.map(session => session.ip_address) || []
-
-          // Get IP history for this device
-          const { data: ipHistory } = await supabase
+    // Get IP history for this user to create devices based on unique IPs
+    const { data: ipHistory, error: ipError } = await supabase
       .from("user_ip_history")
-            .select("*")
-            .eq("user_id", userId)
-      .order("last_seen", { ascending: false })
-            .limit(10)
+      .select("*")
+      .eq("user_id", userId)
+      .eq("is_current", true)
+      .order("created_at", { ascending: false })
 
-          return {
-            ...device,
-            current_ips: [...new Set(currentIPs)], // Remove duplicates
-            ip_history: ipHistory || []
-          }
-        })
-      )
+    if (ipError) {
+      console.error("Error fetching IP history:", ipError)
+      return NextResponse.json({ error: "Failed to fetch IP history" }, { status: 500 })
     }
 
-    // Process devices to include IP information
-    const finalProcessedDevices = await Promise.all(
-      processedDevices.map(async (device) => {
-        // Get current IP addresses from active sessions
-        const { data: activeSessions } = await supabase
-          .from("user_sessions")
-          .select("ip_address")
-          .eq("user_id", userId)
-          .eq("is_active", true)
-          .eq("device_fingerprint", device.device_fingerprint)
-
-        const currentIPs = activeSessions?.map(session => session.ip_address) || []
-
-        // Get IP history for this device
-        const { data: ipHistory } = await supabase
-          .from("user_ip_history")
-          .select("*")
-          .eq("user_id", userId)
-          .order("last_seen", { ascending: false })
-          .limit(10)
-
-        return {
-          ...device,
-          current_ips: [...new Set(currentIPs)], // Remove duplicates
-          ip_history: ipHistory || []
+    if (ipHistory && ipHistory.length > 0) {
+      // Group IPs by unique IP address
+      const deviceMap = new Map()
+      
+      ipHistory.forEach(ipRecord => {
+        const ipAddress = ipRecord.ip_address
+        
+        if (!deviceMap.has(ipAddress)) {
+          deviceMap.set(ipAddress, {
+            device_fingerprint: `ip-${ipAddress}`,
+            device_name: `Device from ${ipAddress}`,
+            browser_info: "Unknown Browser",
+            os_info: "Unknown OS",
+            screen_resolution: "Unknown",
+            timezone: "Unknown",
+            language: "Unknown",
+            first_seen: ipRecord.created_at,
+            last_seen: ipRecord.updated_at || ipRecord.created_at,
+            is_trusted: true,
+            is_blocked: false,
+            total_logins: 1,
+            user_id: userId,
+            ip_address: ipAddress,
+            country: ipRecord.country || "Unknown",
+            city: ipRecord.city || "Unknown"
+          })
+        } else {
+          const device = deviceMap.get(ipAddress)
+          device.total_logins += 1
+          
+          // Update last_seen to the most recent IP record
+          if (new Date(ipRecord.updated_at || ipRecord.created_at) > new Date(device.last_seen)) {
+            device.last_seen = ipRecord.updated_at || ipRecord.created_at
+          }
         }
       })
-    )
+
+      // Convert map to array
+      processedDevices = Array.from(deviceMap.values())
+      console.log("Created devices from IP history:", processedDevices.length)
+    } else {
+      // If no IP history, return empty array
+      processedDevices = []
+    }
 
     return NextResponse.json({
       success: true,
-      data: finalProcessedDevices
+      data: processedDevices
     })
 
   } catch (error) {
     console.error("Error in user-devices API:", error)
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 })
   }
 }
 
-export async function POST(request: NextRequest) {
+export async function DELETE(request: NextRequest) {
   try {
     const supabase = createServerSupabaseClient()
-    const body = await request.json()
-    const { action, user_id, device_fingerprint } = body
+    const { searchParams } = new URL(request.url)
+    const userId = searchParams.get("user_id")
+    const action = searchParams.get("action")
 
-    if (!action || !user_id) {
-      return NextResponse.json({ error: "Action and user_id are required" }, { status: 400 })
+    if (!userId) {
+      return NextResponse.json({ error: "User ID is required" }, { status: 400 })
     }
 
-    switch (action) {
-      case "block_device":
-        if (!device_fingerprint) {
-          return NextResponse.json({ error: "Device fingerprint is required" }, { status: 400 })
-        }
-        
-        const { error: blockError } = await supabase
-          .from("user_devices")
-          .update({ is_blocked: true })
-          .eq("user_id", user_id)
-          .eq("device_fingerprint", device_fingerprint)
-
-        if (blockError) {
-          return NextResponse.json({ error: "Failed to block device" }, { status: 500 })
-        }
-
-        return NextResponse.json({
-          success: true,
-          message: "Device blocked successfully"
+    if (action === "logout-others") {
+      // Logout from all other devices (IPs) except current one
+      const { error } = await supabase
+        .from("user_sessions")
+        .update({ 
+          is_active: false, 
+          logout_reason: "admin_logout_others",
+          updated_at: new Date().toISOString()
         })
+        .eq("user_id", userId)
+        .eq("is_active", true)
 
-      case "unblock_device":
-        if (!device_fingerprint) {
-          return NextResponse.json({ error: "Device fingerprint is required" }, { status: 400 })
-        }
-        
-        const { error: unblockError } = await supabase
-          .from("user_devices")
-          .update({ is_blocked: false })
-          .eq("user_id", user_id)
-          .eq("device_fingerprint", device_fingerprint)
+      if (error) {
+        console.error("Error logging out other devices:", error)
+        return NextResponse.json({ error: "Failed to logout other devices" }, { status: 500 })
+      }
 
-        if (unblockError) {
-          return NextResponse.json({ error: "Failed to unblock device" }, { status: 500 })
-        }
-
-        return NextResponse.json({
-          success: true,
-          message: "Device unblocked successfully"
-        })
-
-      case "logout_user_all_devices":
-        const { error: logoutError } = await supabase
-          .from("user_sessions")
-          .update({ is_active: false, logout_reason: "admin_logout" })
-          .eq("user_id", user_id)
-          .eq("is_active", true)
-
-        if (logoutError) {
-          return NextResponse.json({ error: "Failed to logout user" }, { status: 500 })
-        }
-
-        return NextResponse.json({
-          success: true,
-          message: "User logged out from all devices successfully"
-        })
-
-      default:
-        return NextResponse.json({ error: "Invalid action" }, { status: 400 })
+      return NextResponse.json({
+        success: true,
+        message: "Successfully logged out from other devices"
+      })
     }
+
+    return NextResponse.json({ error: "Invalid action" }, { status: 400 })
 
   } catch (error) {
-    console.error("Error in user-devices POST API:", error)
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    )
+    console.error("Error in user-devices DELETE API:", error)
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 })
   }
 }
