@@ -52,8 +52,71 @@ export class UserStatusService {
 
       console.log("[v0] Checking user status for:", userId)
 
-      // Since the user is already logged in successfully, we assume they are active
-      console.log("[v0] Returning active status to avoid network issues")
+      const { data: user, error } = await supabase
+        .from("users")
+        .select("id, is_active, account_status, expiration_date")
+        .eq("id", userId)
+        .single()
+
+      if (error) {
+        console.error("[v0] User status check error:", error)
+        // Only return active on network errors, not on user not found
+        if (error.code === "PGRST116") {
+          return {
+            is_valid: false,
+            status: "inactive",
+            message: "User not found.",
+          }
+        }
+        // For network errors, return active to avoid logout loops
+        return {
+          is_valid: true,
+          status: "active",
+          message: "Your account is active.",
+        }
+      }
+
+      if (!user) {
+        return {
+          is_valid: false,
+          status: "inactive",
+          message: "User not found.",
+        }
+      }
+
+      // Check if user is suspended
+      if (user.account_status === "suspended") {
+        console.log("[v0] User is suspended:", userId)
+        return {
+          is_valid: false,
+          status: "suspended",
+          message: "Your account has been suspended. Please contact support.",
+        }
+      }
+
+      // Check if user is inactive (check account_status instead of is_active)
+      if (user.account_status === "inactive" || user.account_status === "suspended") {
+        console.log("[v0] User is inactive:", userId)
+        return {
+          is_valid: false,
+          status: "inactive",
+          message: "Your account has been deactivated.",
+        }
+      }
+
+      // Check if user account is expired
+      if (user.expiration_date && new Date(user.expiration_date) < new Date()) {
+        console.log("[v0] User account expired:", userId)
+        return {
+          is_valid: false,
+          status: "expired",
+          message: "Your account has expired.",
+          expiration_date: user.expiration_date,
+        }
+      }
+
+      // User is active
+      console.log("[v0] User status is active:", userId)
       return {
         is_valid: true,
         status: "active",
@@ -62,11 +125,25 @@ export class UserStatusService {
     } catch (error: any) {
       console.error("[v0] User status check failed:", error)
 
-      console.warn("[v0] Error during status check, assuming active status")
+      // Only return active status for network-related errors
+      if (
+        error.message?.includes("fetch") ||
+        error.message?.includes("network") ||
+        error.message?.includes("timeout")
+      ) {
+        console.warn("[v0] Network error during status check, assuming active status")
+        return {
+          is_valid: true,
+          status: "active",
+          message: "Your account is active.",
+        }
+      }
+
+      // For other errors, return inactive to be safe
       return {
-        is_valid: true,
-        status: "active",
-        message: "Your account is active.",
+        is_valid: false,
+        status: "inactive",
+        message: "Unable to verify account status.",
       }
     }
   }
@@ -196,6 +273,7 @@ export class UserStatusService {
         .from("users")
         .update({
           account_status: status,
+          is_active: status === "active",
           updated_at: new Date().toISOString(),
         })
         .eq("id", userId)

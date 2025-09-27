@@ -26,6 +26,7 @@ export async function POST(request: NextRequest) {
         .update({
           is_approved: true,
           account_status: "active",
+          is_active: true,
           approved_at: new Date().toISOString()
         })
         .eq("id", user_id)
@@ -52,7 +53,9 @@ export async function POST(request: NextRequest) {
         .from("users")
         .update({
           is_approved: false,
-          account_status: "suspended"
+          account_status: "inactive",
+          is_active: false,
+          rejected_at: new Date().toISOString()
         })
         .eq("id", user_id)
         .select()

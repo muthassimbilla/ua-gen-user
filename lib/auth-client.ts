@@ -231,6 +231,7 @@ export class AuthService {
               telegram_username: user.telegram_username,
               is_active: user.is_active,
               is_approved: user.is_approved,
+              account_status: user.account_status,
             }
           : null,
         userError,
@@ -249,7 +250,12 @@ export class AuthService {
         throw new Error("Invalid Telegram username or password")
       }
 
-      if (!user.is_active) {
+      if (user.account_status === "suspended") {
+        console.error("[v0] Account is suspended")
+        throw new Error("Your account has been suspended by admin")
+      }
+
+      if (user.account_status === "inactive" || user.account_status === "suspended") {
         console.error("[v0] Account is deactivated")
         throw new Error("Account is deactivated")
       }
@@ -278,14 +284,14 @@ export class AuthService {
       try {
         // Add timeout to IP detection to prevent slow login
         const ipPromise = this.getUserCurrentIP()
-        const timeoutPromise = new Promise<string>((_, reject) => 
-          setTimeout(() => reject(new Error("IP detection timeout")), 3000)
+        const timeoutPromise = new Promise<string>((_, reject) =>
+          setTimeout(() => reject(new Error("IP detection timeout")), 3000),
         )
-        
+
         currentIP = await Promise.race([ipPromise, timeoutPromise])
         console.log("[v0] Current IP:", currentIP)
-      } catch (error) {
-        console.warn("[v0] IP detection failed, using fallback:", error.message)
+       } catch (error: any) {
+         console.warn("[v0] IP detection failed, using fallback:", error.message)
         currentIP = "unknown"
       }
 
@@ -330,13 +336,14 @@ export class AuthService {
         is_active: true,
       })
 
-      const ipHistoryPromise = currentIP && currentIP !== "127.0.0.1" && currentIP !== "unknown" 
-        ? supabase.from("user_ip_history").insert({
-            user_id: user.id,
-            ip_address: currentIP,
-            is_current: true,
-          })
-        : Promise.resolve({ error: null })
+      const ipHistoryPromise =
+        currentIP && currentIP !== "127.0.0.1" && currentIP !== "unknown"
+          ? supabase.from("user_ip_history").insert({
+              user_id: user.id,
+              ip_address: currentIP,
+              is_current: true,
+            })
+          : Promise.resolve({ error: null })
 
       // Wait for session creation (critical)
       const { error: sessionError } = await sessionPromise
@@ -360,7 +367,7 @@ export class AuthService {
             .eq("user_id", user.id)
             .neq("ip_address", currentIP)
             .then(() => console.log("[v0] IP history updated"))
-            .catch(error => console.warn("[v0] IP history update failed:", error))
+            .catch((error: any) => console.warn("[v0] IP history update failed:", error))
         }
       } catch (error) {
         console.warn("[v0] IP tracking failed:", error)
@@ -382,7 +389,8 @@ export class AuthService {
         error.message.includes("approved") ||
         error.message.includes("Pending Approval") ||
         error.message.includes("deactivated") ||
-        error.message.includes("Database error")
+        error.message.includes("Database error") ||
+        error.message.includes("suspended")
       ) {
         throw error
       }
@@ -521,23 +529,23 @@ export class AuthService {
       // Use a faster IP detection service with timeout
       const controller = new AbortController()
       const timeoutId = setTimeout(() => controller.abort(), 2000) // 2 second timeout
-      
+
       const response = await fetch("https://api.ipify.org?format=json", {
         signal: controller.signal,
         headers: {
-          'Accept': 'application/json',
-        }
+          Accept: "application/json",
+        },
       })
-      
+
       clearTimeout(timeoutId)
-      
+
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}`)
       }
-      
+
       const data = await response.json()
       return data.ip
-    } catch (error) {
+    } catch (error: any) {
       console.warn("[v0] IP detection error:", error.message)
       return null
     }

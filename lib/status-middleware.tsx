@@ -70,24 +70,17 @@ export function useStatusMiddleware(userId: string | null, onStatusInvalid?: (st
   }, [userId, onStatusInvalid])
 
   // Manual status check function
-  // Temporarily disable status monitoring to prevent logout issues
-  console.log("[v0] Status monitoring disabled to prevent logout loops")
-
   const checkStatus = async (): Promise<UserStatus | null> => {
     if (!userId) return null
 
     try {
-      return {
-        is_valid: true,
-        status: "active",
-        message: "Your account is active.",
-      }
+      return await UserStatusService.checkUserStatus(userId)
     } catch (error) {
       console.error("[v0] Manual status check failed:", error)
       return {
-        is_valid: true,
-        status: "active",
-        message: "Your account is active.",
+        is_valid: false,
+        status: "inactive",
+        message: "Unable to verify account status.",
       }
     }
   }

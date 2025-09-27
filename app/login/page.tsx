@@ -11,7 +11,7 @@ import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { useAuth } from "@/lib/auth-context"
-import { getClientFlashMessage, clearClientFlashMessage, FlashMessage } from "@/lib/flash-messages"
+import { getClientFlashMessage, clearClientFlashMessage, type FlashMessage } from "@/lib/flash-messages"
 import {
   Eye,
   EyeOff,
@@ -57,11 +57,12 @@ export default function LoginPage() {
       if (typeof window !== "undefined") {
         localStorage.removeItem("session_token")
         localStorage.removeItem("current_user")
-        
+
         // Clear cookies with Vercel-compatible settings
-        document.cookie = "session_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; domain=" + window.location.hostname
+        document.cookie =
+          "session_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; domain=" + window.location.hostname
         document.cookie = "session_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT"
-        
+
         // Force reload to clear any cached state
         setTimeout(() => {
           window.location.reload()
@@ -112,14 +113,14 @@ export default function LoginPage() {
       setSessionInvalidReason(true)
       // Clear session data and URL parameters to prevent interference
       clearSessionData()
-      
+
       // Vercel-specific URL cleanup
       if (typeof window !== "undefined") {
         const newUrl = new URL(window.location.href)
         newUrl.searchParams.delete("reason")
         newUrl.searchParams.delete("message")
         window.history.replaceState({}, "", newUrl.toString())
-        
+
         // Force a small delay for Vercel edge runtime
         setTimeout(() => {
           console.log("[v0] Vercel session cleanup completed")
@@ -159,19 +160,19 @@ export default function LoginPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    
+
     // Prevent multiple submissions
     if (isSubmitting) return
-    
+
     // Clear any session expired state before starting login (Vercel optimized)
     if (sessionInvalidReason) {
       setSessionInvalidReason(false)
       clearSessionData()
-      
+
       // Vercel-specific: Wait for cleanup to complete
-      await new Promise(resolve => setTimeout(resolve, 200))
+      await new Promise((resolve) => setTimeout(resolve, 200))
     }
-    
+
     // Immediate UI feedback - no freeze
     setIsSubmitting(true)
     setLoading(true)
@@ -179,90 +180,101 @@ export default function LoginPage() {
     setSuccessMessage("")
     setPendingApproval(false)
 
-    // Use requestAnimationFrame to ensure UI updates before heavy operations
-    requestAnimationFrame(async () => {
-      try {
-        const validationErrors = validateForm()
-        if (validationErrors.length > 0) {
-          setErrors(validationErrors)
-          setLoading(false)
-          return
-        }
+    try {
+      const validationErrors = validateForm()
+      if (validationErrors.length > 0) {
+        setErrors(validationErrors)
+        return
+      }
 
-        // Add timeout to prevent infinite loading (reduced for faster feedback)
-        const loginTimeout = setTimeout(() => {
-          setLoading(false)
-          setErrors(["Login is taking longer than expected. Please try again."])
-        }, 10000) // 10 second timeout
-
-        try {
-          // Optimize login process
-          const loginPromise = login(formData.telegram_username.trim(), formData.password)
-          const redirectTo = searchParams.get("redirect") || "/tool"
-
-          // Start login and redirect simultaneously
-          await loginPromise
-
-          clearTimeout(loginTimeout)
-          setTimeout(() => {
-            router.push(redirectTo)
-          }, 100)
-        } catch (loginError) {
-          clearTimeout(loginTimeout)
-          throw loginError
-        }
-      } catch (error: any) {
-        console.error("[v0] Login error:", error)
-
-        console.log("[v0] Error message:", error.message)
-        console.log("[v0] Error type:", typeof error.message)
-        console.log("[v0] Error includes pending approval:", error.message?.includes("pending approval"))
-        console.log("[v0] Full error object:", error)
-
-        // Check for specific error messages (case insensitive)
-        const errorMsg = error.message?.toLowerCase() || ""
-
-        console.log("[v0] Checking error message:", errorMsg)
-        console.log("[v0] Contains 'pending approval':", errorMsg.includes("pending approval"))
-        console.log("[v0] Contains 'not been approved':", errorMsg.includes("not been approved"))
-        console.log("[v0] Contains 'account is pending approval':", errorMsg.includes("account is pending approval"))
-
-        if (
-          errorMsg.includes("pending approval") ||
-          errorMsg.includes("not been approved") ||
-          errorMsg.includes("account is pending approval") ||
-          errorMsg.includes("is pending approval") ||
-          errorMsg.includes("waiting for admin approval") ||
-          errorMsg.includes("requires admin approval")
-        ) {
-          console.log("[v0] Setting pending approval error")
-          setPendingApproval(true)
-          setErrors([]) // Clear other errors when showing pending approval
-        } else if (errorMsg.includes("deactivated") || errorMsg.includes("account is deactivated")) {
-          console.log("[v0] Setting deactivated error")
-          setErrors(["Your account has been deactivated. Please contact support."])
-        } else if (
-          errorMsg.includes("invalid telegram") ||
-          errorMsg.includes("invalid password") ||
-          errorMsg.includes("invalid username") ||
-          errorMsg.includes("invalid credentials")
-        ) {
-          console.log("[v0] Setting invalid credentials error")
-          setErrors(["Invalid username or password. Please check your credentials and try again."])
-        } else if (errorMsg.includes("database error") || errorMsg.includes("database")) {
-          console.log("[v0] Setting database error")
-          setErrors(["Database connection error. Please try again later."])
-        } else if (errorMsg.includes("network error") || errorMsg.includes("connection")) {
-          console.log("[v0] Setting network error")
-          setErrors(["Network connection error. Please check your internet connection and try again."])
-        } else {
-          console.log("[v0] Setting generic error:", error.message)
-          setErrors([error.message || "Login failed. Please try again."])
-        }
+      // Add timeout to prevent infinite loading
+      const loginTimeout = setTimeout(() => {
+        console.error("[v0] Login timeout - taking too long")
         setLoading(false)
         setIsSubmitting(false)
+        setErrors(["Login is taking longer than expected. Please try again."])
+      }, 10000) // 10 second timeout
+
+      try {
+        // Optimize login process
+        const loginPromise = login(formData.telegram_username.trim(), formData.password)
+        const redirectTo = searchParams.get("redirect") || "/tool"
+
+        // Start login and redirect simultaneously
+        await loginPromise
+
+        clearTimeout(loginTimeout)
+        setTimeout(() => {
+          router.push(redirectTo)
+        }, 100)
+      } catch (loginError) {
+        clearTimeout(loginTimeout)
+        throw loginError
       }
-    })
+    } catch (error: any) {
+      console.error("[v0] Login error:", error)
+
+      console.log("[v0] Error message:", error.message)
+      console.log("[v0] Error type:", typeof error.message)
+      console.log("[v0] Error includes pending approval:", error.message?.includes("pending approval"))
+      console.log("[v0] Full error object:", error)
+
+      // Check for specific error messages (case insensitive)
+      const errorMsg = error.message?.toLowerCase() || ""
+
+      console.log("[v0] Checking error message:", errorMsg)
+      console.log("[v0] Contains 'pending approval':", errorMsg.includes("pending approval"))
+      console.log("[v0] Contains 'not been approved':", errorMsg.includes("not been approved"))
+      console.log("[v0] Contains 'account is pending approval':", errorMsg.includes("account is pending approval"))
+      console.log("[v0] Contains 'is pending approval':", errorMsg.includes("is pending approval"))
+      console.log("[v0] Contains 'waiting for admin approval':", errorMsg.includes("waiting for admin approval"))
+      console.log("[v0] Contains 'requires admin approval':", errorMsg.includes("requires admin approval"))
+
+      if (
+        errorMsg.includes("pending approval") ||
+        errorMsg.includes("not been approved") ||
+        errorMsg.includes("account is pending approval") ||
+        errorMsg.includes("is pending approval") ||
+        errorMsg.includes("waiting for admin approval") ||
+        errorMsg.includes("requires admin approval")
+      ) {
+        console.log("[v0] Setting pending approval error")
+        setPendingApproval(true)
+        setErrors([]) // Clear other errors when showing pending approval
+      } else if (errorMsg.includes("deactivated") || errorMsg.includes("account is deactivated")) {
+        console.log("[v0] Setting deactivated error")
+        setErrors(["Your account has been deactivated. Please contact support."])
+      } else if (
+        errorMsg.includes("suspended") ||
+        errorMsg.includes("account has been suspended") ||
+        errorMsg.includes("সাসপেন্ড") ||
+        errorMsg.includes("suspend")
+      ) {
+        console.log("[v0] Setting suspended error")
+        setErrors(["Your account suspended by admin"])
+      } else if (
+        errorMsg.includes("invalid telegram") ||
+        errorMsg.includes("invalid password") ||
+        errorMsg.includes("invalid username") ||
+        errorMsg.includes("invalid credentials")
+      ) {
+        console.log("[v0] Setting invalid credentials error")
+        setErrors(["Invalid username or password. Please check your credentials and try again."])
+      } else if (errorMsg.includes("database error") || errorMsg.includes("database")) {
+        console.log("[v0] Setting database error")
+        setErrors(["Database connection error. Please try again later."])
+      } else if (errorMsg.includes("network error") || errorMsg.includes("connection")) {
+        console.log("[v0] Setting network error")
+        setErrors(["Network connection error. Please check your internet connection and try again."])
+      } else {
+        console.log("[v0] Setting generic error:", error.message)
+        setErrors([error.message || "Login failed. Please try again."])
+      }
+    } finally {
+      console.log("[v0] Resetting loading states")
+      setLoading(false)
+      setIsSubmitting(false)
+    }
   }
 
   return (
@@ -363,11 +375,11 @@ export default function LoginPage() {
               <CardContent className="space-y-4">
                 {/* Flash Message */}
                 {flashMessage && (
-                  <Alert className={`border-green-500/30 bg-green-500/10 backdrop-blur-sm rounded-xl transition-all duration-500 ease-out ${
-                    showSuccessMessage 
-                      ? 'opacity-100 translate-y-0 scale-100' 
-                      : 'opacity-0 translate-y-4 scale-95'
-                  }`}>
+                  <Alert
+                    className={`border-green-500/30 bg-green-500/10 backdrop-blur-sm rounded-xl transition-all duration-500 ease-out ${
+                      showSuccessMessage ? "opacity-100 translate-y-0 scale-100" : "opacity-0 translate-y-4 scale-95"
+                    }`}
+                  >
                     <CheckCircle className="h-5 w-5 text-green-500" />
                     <AlertDescription className="text-green-400 font-medium">{flashMessage.message}</AlertDescription>
                   </Alert>
@@ -375,11 +387,11 @@ export default function LoginPage() {
 
                 {/* Success Message */}
                 {successMessage && !flashMessage && (
-                  <Alert className={`border-green-500/30 bg-green-500/10 backdrop-blur-sm rounded-xl transition-all duration-500 ease-out ${
-                    showSuccessMessage 
-                      ? 'opacity-100 translate-y-0 scale-100' 
-                      : 'opacity-0 translate-y-4 scale-95'
-                  }`}>
+                  <Alert
+                    className={`border-green-500/30 bg-green-500/10 backdrop-blur-sm rounded-xl transition-all duration-500 ease-out ${
+                      showSuccessMessage ? "opacity-100 translate-y-0 scale-100" : "opacity-0 translate-y-4 scale-95"
+                    }`}
+                  >
                     <CheckCircle className="h-5 w-5 text-green-500" />
                     <AlertDescription className="text-green-400 font-medium">{successMessage}</AlertDescription>
                   </Alert>
@@ -408,7 +420,8 @@ export default function LoginPage() {
                       <div className="space-y-2">
                         <p className="font-semibold">Security Alert: IP Address Changed</p>
                         <p className="text-sm">
-                          Your session has expired due to IP address change. This is a security feature to protect your account.
+                          Your session has expired due to IP address change. This is a security feature to protect your
+                          account.
                         </p>
                         <p className="text-xs text-orange-500 font-medium">
                           Please log in again to continue. Your account is secure.
@@ -451,7 +464,6 @@ export default function LoginPage() {
                     </AlertDescription>
                   </Alert>
                 )}
-
 
                 {/* Login Form */}
                 <form onSubmit={handleSubmit} className="space-y-4">
@@ -513,8 +525,8 @@ export default function LoginPage() {
                     className="w-full h-12 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 relative overflow-hidden active:scale-[0.98] active:shadow-md"
                     disabled={loading || isSubmitting}
                     style={{
-                      transform: isSubmitting ? 'scale(0.98)' : undefined,
-                      transition: 'transform 0.1s ease-in-out'
+                      transform: isSubmitting ? "scale(0.98)" : undefined,
+                      transition: "transform 0.1s ease-in-out",
                     }}
                   >
                     {/* Immediate loading overlay */}
@@ -526,9 +538,11 @@ export default function LoginPage() {
                         </div>
                       </div>
                     )}
-                    
+
                     {/* Button content */}
-                    <div className={`flex items-center gap-2 transition-opacity duration-200 ${loading ? 'opacity-0' : 'opacity-100'}`}>
+                    <div
+                      className={`flex items-center gap-2 transition-opacity duration-200 ${loading ? "opacity-0" : "opacity-100"}`}
+                    >
                       <LogIn className="h-5 w-5" />
                       Sign In
                     </div>

@@ -78,10 +78,19 @@ export class AdminUserService {
   }
 
   private static calculateCurrentStatus(user: any): "active" | "suspended" | "expired" | "inactive" | "pending" {
+    console.log("[v0] Calculating status for user:", user.id, {
+      is_approved: user.is_approved,
+      account_status: user.account_status,
+      is_active: user.is_active,
+      expiration_date: user.expiration_date,
+    })
+
     if (!user.is_approved) return "pending"
     if (user.account_status === "suspended") return "suspended"
     if (user.expiration_date && new Date(user.expiration_date) < new Date()) return "expired"
-    if (user.account_status === "active" && user.is_active) return "active"
+    // Fixed: Check is_active first, then account_status
+    if (!user.is_active) return "inactive"
+    if (user.account_status === "active") return "active"
     return "inactive"
   }
 
@@ -97,6 +106,8 @@ export class AdminUserService {
         .from("users")
         .update({
           is_approved: true,
+          is_active: true,
+          account_status: "active",
           approved_at: new Date().toISOString(),
           approved_by: adminUserId || null,
           updated_at: new Date().toISOString(),
@@ -127,8 +138,11 @@ export class AdminUserService {
         .from("users")
         .update({
           is_approved: false,
+          is_active: false,
+          account_status: "inactive",
           approved_at: null,
           approved_by: null,
+          rejected_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
         })
         .eq("id", userId)
@@ -344,27 +358,48 @@ export class AdminUserService {
 
   static async toggleUserStatus(userId: string, isActive: boolean): Promise<void> {
     try {
+      console.log("[v0] AdminUserService.toggleUserStatus called with:", { userId, isActive })
+
       const supabase = this.getSupabaseClient()
 
       if (!supabase) {
         throw new Error("Supabase integration required")
       }
 
-      // Update user active status in database
-      const { error } = await supabase
+      // Update user active status and account status in database
+      const { data, error } = await supabase
         .from("users")
         .update({
           is_active: isActive,
+          account_status: isActive ? "active" : "inactive",
           updated_at: new Date().toISOString(),
         })
         .eq("id", userId)
+        .select("id, is_active, full_name, account_status")
 
       if (error) {
         console.error("[v0] Toggle user status error:", error)
-        throw new Error("Failed to change user status")
+        throw new Error(`Failed to change user status: ${error.message}`)
       }
 
-      console.log("[v0] User status successfully toggled:", userId, isActive)
+      console.log("[v0] Database update result:", data)
+
+      if (!data || data.length === 0) {
+        throw new Error("No user was updated. User may not exist.")
+      }
+
+      const updatedUser = data[0]
+      console.log("[v0] User status successfully toggled:", {
+        userId,
+        newIsActive: updatedUser.is_active,
+        accountStatus: updatedUser.account_status,
+        fullName: updatedUser.full_name,
+      })
+
+      // Verify the update was successful
+      if (updatedUser.is_active !== isActive) {
+        throw new Error("Database update failed - status not changed")
+      }
     } catch (error: any) {
       console.error("[v0] Toggle user status failed:", error)
       throw error
@@ -465,5 +500,81 @@ export class AdminUserService {
     }
 
     return null
+  }
+
+  static async handleSecurityUpdate(
+    userId: string,
+    data: {
+      status?: "active" | "suspended"
+      expirationDate?: string | null
+      activateAccount?: boolean
+    },
+  ): Promise<void> {
+    try {
+      console.log("[v0] AdminUserService.handleSecurityUpdate called with:", { userId, data })
+
+      const supabase = this.getSupabaseClient()
+
+      if (!supabase) {
+        throw new Error("Supabase integration required")
+      }
+
+      const updateData: any = {
+        updated_at: new Date().toISOString(),
+      }
+
+      // Update account status
+      if (data.status) {
+        updateData.account_status = data.status
+        console.log("[v0] Setting account_status to:", data.status)
+      }
+
+      // Update expiration date
+      if (data.expirationDate !== undefined) {
+        updateData.expiration_date = data.expirationDate
+        console.log("[v0] Setting expiration_date to:", data.expirationDate)
+      }
+
+      // If activating account, ensure is_active is true
+      if (data.status === "active" || data.activateAccount) {
+        updateData.is_active = true
+        console.log("[v0] Setting is_active to true")
+      }
+
+      // If suspending account, set is_active to false
+      if (data.status === "suspended") {
+        updateData.is_active = false
+        console.log("[v0] Setting is_active to false due to suspension")
+      }
+
+      const { data: result, error } = await supabase
+        .from("users")
+        .update(updateData)
+        .eq("id", userId)
+        .select("id, is_active, account_status, expiration_date, full_name")
+
+      if (error) {
+        console.error("[v0] Security update error:", error)
+        throw new Error(`Failed to update security settings: ${error.message}`)
+      }
+
+      console.log("[v0] Security update successful:", result)
+
+      if (!result || result.length === 0) {
+        throw new Error("No user was updated. User may not exist.")
+      }
+
+      const updatedUser = result[0]
+      console.log("[v0] User security settings successfully updated:", {
+        userId,
+        newAccountStatus: updatedUser.account_status,
+        newIsActive: updatedUser.is_active,
+        newExpirationDate: updatedUser.expiration_date,
+        fullName: updatedUser.full_name,
+      })
+    } catch (error: any) {
+      console.error("[v0] Security update failed:", error)
+      throw error
+    }
   }
 }

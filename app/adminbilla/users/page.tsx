@@ -164,18 +164,21 @@ export default function UserManagementPage() {
     },
   ) => {
     try {
-      if (data.status) {
-        await AdminUserService.updateUserStatus(userId, data.status)
-      }
-      if (data.expirationDate !== undefined) {
-        await AdminUserService.updateUserExpiration(userId, data.expirationDate)
-      }
+      console.log("[v0] handleSecurityUpdate called with:", { userId, data })
+
+      await AdminUserService.handleSecurityUpdate(userId, {
+        ...data,
+        activateAccount: data.status === "active",
+      })
+
       await loadUsers()
       setIsSecurityDialogOpen(false)
       setSelectedUser(null)
-    } catch (error) {
+
+      console.log("[v0] Security settings updated successfully")
+    } catch (error: any) {
       console.error("Error updating security settings:", error)
-      alert("Failed to update security settings")
+      alert(`Failed to update security settings: ${error.message}`)
     }
   }
 
@@ -192,10 +195,20 @@ export default function UserManagementPage() {
 
   const toggleUserStatus = async (userId: string, currentStatus: boolean) => {
     try {
-      await AdminUserService.toggleUserStatus(userId, !currentStatus)
+      console.log("[v0] Toggling user status:", userId, "from", currentStatus, "to", !currentStatus)
+
+      const newStatus = !currentStatus
+      await AdminUserService.toggleUserStatus(userId, newStatus)
+
+      // Reload users to get fresh data
       await loadUsers()
-    } catch (error) {
+
+      // Show success message
+      const statusText = newStatus ? "activated" : "deactivated"
+      console.log(`[v0] User successfully ${statusText}`)
+    } catch (error: any) {
       console.error("Error toggling user status:", error)
+      alert(`Failed to update user status: ${error.message}`)
     }
   }
 
@@ -424,127 +437,111 @@ export default function UserManagementPage() {
                   <Smartphone className="w-3 h-3 lg:w-4 lg:w-4 flex-shrink-0" />
                   <span className="truncate">Active Sessions: {user.device_count || 0}</span>
                 </div>
+                <div className="flex items-center gap-2 text-xs lg:text-sm">
+                  <div className={`w-2 h-2 rounded-full ${user.is_active ? "bg-green-500" : "bg-red-500"}`}></div>
+                  <span className={user.is_active ? "text-green-600" : "text-red-600"}>
+                    {user.is_active ? "Account Active" : "Account Deactivated"}
+                  </span>
+                </div>
               </div>
 
               <div className="space-y-2">
-                {/* Top row: Primary actions (Approval/View) */}
-                <div className="flex items-center gap-1.5 lg:gap-2">
+                {/* Primary Actions Row */}
+                <div className="flex items-center gap-2">
                   {user.current_status === "pending" && (
                     <>
                       <Button
                         variant="outline"
                         size="sm"
                         onClick={() => handleApproveUser(user.id)}
-                        className="bg-green-50 border-green-200 text-green-700 hover:bg-green-100 hover:border-green-300 hover:text-green-800 text-xs lg:text-sm font-medium shadow-sm flex-1"
+                        className="bg-green-50 border-green-200 text-green-700 hover:bg-green-100 flex-1 text-xs font-medium"
                       >
-                        <CheckCircle className="h-3 w-3 lg:h-4 lg:w-4 mr-1.5" />
-                        <span className="hidden sm:inline">Approve</span>
+                        <CheckCircle className="h-3 w-3 mr-1.5" />
+                        Approve
                       </Button>
                       <Button
                         variant="outline"
                         size="sm"
                         onClick={() => handleRejectUser(user.id)}
-                        className="bg-red-50 border-red-200 text-red-700 hover:bg-red-100 hover:border-red-300 hover:text-red-800 text-xs lg:text-sm font-medium shadow-sm flex-1"
+                        className="bg-red-50 border-red-200 text-red-700 hover:bg-red-100 flex-1 text-xs font-medium"
                       >
-                        <XCircle className="h-3 w-3 lg:h-4 lg:w-4 mr-1.5" />
-                        <span className="hidden sm:inline">Reject</span>
+                        <XCircle className="h-3 w-3 mr-1.5" />
+                        Reject
                       </Button>
                     </>
                   )}
-                  {user.current_status === "active" && (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleRejectUser(user.id)}
-                      className="bg-orange-50 border-orange-200 text-orange-700 hover:bg-orange-100 hover:border-orange-300 hover:text-orange-800 text-xs lg:text-sm font-medium shadow-sm flex-1"
-                    >
-                      <XCircle className="h-3 w-3 lg:h-4 lg:w-4 mr-1.5" />
-                      <span className="hidden sm:inline">Reject</span>
-                    </Button>
-                  )}
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => {
-                      console.log("[v0] View button clicked for user:", user.id)
-                      handleViewUser(user)
-                    }}
-                    className="bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100 hover:border-blue-300 hover:text-blue-800 flex-1 text-xs lg:text-sm font-medium shadow-sm"
-                  >
-                    <Eye className="h-3 w-3 lg:h-4 lg:w-4 mr-1.5" />
-                    <span className="hidden sm:inline">View</span>
-                  </Button>
-                </div>
 
-                {/* Bottom row: Secondary actions (Edit, Security, Sessions, Toggle, Delete) */}
-                <div className="flex items-center gap-1.5 lg:gap-2">
+                  {/* Activation Toggle - Most Important Action */}
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={() => {
-                      console.log("[v0] Edit button clicked for user:", user.id)
-                      handleEditUser(user)
-                    }}
-                    className="bg-indigo-50 border-indigo-200 text-indigo-700 hover:bg-indigo-100 hover:border-indigo-300 hover:text-indigo-800 p-2 shadow-sm"
-                  >
-                    <Edit className="h-3 w-3 lg:h-4 lg:w-4" />
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => {
-                      console.log("[v0] View devices button clicked for user:", user.id)
-                      handleViewDevices(user)
-                    }}
-                    className="bg-green-50 border-green-200 text-green-700 hover:bg-green-100 hover:border-green-300 hover:text-green-800 p-2 shadow-sm"
-                  >
-                    <Smartphone className="h-3 w-3 lg:h-4 lg:w-4" />
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => {
-                      console.log("[v0] Security button clicked for user:", user.id)
-                      handleSecuritySettings(user)
-                    }}
-                    className="bg-purple-50 border-purple-200 text-purple-700 hover:bg-purple-100 hover:border-purple-300 hover:text-purple-800 p-2 shadow-sm"
-                  >
-                    <Shield className="h-3 w-3 lg:h-4 lg:w-4" />
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => {
-                      console.log(
-                        "[v0] Toggle status button clicked for user:",
-                        user.id,
-                        "current active:",
-                        user.is_active,
-                      )
+                      console.log("[v0] Toggle button clicked for user:", user.id, "current is_active:", user.is_active)
                       toggleUserStatus(user.id, user.is_active)
                     }}
-                    className={`p-2 shadow-sm font-medium ${
+                    className={`flex-1 text-xs font-medium transition-all duration-200 ${
                       user.is_active
-                        ? "bg-red-50 border-red-200 text-red-700 hover:bg-red-100 hover:border-red-300 hover:text-red-800"
-                        : "bg-green-50 border-green-200 text-green-700 hover:bg-green-100 hover:border-green-300 hover:text-green-800"
+                        ? "bg-red-50 border-red-200 text-red-700 hover:bg-red-100 hover:border-red-300"
+                        : "bg-green-50 border-green-200 text-green-700 hover:bg-green-100 hover:border-green-300"
                     }`}
                   >
                     {user.is_active ? (
-                      <UserX className="h-3 w-3 lg:h-4 lg:w-4" />
+                      <>
+                        <UserX className="h-3 w-3 mr-1.5" />
+                        Deactivate
+                      </>
                     ) : (
-                      <UserCheck className="h-3 w-3 lg:h-4 lg:w-4" />
+                      <>
+                        <UserCheck className="h-3 w-3 mr-1.5" />
+                        Activate
+                      </>
                     )}
+                  </Button>
+
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleViewUser(user)}
+                    className="bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100 flex-1 text-xs font-medium"
+                  >
+                    <Eye className="h-3 w-3 mr-1.5" />
+                    View
+                  </Button>
+                </div>
+
+                {/* Secondary Actions Row */}
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleEditUser(user)}
+                    className="bg-indigo-50 border-indigo-200 text-indigo-700 hover:bg-indigo-100 p-2"
+                  >
+                    <Edit className="h-3 w-3" />
                   </Button>
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => {
-                      console.log("[v0] Delete button clicked for user:", user.id)
-                      handleDeleteUser(user.id)
-                    }}
-                    className="bg-red-50 border-red-200 text-red-700 hover:bg-red-100 hover:border-red-300 hover:text-red-800 p-2 shadow-sm"
+                    onClick={() => handleViewDevices(user)}
+                    className="bg-green-50 border-green-200 text-green-700 hover:bg-green-100 p-2"
                   >
-                    <Trash2 className="h-3 w-3 lg:h-4 lg:w-4" />
+                    <Smartphone className="h-3 w-3" />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleSecuritySettings(user)}
+                    className="bg-purple-50 border-purple-200 text-purple-700 hover:bg-purple-100 p-2"
+                  >
+                    <Shield className="h-3 w-3" />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleDeleteUser(user.id)}
+                    className="bg-red-50 border-red-200 text-red-700 hover:bg-red-100 p-2"
+                  >
+                    <Trash2 className="h-3 w-3" />
                   </Button>
                 </div>
               </div>
@@ -799,6 +796,17 @@ function SecuritySettingsForm({
   const [expirationDate, setExpirationDate] = useState(user.expiration_date ? user.expiration_date.split("T")[0] : "")
   const [hasExpiration, setHasExpiration] = useState(!!user.expiration_date)
 
+  const getCurrentStatus = () => {
+    if (!user.is_approved) return "pending"
+    if (user.account_status === "suspended") return "suspended"
+    if (user.expiration_date && new Date(user.expiration_date) < new Date()) return "expired"
+    if (!user.is_active) return "inactive"
+    if (user.account_status === "active") return "active"
+    return "inactive"
+  }
+
+  const currentStatus = getCurrentStatus()
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
 
@@ -812,6 +820,7 @@ function SecuritySettingsForm({
       data.expirationDate = null
     }
 
+    console.log("[v0] SecuritySettingsForm submitting:", data)
     onSave(user.id, data)
   }
 
@@ -823,9 +832,22 @@ function SecuritySettingsForm({
           <AlertTriangle className="h-4 w-4 text-orange-500" />
           <span className="text-sm font-medium">Current Status</span>
         </div>
-        <Badge variant={user.current_status === "active" ? "default" : "destructive"}>
-          {user.current_status === "active" ? "Active" : user.current_status === "suspended" ? "Suspended" : "Expired"}
+        <Badge variant={currentStatus === "active" ? "default" : "destructive"}>
+          {currentStatus === "active"
+            ? "Active"
+            : currentStatus === "suspended"
+              ? "Suspended"
+              : currentStatus === "expired"
+                ? "Expired"
+                : currentStatus === "inactive"
+                  ? "Inactive"
+                  : "Pending"}
         </Badge>
+        <div className="mt-2 text-xs text-muted-foreground">
+          <p>is_active: {user.is_active ? "true" : "false"}</p>
+          <p>account_status: {user.account_status}</p>
+          {user.expiration_date && <p>expires: {new Date(user.expiration_date).toLocaleDateString()}</p>}
+        </div>
       </div>
 
       {/* Account Status */}
