@@ -14,6 +14,9 @@ import {
   Ban,
   CheckCircle,
   LogOut,
+  RefreshCw,
+  Play,
+  Pause,
 } from "lucide-react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -22,6 +25,7 @@ import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useToast } from "@/hooks/use-toast"
 import { Alert, AlertDescription } from "@/components/ui/alert"
+import { Switch } from "@/components/ui/switch"
 
 interface UserDevice {
   user_id: string
@@ -85,6 +89,8 @@ export default function DeviceMonitoringPage() {
   const [searchTerm, setSearchTerm] = useState("")
   const [filterStatus, setFilterStatus] = useState("all")
   const [selectedUser, setSelectedUser] = useState<string | null>(null)
+  const [autoRefresh, setAutoRefresh] = useState(true)
+  const [lastUpdated, setLastUpdated] = useState<Date>(new Date())
 
   useEffect(() => {
     if (admin) {
@@ -92,12 +98,30 @@ export default function DeviceMonitoringPage() {
     }
   }, [admin])
 
-  const loadData = async () => {
+  // Auto-refresh effect
+  useEffect(() => {
+    if (!autoRefresh || !admin) return
+
+    const interval = setInterval(() => {
+      loadData()
+    }, 10000) // Refresh every 10 seconds
+
+    return () => clearInterval(interval)
+  }, [autoRefresh, admin])
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      // Any cleanup if needed
+    }
+  }, [])
+
+  const loadData = async (showToast = false) => {
     try {
       setLoading(true)
 
-      // Load device data
-      const devicesResponse = await fetch("/api/admin/user-devices", {
+      // Load device data - Get all devices at once
+      const devicesResponse = await fetch("/api/admin/all-devices", {
         headers: {
           Authorization: `Bearer ${admin?.id || "admin-token"}`,
         },
@@ -106,6 +130,23 @@ export default function DeviceMonitoringPage() {
       if (devicesResponse.ok) {
         const devicesData = await devicesResponse.json()
         setDevices(devicesData.data || [])
+        setLastUpdated(new Date())
+        
+        if (showToast) {
+          toast({
+            title: "Data Updated",
+            description: "Device monitoring data has been refreshed",
+          })
+        }
+      } else {
+        console.error("Failed to load devices:", devicesResponse.status)
+        if (showToast) {
+          toast({
+            title: "Error",
+            description: "Failed to load device data",
+            variant: "destructive",
+          })
+        }
       }
 
       // Load IP stats
@@ -118,14 +159,25 @@ export default function DeviceMonitoringPage() {
       if (statsResponse.ok) {
         const statsData = await statsResponse.json()
         setStats(statsData.data)
+      } else {
+        console.error("Failed to load stats:", statsResponse.status)
+        if (showToast) {
+          toast({
+            title: "Error",
+            description: "Failed to load statistics",
+            variant: "destructive",
+          })
+        }
       }
     } catch (error) {
       console.error("Error loading device monitoring data:", error)
+      if (showToast) {
         toast({
           title: "Error",
           description: "Failed to load data",
           variant: "destructive",
         })
+      }
     } finally {
       setLoading(false)
     }
@@ -220,11 +272,35 @@ export default function DeviceMonitoringPage() {
         <div>
           <h1 className="text-2xl font-bold text-foreground">Device Monitoring</h1>
           <p className="text-muted-foreground">Track user devices and IP addresses</p>
+          <div className="flex items-center gap-2 mt-1">
+            <Clock className="w-3 h-3 text-muted-foreground" />
+            <span className="text-xs text-muted-foreground">
+              Last updated: {lastUpdated.toLocaleTimeString()}
+            </span>
+            {autoRefresh && (
+              <Badge variant="secondary" className="text-xs">
+                <Activity className="w-3 h-3 mr-1" />
+                Live
+              </Badge>
+            )}
+          </div>
         </div>
-        <Button onClick={loadData} variant="outline">
-          <Activity className="w-4 h-4 mr-2" />
-          Refresh
-        </Button>
+        <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2">
+            <Switch
+              checked={autoRefresh}
+              onCheckedChange={setAutoRefresh}
+              id="auto-refresh"
+            />
+            <label htmlFor="auto-refresh" className="text-sm text-muted-foreground">
+              Auto Refresh
+            </label>
+          </div>
+          <Button onClick={() => loadData(true)} variant="outline" size="sm">
+            <RefreshCw className="w-4 h-4 mr-2" />
+            Refresh
+          </Button>
+        </div>
       </div>
 
       {/* Stats Cards */}

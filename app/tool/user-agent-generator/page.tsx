@@ -74,23 +74,6 @@ const loadSupabaseModules = async () => {
   }
 }
 
-const AppHeader = memo(() => (
-  <div className="text-center space-y-4 mb-8">
-    <div className="flex items-center justify-center gap-3 mb-4">
-      <div className="p-3 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl shadow-lg">
-        <Smartphone className="h-8 w-8 text-white" />
-      </div>
-      <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-        User Agent Generator
-      </h1>
-    </div>
-    <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-      Generate unique, realistic user agents for iOS, Android, Instagram, and Facebook applications
-    </p>
-  </div>
-))
-
-AppHeader.displayName = "AppHeader"
 
 export default function UserAgentGenerator() {
   const [platform, setPlatform] = useState("")
@@ -1505,23 +1488,6 @@ export default function UserAgentGenerator() {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 relative z-10">
-        {/* Header Section */}
-        <div className="text-center mb-12">
-          <div className="inline-flex items-center gap-3 mb-6">
-            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-lg relative overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent" />
-              <Smartphone className="w-8 h-8 text-white relative z-10" />
-            </div>
-            <div className="text-left">
-              <h1 className="text-3xl lg:text-4xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-                User Agent Generator
-              </h1>
-              <p className="text-slate-600 dark:text-slate-300 mt-1">
-                Generate realistic iOS & Android user agents
-              </p>
-            </div>
-          </div>
-        </div>
 
         <div className="space-y-8">
           <Card className="bg-white/70 dark:bg-slate-800/70 backdrop-blur-sm border-slate-200/50 dark:border-slate-700/50 shadow-2xl">
@@ -1546,8 +1512,8 @@ export default function UserAgentGenerator() {
 
               {userAgents.length > 0 && (
                 <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border-0 shadow-2xl">
-                  <CardHeader className="bg-gradient-to-r from-green-500/10 to-emerald-500/10">
-                    <CardTitle className="flex items-center justify-between">
+                  <CardHeader className="bg-gradient-to-r from-green-500/10 to-emerald-500/10 py-3">
+                    <CardTitle className="flex items-center justify-between text-lg">
                       <span className="text-slate-900 dark:text-slate-100">
                         Generated User Agents ({userAgents.length})
                       </span>

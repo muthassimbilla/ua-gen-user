@@ -111,7 +111,7 @@ export default function TopNavigation() {
                     className="w-full flex items-center justify-center gap-3 px-4 py-4 bg-gradient-to-r from-blue-50 to-indigo-100 dark:from-blue-900/20 dark:to-indigo-800/20 hover:from-blue-100 hover:to-indigo-200 dark:hover:from-blue-900/30 dark:hover:to-indigo-800/30 text-blue-600 dark:text-blue-400 rounded-2xl transition-all duration-300 font-semibold hover:scale-105 active:scale-95 shadow-lg hover:shadow-xl"
                   >
                     <Settings className="w-5 h-5" />
-                    প্রোফাইল দেখুন
+                    View Profile
                   </Link>
                   
                   <button

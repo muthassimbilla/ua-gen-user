@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Badge } from "@/components/ui/badge"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import {
   Search,
   Edit,
@@ -27,8 +28,11 @@ import {
   CheckCircle,
   XCircle,
   Smartphone,
+  RefreshCw,
+  User,
 } from "lucide-react"
 import { AdminUserService, type AdminUser } from "@/lib/admin-user-service"
+import { Switch } from "@/components/ui/switch"
 
 export default function UserManagementPage() {
   const [users, setUsers] = useState<AdminUser[]>([])
@@ -43,15 +47,29 @@ export default function UserManagementPage() {
   const [isDevicesDialogOpen, setIsDevicesDialogOpen] = useState(false)
   const [userDevices, setUserDevices] = useState<any[]>([])
   const [devicesLoading, setDevicesLoading] = useState(false)
+  const [autoRefresh, setAutoRefresh] = useState(true)
+  const [lastUpdated, setLastUpdated] = useState<Date>(new Date())
 
   useEffect(() => {
     loadUsers()
   }, [])
 
+  // Auto-refresh effect
+  useEffect(() => {
+    if (!autoRefresh) return
+
+    const interval = setInterval(() => {
+      loadUsers()
+    }, 20000) // Refresh every 20 seconds
+
+    return () => clearInterval(interval)
+  }, [autoRefresh])
+
   const loadUsers = async () => {
     try {
       const userData = await AdminUserService.getAllUsers()
       setUsers(userData)
+      setLastUpdated(new Date())
     } catch (error) {
       console.error("Error loading users:", error)
     } finally {
@@ -275,8 +293,39 @@ export default function UserManagementPage() {
             <p className="text-muted-foreground text-sm lg:text-base">
               View and manage all user information and security settings
             </p>
+            <div className="flex items-center gap-2 mt-1">
+              <Clock className="w-3 h-3 text-muted-foreground" />
+              <span className="text-xs text-muted-foreground">
+                Last updated: {lastUpdated.toLocaleTimeString()}
+              </span>
+              {autoRefresh && (
+                <Badge variant="secondary" className="text-xs">
+                  <Activity className="w-3 h-3 mr-1" />
+                  Live
+                </Badge>
+              )}
+            </div>
           </div>
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 lg:gap-3">
+            <div className="flex items-center gap-2">
+              <Switch
+                checked={autoRefresh}
+                onCheckedChange={setAutoRefresh}
+                id="auto-refresh-users"
+              />
+              <label htmlFor="auto-refresh-users" className="text-sm text-muted-foreground">
+                Auto Refresh
+              </label>
+            </div>
+            <Button 
+              onClick={loadUsers} 
+              variant="outline" 
+              size="sm" 
+              className="text-xs lg:text-sm bg-transparent"
+            >
+              <RefreshCw className="h-3 w-3 lg:h-4 lg:w-4 mr-2" />
+              Refresh
+            </Button>
             <Button variant="outline" size="sm" className="text-xs lg:text-sm bg-transparent">
               <Download className="h-3 w-3 lg:h-4 lg:w-4 mr-2" />
               Export
@@ -437,6 +486,12 @@ export default function UserManagementPage() {
                   <Smartphone className="w-3 h-3 lg:w-4 lg:w-4 flex-shrink-0" />
                   <span className="truncate">Active Sessions: {user.device_count || 0}</span>
                 </div>
+                {user.last_login && (
+                  <div className="flex items-center gap-2 text-xs lg:text-sm text-muted-foreground">
+                    <Clock className="w-3 h-3 lg:w-4 lg:w-4 flex-shrink-0" />
+                    <span className="truncate">Last Login: {new Date(user.last_login).toLocaleString("en-US")}</span>
+                  </div>
+                )}
                 <div className="flex items-center gap-2 text-xs lg:text-sm">
                   <div className={`w-2 h-2 rounded-full ${user.is_active ? "bg-green-500" : "bg-red-500"}`}></div>
                   <span className={user.is_active ? "text-green-600" : "text-red-600"}>
@@ -514,30 +569,6 @@ export default function UserManagementPage() {
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => handleEditUser(user)}
-                    className="bg-indigo-50 border-indigo-200 text-indigo-700 hover:bg-indigo-100 p-2"
-                  >
-                    <Edit className="h-3 w-3" />
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleViewDevices(user)}
-                    className="bg-green-50 border-green-200 text-green-700 hover:bg-green-100 p-2"
-                  >
-                    <Smartphone className="h-3 w-3" />
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleSecuritySettings(user)}
-                    className="bg-purple-50 border-purple-200 text-purple-700 hover:bg-purple-100 p-2"
-                  >
-                    <Shield className="h-3 w-3" />
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
                     onClick={() => handleDeleteUser(user.id)}
                     className="bg-red-50 border-red-200 text-red-700 hover:bg-red-100 p-2"
                   >
@@ -580,57 +611,228 @@ export default function UserManagementPage() {
 
       {/* View User Dialog */}
       <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>User Details</DialogTitle>
-            <DialogDescription>View complete user information</DialogDescription>
+            <DialogTitle className="flex items-center gap-2">
+              <Eye className="h-5 w-5" />
+              User Details - {selectedUser?.full_name}
+            </DialogTitle>
+            <DialogDescription>Complete user information and activity details</DialogDescription>
           </DialogHeader>
           {selectedUser && (
-            <div className="space-y-4">
-              <div className="flex items-center gap-4 p-4 rounded-xl bg-muted/50">
-                <div className="w-16 h-16 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white text-xl font-semibold">
+            <div className="space-y-6">
+              {/* User Profile Header */}
+              <div className="flex items-center gap-4 p-6 rounded-xl bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20">
+                <div className="w-20 h-20 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white text-2xl font-bold">
                   {selectedUser.full_name.charAt(0)}
                 </div>
-                <div>
-                  <h3 className="text-lg font-semibold text-foreground">{selectedUser.full_name}</h3>
-                  <p className="text-sm text-muted-foreground">@{selectedUser.telegram_username}</p>
-                  <Badge variant={getStatusInfo(selectedUser.current_status).variant} className="mt-1">
-                    {getStatusInfo(selectedUser.current_status).text}
-                  </Badge>
+                <div className="flex-1">
+                  <h3 className="text-2xl font-bold text-foreground">{selectedUser.full_name}</h3>
+                  <p className="text-lg text-muted-foreground">@{selectedUser.telegram_username}</p>
+                  <div className="flex items-center gap-2 mt-2">
+                    <Badge variant={getStatusInfo(selectedUser.current_status).variant} className="text-sm">
+                      {getStatusInfo(selectedUser.current_status).text}
+                    </Badge>
+                    <Badge variant="outline" className="text-sm">
+                      {selectedUser.device_count || 0} Active Sessions
+                    </Badge>
+                  </div>
                 </div>
               </div>
 
-              <div className="space-y-3">
-                <div className="flex justify-between items-center py-2 border-b border-border">
-                  <span className="text-sm font-medium text-muted-foreground">User ID</span>
-                  <span className="text-sm text-foreground font-mono">{selectedUser.id}</span>
-                </div>
-                <div className="flex justify-between items-center py-2 border-b border-border">
-                  <span className="text-sm font-medium text-muted-foreground">Account Status</span>
-                  <span className={`text-sm font-medium ${getStatusInfo(selectedUser.current_status).color}`}>
-                    {getStatusInfo(selectedUser.current_status).text}
-                  </span>
-                </div>
-                {selectedUser.expiration_date && (
-                  <div className="flex justify-between items-center py-2 border-b border-border">
-                    <span className="text-sm font-medium text-muted-foreground">Expiration Date</span>
-                    <span className="text-sm text-foreground">
-                      {new Date(selectedUser.expiration_date).toLocaleDateString("bn-BD")}
-                    </span>
+              {/* Basic Information */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <Card>
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-lg flex items-center gap-2">
+                      <User className="h-5 w-5" />
+                      Basic Information
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <div className="flex justify-between items-center py-2 border-b border-border">
+                      <span className="text-sm font-medium text-muted-foreground">User ID</span>
+                      <code className="text-xs text-foreground font-mono bg-muted px-2 py-1 rounded">
+                        {selectedUser.id}
+                      </code>
+                    </div>
+                    <div className="flex justify-between items-center py-2 border-b border-border">
+                      <span className="text-sm font-medium text-muted-foreground">Full Name</span>
+                      <span className="text-sm text-foreground font-medium">{selectedUser.full_name}</span>
+                    </div>
+                    <div className="flex justify-between items-center py-2 border-b border-border">
+                      <span className="text-sm font-medium text-muted-foreground">Telegram Username</span>
+                      <span className="text-sm text-foreground font-medium">@{selectedUser.telegram_username}</span>
+                    </div>
+                    <div className="flex justify-between items-center py-2 border-b border-border">
+                      <span className="text-sm font-medium text-muted-foreground">Account Status</span>
+                      <Badge variant={getStatusInfo(selectedUser.current_status).variant} className="text-xs">
+                        {getStatusInfo(selectedUser.current_status).text}
+                      </Badge>
+                    </div>
+                    <div className="flex justify-between items-center py-2">
+                      <span className="text-sm font-medium text-muted-foreground">Is Active</span>
+                      <div className="flex items-center gap-2">
+                        <div className={`w-2 h-2 rounded-full ${selectedUser.is_active ? "bg-green-500" : "bg-red-500"}`}></div>
+                        <span className={`text-sm font-medium ${selectedUser.is_active ? "text-green-600" : "text-red-600"}`}>
+                          {selectedUser.is_active ? "Active" : "Inactive"}
+                        </span>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-lg flex items-center gap-2">
+                      <Calendar className="h-5 w-5" />
+                      Account Timeline
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <div className="flex justify-between items-center py-2 border-b border-border">
+                      <span className="text-sm font-medium text-muted-foreground">Join Date</span>
+                      <span className="text-sm text-foreground">
+                        {new Date(selectedUser.created_at).toLocaleDateString("en-US", {
+                          year: "numeric",
+                          month: "long",
+                          day: "numeric",
+                          hour: "2-digit",
+                          minute: "2-digit"
+                        })}
+                      </span>
+                    </div>
+                    <div className="flex justify-between items-center py-2 border-b border-border">
+                      <span className="text-sm font-medium text-muted-foreground">Last Updated</span>
+                      <span className="text-sm text-foreground">
+                        {new Date(selectedUser.updated_at).toLocaleDateString("en-US", {
+                          year: "numeric",
+                          month: "long",
+                          day: "numeric",
+                          hour: "2-digit",
+                          minute: "2-digit"
+                        })}
+                      </span>
+                    </div>
+                    {selectedUser.approved_at && (
+                      <div className="flex justify-between items-center py-2 border-b border-border">
+                        <span className="text-sm font-medium text-muted-foreground">Approved Date</span>
+                        <span className="text-sm text-foreground">
+                          {new Date(selectedUser.approved_at).toLocaleDateString("en-US", {
+                            year: "numeric",
+                            month: "long",
+                            day: "numeric",
+                            hour: "2-digit",
+                            minute: "2-digit"
+                          })}
+                        </span>
+                      </div>
+                    )}
+                    {selectedUser.expiration_date && (
+                      <div className="flex justify-between items-center py-2 border-b border-border">
+                        <span className="text-sm font-medium text-muted-foreground">Expiration Date</span>
+                        <span className="text-sm text-foreground">
+                          {new Date(selectedUser.expiration_date).toLocaleDateString("en-US", {
+                            year: "numeric",
+                            month: "long",
+                            day: "numeric"
+                          })}
+                        </span>
+                      </div>
+                    )}
+                    {selectedUser.last_login && (
+                      <div className="flex justify-between items-center py-2">
+                        <span className="text-sm font-medium text-muted-foreground">Last Login</span>
+                        <span className="text-sm text-foreground">
+                          {new Date(selectedUser.last_login).toLocaleDateString("en-US", {
+                            year: "numeric",
+                            month: "long",
+                            day: "numeric",
+                            hour: "2-digit",
+                            minute: "2-digit"
+                          })}
+                        </span>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Device & Session Information */}
+              <Card>
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <Smartphone className="h-5 w-5" />
+                    Device & Session Information
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="flex justify-between items-center py-2 border-b border-border">
+                      <span className="text-sm font-medium text-muted-foreground">Active Sessions</span>
+                      <Badge variant="outline" className="text-sm">
+                        {selectedUser.device_count || 0} Devices
+                      </Badge>
+                    </div>
+                    <div className="flex justify-between items-center py-2 border-b border-border">
+                      <span className="text-sm font-medium text-muted-foreground">Approval Status</span>
+                      <Badge variant={selectedUser.is_approved ? "default" : "secondary"} className="text-sm">
+                        {selectedUser.is_approved ? "Approved" : "Pending"}
+                      </Badge>
+                    </div>
                   </div>
-                )}
-                <div className="flex justify-between items-center py-2 border-b border-border">
-                  <span className="text-sm font-medium text-muted-foreground">Join Date</span>
-                  <span className="text-sm text-foreground">
-                    {new Date(selectedUser.created_at).toLocaleDateString("bn-BD")}
-                  </span>
-                </div>
-                <div className="flex justify-between items-center py-2 border-b border-border">
-                  <span className="text-sm font-medium text-muted-foreground">Last Updated</span>
-                  <span className="text-sm text-foreground">
-                    {new Date(selectedUser.updated_at).toLocaleDateString("bn-BD")}
-                  </span>
-                </div>
+                  
+                  {selectedUser.user_agent && selectedUser.user_agent !== "Unknown" && (
+                    <div className="space-y-2">
+                      <span className="text-sm font-medium text-muted-foreground">User Agent</span>
+                      <div className="bg-muted p-3 rounded-lg">
+                        <code className="text-xs text-foreground break-all leading-relaxed block">
+                          {selectedUser.user_agent}
+                        </code>
+                      </div>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Action Buttons */}
+              <div className="flex flex-wrap gap-2 pt-4 border-t">
+                <Button
+                  onClick={() => {
+                    setIsViewDialogOpen(false)
+                    handleEditUser(selectedUser)
+                  }}
+                  variant="outline"
+                  size="sm"
+                  className="bg-indigo-50 border-indigo-200 text-indigo-700 hover:bg-indigo-100"
+                >
+                  <Edit className="h-4 w-4 mr-2" />
+                  Edit User
+                </Button>
+                <Button
+                  onClick={() => {
+                    setIsViewDialogOpen(false)
+                    handleViewDevices(selectedUser)
+                  }}
+                  variant="outline"
+                  size="sm"
+                  className="bg-green-50 border-green-200 text-green-700 hover:bg-green-100"
+                >
+                  <Smartphone className="h-4 w-4 mr-2" />
+                  View Devices
+                </Button>
+                <Button
+                  onClick={() => {
+                    setIsViewDialogOpen(false)
+                    handleSecuritySettings(selectedUser)
+                  }}
+                  variant="outline"
+                  size="sm"
+                  className="bg-purple-50 border-purple-200 text-purple-700 hover:bg-purple-100"
+                >
+                  <Shield className="h-4 w-4 mr-2" />
+                  Security Settings
+                </Button>
               </div>
             </div>
           )}

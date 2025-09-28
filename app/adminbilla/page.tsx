@@ -3,15 +3,22 @@
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { useAdminAuth } from "@/lib/admin-auth-context"
-import { Users, Settings, Shield, Activity, Clock, CheckCircle, Smartphone } from "lucide-react"
+import { Users, Settings, Shield, Activity, Clock, CheckCircle, Smartphone, RefreshCw, LogIn, AlertTriangle, Globe, UserPlus } from "lucide-react"
 import Link from "next/link"
 import { AdminUserService, type AdminUser } from "@/lib/admin-user-service"
+import { Button } from "@/components/ui/button"
+import { Switch } from "@/components/ui/switch"
+import { Badge } from "@/components/ui/badge"
 
 export default function AdminDashboard() {
   const { admin, isLoading } = useAdminAuth()
   const router = useRouter()
   const [users, setUsers] = useState<AdminUser[]>([])
   const [isLoadingData, setIsLoadingData] = useState(true)
+  const [autoRefresh, setAutoRefresh] = useState(true)
+  const [lastUpdated, setLastUpdated] = useState<Date>(new Date())
+  const [recentActivities, setRecentActivities] = useState<any[]>([])
+  const [isLoadingActivities, setIsLoadingActivities] = useState(true)
 
   useEffect(() => {
     if (!isLoading && !admin) {
@@ -19,11 +26,34 @@ export default function AdminDashboard() {
     }
   }, [admin, isLoading, router])
 
+  const loadRecentActivities = async () => {
+    try {
+      setIsLoadingActivities(true)
+      const response = await fetch("/api/admin/recent-activity", {
+        headers: {
+          Authorization: `Bearer ${admin?.id || "admin-token"}`,
+        },
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+        setRecentActivities(data.data || [])
+      } else {
+        console.error("Failed to load recent activities:", response.status)
+      }
+    } catch (error) {
+      console.error("Error loading recent activities:", error)
+    } finally {
+      setIsLoadingActivities(false)
+    }
+  }
+
   useEffect(() => {
     const loadDashboardData = async () => {
       try {
         const userData = await AdminUserService.getAllUsers()
         setUsers(userData)
+        setLastUpdated(new Date())
       } catch (error) {
         console.error("Error loading dashboard data:", error)
       } finally {
@@ -33,8 +63,30 @@ export default function AdminDashboard() {
 
     if (admin) {
       loadDashboardData()
+      loadRecentActivities()
     }
   }, [admin])
+
+  // Auto-refresh effect
+  useEffect(() => {
+    if (!autoRefresh || !admin) return
+
+    const interval = setInterval(() => {
+      const loadDashboardData = async () => {
+        try {
+          const userData = await AdminUserService.getAllUsers()
+          setUsers(userData)
+          setLastUpdated(new Date())
+        } catch (error) {
+          console.error("Error loading dashboard data:", error)
+        }
+      }
+      loadDashboardData()
+      loadRecentActivities()
+    }, 15000) // Refresh every 15 seconds
+
+    return () => clearInterval(interval)
+  }, [autoRefresh, admin])
 
   if (!admin) {
     return null // Will redirect to login
@@ -117,53 +169,6 @@ export default function AdminDashboard() {
     },
   ]
 
-  const getRecentActivity = () => {
-    const activities = []
-
-    const recentUsers = users
-      .filter((user) => {
-        const createdDate = new Date(user.created_at)
-        const daysDiff = (Date.now() - createdDate.getTime()) / (1000 * 60 * 60 * 24)
-        return daysDiff <= 7
-      })
-      .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
-      .slice(0, 3)
-
-    recentUsers.forEach((user) => {
-      const timeAgo = getTimeAgo(user.created_at)
-      activities.push({
-        action: "New User Registration",
-        user: user.full_name,
-        time: timeAgo,
-        type: "user",
-      })
-    })
-
-    const recentApprovals = users
-      .filter((user) => user.approved_at && user.current_status === "active")
-      .sort((a, b) => new Date(b.approved_at!).getTime() - new Date(a.approved_at!).getTime())
-      .slice(0, 2)
-
-    recentApprovals.forEach((user) => {
-      const timeAgo = getTimeAgo(user.approved_at!)
-      activities.push({
-        action: "User Approved",
-        user: user.full_name,
-        time: timeAgo,
-        type: "approval",
-      })
-    })
-
-    activities.push({
-      action: "System Status Check",
-      user: "System",
-      time: "10 minutes ago",
-      type: "system",
-    })
-
-    return activities.slice(0, 4)
-  }
-
   const getTimeAgo = (dateString: string) => {
     const date = new Date(dateString)
     const now = new Date()
@@ -179,7 +184,43 @@ export default function AdminDashboard() {
     return `${diffInDays} days ago`
   }
 
-  const recentActivities = getRecentActivity()
+  const getActivityIcon = (iconName: string) => {
+    switch (iconName) {
+      case "Users":
+        return <Users className="w-4 h-4 lg:w-5 lg:h-5" />
+      case "CheckCircle":
+        return <CheckCircle className="w-4 h-4 lg:w-5 lg:h-5" />
+      case "LogIn":
+        return <LogIn className="w-4 h-4 lg:w-5 lg:h-5" />
+      case "Shield":
+        return <Shield className="w-4 h-4 lg:w-5 lg:h-5" />
+      case "Settings":
+        return <Settings className="w-4 h-4 lg:w-5 lg:h-5" />
+      case "Globe":
+        return <Globe className="w-4 h-4 lg:w-5 lg:h-5" />
+      case "UserPlus":
+        return <UserPlus className="w-4 h-4 lg:w-5 lg:h-5" />
+      default:
+        return <Activity className="w-4 h-4 lg:w-5 lg:h-5" />
+    }
+  }
+
+  const getActivityColor = (color: string) => {
+    switch (color) {
+      case "blue":
+        return "bg-blue-500/10 text-blue-600 dark:text-blue-400"
+      case "green":
+        return "bg-green-500/10 text-green-600 dark:text-green-400"
+      case "purple":
+        return "bg-purple-500/10 text-purple-600 dark:text-purple-400"
+      case "orange":
+        return "bg-orange-500/10 text-orange-600 dark:text-orange-400"
+      case "red":
+        return "bg-red-500/10 text-red-600 dark:text-red-400"
+      default:
+        return "bg-gray-500/10 text-gray-600 dark:text-gray-400"
+    }
+  }
 
   return (
     <div className="space-y-4 lg:space-y-6">
@@ -188,10 +229,52 @@ export default function AdminDashboard() {
           <div>
             <h1 className="text-2xl lg:text-3xl font-bold text-foreground mb-2">Admin Dashboard</h1>
             <p className="text-muted-foreground text-sm lg:text-base">Welcome, {admin?.full_name}</p>
+            <div className="flex items-center gap-2 mt-1">
+              <Clock className="w-3 h-3 text-muted-foreground" />
+              <span className="text-xs text-muted-foreground">
+                Last updated: {lastUpdated.toLocaleTimeString()}
+              </span>
+              {autoRefresh && (
+                <Badge variant="secondary" className="text-xs">
+                  <Activity className="w-3 h-3 mr-1" />
+                  Live
+                </Badge>
+              )}
+            </div>
           </div>
-          <div className="flex items-center gap-2 text-xs lg:text-sm text-muted-foreground">
-            <Clock className="w-4 h-4" />
-            <span className="truncate">Last Updated: {new Date().toLocaleString("en-US")}</span>
+          <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2">
+              <Switch
+                checked={autoRefresh}
+                onCheckedChange={setAutoRefresh}
+                id="auto-refresh-dashboard"
+              />
+              <label htmlFor="auto-refresh-dashboard" className="text-sm text-muted-foreground">
+                Auto Refresh
+              </label>
+            </div>
+            <Button 
+              onClick={() => {
+                const loadDashboardData = async () => {
+                  try {
+                    setIsLoadingData(true)
+                    const userData = await AdminUserService.getAllUsers()
+                    setUsers(userData)
+                    setLastUpdated(new Date())
+                  } catch (error) {
+                    console.error("Error loading dashboard data:", error)
+                  } finally {
+                    setIsLoadingData(false)
+                  }
+                }
+                loadDashboardData()
+              }} 
+              variant="outline" 
+              size="sm"
+            >
+              <RefreshCw className="w-4 h-4 mr-2" />
+              Refresh
+            </Button>
           </div>
         </div>
       </div>
@@ -262,12 +345,31 @@ export default function AdminDashboard() {
       </div>
 
       <div className="glass-card p-4 lg:p-6 rounded-2xl">
-        <h2 className="text-lg lg:text-xl font-semibold text-foreground mb-4 lg:mb-6">Recent Activity</h2>
-        {isLoadingData ? (
+        <div className="flex items-center justify-between mb-4 lg:mb-6">
+          <h2 className="text-lg lg:text-xl font-semibold text-foreground">Recent Activity</h2>
+          <Button
+            onClick={loadRecentActivities}
+            variant="outline"
+            size="sm"
+            disabled={isLoadingActivities}
+            className="text-xs"
+          >
+            <RefreshCw className={`w-3 h-3 mr-2 ${isLoadingActivities ? "animate-spin" : ""}`} />
+            Refresh
+          </Button>
+        </div>
+        
+        {isLoadingActivities ? (
           <div className="space-y-3 lg:space-y-4">
-            {[1, 2, 3, 4].map((i) => (
+            {[1, 2, 3, 4, 5].map((i) => (
               <div key={i} className="animate-pulse">
-                <div className="h-12 bg-muted/50 rounded-xl"></div>
+                <div className="flex items-center space-x-3 lg:space-x-4 p-2 lg:p-3">
+                  <div className="w-8 h-8 lg:w-10 lg:h-10 rounded-full bg-muted/50"></div>
+                  <div className="flex-1 space-y-2">
+                    <div className="h-4 bg-muted/50 rounded w-3/4"></div>
+                    <div className="h-3 bg-muted/50 rounded w-1/2"></div>
+                  </div>
+                </div>
               </div>
             ))}
           </div>
@@ -276,42 +378,45 @@ export default function AdminDashboard() {
             {recentActivities.length > 0 ? (
               recentActivities.map((activity, index) => (
                 <div
-                  key={index}
-                  className="flex items-center space-x-3 lg:space-x-4 p-2 lg:p-3 rounded-xl hover:bg-muted/50 transition-colors"
+                  key={activity.id || index}
+                  className="flex items-center space-x-3 lg:space-x-4 p-3 lg:p-4 rounded-xl hover:bg-muted/50 transition-all duration-200 border border-transparent hover:border-border/50"
                 >
                   <div
-                    className={`w-8 h-8 lg:w-10 lg:h-10 rounded-full flex items-center justify-center ${
-                      activity.type === "user"
-                        ? "bg-blue-500/10 text-blue-600"
-                        : activity.type === "approval"
-                          ? "bg-green-500/10 text-green-600"
-                          : activity.type === "system"
-                            ? "bg-purple-500/10 text-purple-600"
-                            : "bg-red-500/10 text-red-600"
-                    }`}
+                    className={`w-10 h-10 lg:w-12 lg:h-12 rounded-full flex items-center justify-center ${getActivityColor(activity.color)}`}
                   >
-                    {activity.type === "user" ? (
-                      <Users className="w-4 h-4 lg:w-5 lg:h-5" />
-                    ) : activity.type === "approval" ? (
-                      <CheckCircle className="w-4 h-4 lg:w-5 lg:h-5" />
-                    ) : activity.type === "system" ? (
-                      <Settings className="w-4 h-4 lg:w-5 lg:h-5" />
-                    ) : (
-                      <Shield className="w-4 h-4 lg:w-5 lg:h-5" />
-                    )}
+                    {getActivityIcon(activity.icon)}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <div className="text-sm font-medium text-foreground truncate">{activity.action}</div>
-                    <div className="text-xs text-muted-foreground truncate">
-                      {activity.user} • {activity.time}
+                    <div className="flex items-center gap-2 mb-1">
+                      <div className="text-sm font-semibold text-foreground truncate">
+                        {activity.action}
+                      </div>
+                      <Badge 
+                        variant="outline" 
+                        className={`text-xs ${getActivityColor(activity.color).replace('bg-', 'bg-').replace('text-', 'text-')}`}
+                      >
+                        {activity.type}
+                      </Badge>
+                    </div>
+                    <div className="text-xs text-muted-foreground truncate mb-1">
+                      {activity.user} {activity.username && `(@${activity.username})`}
+                    </div>
+                    {activity.details && (
+                      <div className="text-xs text-muted-foreground/80 truncate">
+                        {activity.details}
+                      </div>
+                    )}
+                    <div className="text-xs text-muted-foreground/60 mt-1">
+                      {getTimeAgo(activity.time)}
                     </div>
                   </div>
                 </div>
               ))
             ) : (
-              <div className="text-center py-8">
-                <Activity className="w-12 h-12 text-muted-foreground mx-auto mb-2" />
-                <p className="text-muted-foreground">No recent activity</p>
+              <div className="text-center py-12">
+                <Activity className="w-16 h-16 text-muted-foreground/50 mx-auto mb-4" />
+                <h3 className="text-lg font-medium text-foreground mb-2">No Recent Activity</h3>
+                <p className="text-muted-foreground text-sm">Activity will appear here as users interact with the system</p>
               </div>
             )}
           </div>

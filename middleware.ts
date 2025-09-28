@@ -181,17 +181,11 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  // Handle root route
+  // Handle root route - always redirect to landing page
   if (pathname === "/") {
-    if (isAuthenticated) {
-      const response = NextResponse.redirect(new URL("/tool", request.url))
-      response.headers.set("x-redirect-count", (parseInt(redirectCount) + 1).toString())
-      return response
-    } else {
-      const response = NextResponse.redirect(new URL("/login", request.url))
-      response.headers.set("x-redirect-count", (parseInt(redirectCount) + 1).toString())
-      return response
-    }
+    const response = NextResponse.redirect(new URL("/landing", request.url))
+    response.headers.set("x-redirect-count", (parseInt(redirectCount) + 1).toString())
+    return response
   }
 
   return NextResponse.next()

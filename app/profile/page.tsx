@@ -191,7 +191,7 @@ export default function ProfilePage() {
                     <div>
                       <p className="text-sm font-medium text-muted-foreground">Member Since</p>
                       <p className="text-2xl font-bold text-purple-600">
-                        {formatDate(user?.created_at).split(' ')[1]}
+                        {user?.created_at ? new Date(user.created_at).toLocaleDateString("en-US", { month: "long", year: "numeric" }) : "Unknown"}
                       </p>
                     </div>
                     <div className="w-12 h-12 rounded-xl bg-purple-500/20 flex items-center justify-center">

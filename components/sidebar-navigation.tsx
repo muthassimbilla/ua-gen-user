@@ -3,12 +3,13 @@
 import { useState } from "react"
 import { usePathname } from "next/navigation"
 import Link from "next/link"
-import { Smartphone, Menu, X, Clock, Home, Code } from "lucide-react"
+import { Smartphone, Menu, X, Clock, Home, Code, MapPin } from "lucide-react"
 import ThemeToggle from "./theme-toggle"
 
 const navItems = [
   { name: "Home", href: "/tool", icon: Home, status: "Active" },
   { name: "User Agent Generator", href: "/tool/user-agent-generator", icon: Smartphone, status: "Active" },
+  { name: "Address Generator", href: "/tool/address-generator", icon: MapPin, status: "Active" },
 ]
 
 export default function SidebarNavigation() {
@@ -22,6 +23,12 @@ export default function SidebarNavigation() {
   const isActive = (href: string, name: string) => {
     if (name === "Home") {
       return pathname === "/tool"
+    }
+    if (name === "User Agent Generator") {
+      return pathname === "/tool/user-agent-generator"
+    }
+    if (name === "Address Generator") {
+      return pathname === "/tool/address-generator"
     }
     return pathname.startsWith(href)
   }

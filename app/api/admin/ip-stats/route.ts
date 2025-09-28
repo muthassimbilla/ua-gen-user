@@ -29,8 +29,19 @@ export async function GET(request: NextRequest) {
     // Get unique IPs count (same as total devices now)
     const uniqueIPCount = totalDevices
 
-    // Get users with multiple devices
-    const { data: multiDeviceUsers } = await supabase.rpc("get_users_with_multiple_devices")
+    // Get users with multiple devices (count users with more than 1 unique IP)
+    const { data: multiDeviceUsers } = await supabase
+      .from("user_ip_history")
+      .select("user_id")
+      .eq("is_current", true)
+      .not("user_id", "is", null)
+
+    const userIPCounts = multiDeviceUsers?.reduce((acc: any, item: any) => {
+      acc[item.user_id] = (acc[item.user_id] || 0) + 1
+      return acc
+    }, {}) || {}
+
+    const multiDeviceUsersCount = Object.values(userIPCounts).filter((count: any) => count > 1).length
 
     // Get recent IP changes (last 24 hours)
     const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()
@@ -73,7 +84,7 @@ export async function GET(request: NextRequest) {
           active_sessions: activeSessions || 0,
           total_devices: totalDevices || 0,
           unique_ips: uniqueIPCount || 0,
-          multi_device_users: multiDeviceUsers?.length || 0,
+          multi_device_users: multiDeviceUsersCount || 0,
         },
         recent_ip_changes: recentIPChanges || [],
         top_countries: topCountries,

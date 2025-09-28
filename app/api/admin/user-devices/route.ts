@@ -81,11 +81,23 @@ export async function GET(request: NextRequest) {
             user_id: userId,
             ip_address: ipAddress,
             country: ipRecord.country || "Unknown",
-            city: ipRecord.city || "Unknown"
+            city: ipRecord.city || "Unknown",
+            current_ips: [ipAddress],
+            ip_history: [{
+              ip_address: ipAddress,
+              country: ipRecord.country || "Unknown",
+              city: ipRecord.city || "Unknown",
+              isp: ipRecord.isp || "Unknown",
+              first_seen: ipRecord.created_at,
+              last_seen: ipRecord.updated_at || ipRecord.created_at,
+              is_current: true
+            }],
+            active_sessions: 1
           })
         } else {
           const device = deviceMap.get(ipAddress)
           device.total_logins += 1
+          device.active_sessions += 1
           
           // Update last_seen to the most recent IP record
           if (new Date(ipRecord.updated_at || ipRecord.created_at) > new Date(device.last_seen)) {

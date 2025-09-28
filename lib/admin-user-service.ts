@@ -14,6 +14,8 @@ export interface AdminUser {
   created_at: string
   updated_at: string
   device_count?: number
+  user_agent?: string
+  last_login?: string
 }
 
 export class AdminUserService {
@@ -33,10 +35,13 @@ export class AdminUserService {
         throw new Error("Failed to load user data")
       }
 
-      // Get unique IP counts instead of session counts for device counting
+      // Get unique IP counts and user agent data
       const usersWithDeviceCount = await Promise.all(
         users.map(async (user) => {
           let uniqueIPCount = 0
+          let userAgent = "Unknown"
+          let lastLogin = null
+
           try {
             // Count unique IP addresses for this user
             const { data: ipHistory, error: ipError } = await supabase
@@ -50,8 +55,24 @@ export class AdminUserService {
               const uniqueIPs = new Set(ipHistory.map(ip => ip.ip_address))
               uniqueIPCount = uniqueIPs.size
             }
-          } catch (ipError) {
-            console.error("[v0] Error getting IP count for user:", user.id, ipError)
+
+            // Get latest user agent and last login from active sessions
+            const { data: latestSession, error: sessionError } = await supabase
+              .from("user_sessions")
+              .select("user_agent, last_accessed, created_at")
+              .eq("user_id", user.id)
+              .eq("is_active", true)
+              .gt("expires_at", new Date().toISOString())
+              .order("last_accessed", { ascending: false })
+              .limit(1)
+              .single()
+
+            if (!sessionError && latestSession) {
+              userAgent = latestSession.user_agent || "Unknown"
+              lastLogin = latestSession.last_accessed || latestSession.created_at
+            }
+          } catch (error) {
+            console.error("[v0] Error getting additional data for user:", user.id, error)
           }
 
           return {
@@ -67,7 +88,9 @@ export class AdminUserService {
             current_status: this.calculateCurrentStatus(user),
             created_at: user.created_at,
             updated_at: user.updated_at || user.created_at,
-            device_count: uniqueIPCount, // Now shows unique IP count
+            device_count: uniqueIPCount,
+            user_agent: userAgent,
+            last_login: lastLogin,
           }
         }),
       )
