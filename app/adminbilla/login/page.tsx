@@ -199,7 +199,7 @@ export default function AdminLoginPage() {
 
         {/* Footer */}
         <div className="text-center mt-6">
-          <p className="text-sm text-muted-foreground">© 2025 User Agent Generator. All rights reserved.</p>
+          <p className="text-sm text-muted-foreground">© 2025 UGen Pro. All rights reserved.</p>
         </div>
       </div>
     </div>

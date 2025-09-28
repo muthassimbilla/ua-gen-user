@@ -149,9 +149,28 @@ export default function SignupPage() {
 
   return (
     <div className="h-screen flex items-center justify-center p-4 relative overflow-hidden bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
+      {/* Go Back Button - Fixed Position */}
+      <div className="absolute top-6 left-6 z-20">
+        <Link 
+          href="/landing" 
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-white/10 dark:bg-gray-800/20 backdrop-blur-sm border border-white/20 dark:border-gray-700/30 text-green-600 dark:text-green-400 hover:bg-white/20 dark:hover:bg-gray-800/30 hover:border-green-300/50 dark:hover:border-green-500/50 transition-all duration-200 hover:scale-105 shadow-sm hover:shadow-md group"
+        >
+          <svg className="w-4 h-4 transition-transform duration-200 group-hover:-translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+          </svg>
+          <span className="text-sm font-medium">Go back</span>
+        </Link>
+      </div>
+
       {/* Theme Toggle Button */}
       <div className="absolute top-6 right-6 z-20">
-        <AuthThemeToggle />
+        <div className="relative group">
+          <AuthThemeToggle />
+          {/* Tooltip */}
+          <div className="absolute -bottom-12 right-0 bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 text-xs px-2 py-1 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap">
+            Toggle theme
+          </div>
+        </div>
       </div>
 
       {/* Animated Background Elements */}
@@ -169,15 +188,6 @@ export default function SignupPage() {
       </div>
 
       <div className="w-full max-w-6xl relative z-10">
-        {/* Header with Home Link */}
-        <div className="mb-8 text-center lg:text-left">
-          <Link 
-            href="/landing" 
-            className="inline-flex items-center space-x-2 text-blue-600 hover:text-blue-700 transition-colors"
-          >
-            <span className="text-sm font-medium">← হোমে ফিরে যান</span>
-          </Link>
-        </div>
         
         <div className="grid lg:grid-cols-2 gap-8 items-center">
           {/* Left Side - Branding */}
@@ -185,7 +195,8 @@ export default function SignupPage() {
             <div className="space-y-4">
               <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center shadow-lg relative overflow-hidden">
                 <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent" />
-                <UserPlus className="w-10 h-10 text-white relative z-10" />
+                {/* U Letter Logo */}
+                <img src="/u-logo.svg" alt="UGen Pro Logo" className="w-full h-full relative z-10 object-contain" />
                 <div className="absolute -top-1 -right-1">
                   <Sparkles className="w-4 h-4 text-yellow-400 animate-pulse" />
                 </div>
@@ -415,7 +426,7 @@ export default function SignupPage() {
             {/* Footer */}
             <div className="text-center mt-4">
               <p className="text-xs text-muted-foreground/70">
-                © 2025 User Agent Generator. All rights reserved.
+                © 2025 UGen Pro. All rights reserved.
               </p>
             </div>
           </div>

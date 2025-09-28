@@ -10,7 +10,7 @@ import { useEffect, useState } from "react"
 
 const tools = [
   {
-    name: "Flo Hiv Tool",
+    name: "User Agent Generator",
     features: [
       "Generate realistic iOS & Android user agents",
       "Support for Instagram & Facebook apps",
@@ -139,29 +139,12 @@ export default function ToolsPage() {
           />
         </div>
 
-        {/* Header Section */}
-        <section className="relative z-10 px-6 pt-16 lg:pt-12 pb-8">
-          <div className="max-w-6xl mx-auto text-center">
-            <div className="mb-8">
-              {/* Welcome Animation */}
-              {showWelcome && (
-                <div className="mb-6 animate-fade-in-up">
-                  <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-green-500/10 to-emerald-500/10 border border-green-500/20 text-green-600 dark:text-green-400 text-sm font-medium">
-                    <Sparkles className="w-4 h-4 animate-pulse" />
-                    Welcome back! Ready to build something amazing?
-                    <Zap className="w-4 h-4" />
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-        </section>
 
         {/* Tools Grid */}
-        <section className="relative z-10 px-6 pb-20">
-          <div className="max-w-6xl mx-auto">
+        <section className="relative z-10 px-6 pt-20 pb-20">
+          <div className="max-w-7xl mx-auto">
             <div
-              className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 transition-all duration-1000 delay-400 ${isLoaded ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}
+              className={`grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 transition-all duration-1000 delay-400 ${isLoaded ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}
             >
               {tools.map((tool, index) => {
                 const IconComponent = tool.icon
@@ -176,17 +159,21 @@ export default function ToolsPage() {
                       animationFillMode: "both",
                     }}
                   >
-                    <Card className="h-full flex flex-col bg-white/70 dark:bg-slate-800/40 backdrop-blur-sm border-slate-200/50 dark:border-slate-700/30 hover:border-blue-300 dark:hover:border-blue-500/50 transition-all duration-500 hover:shadow-2xl hover:shadow-blue-500/10 dark:hover:shadow-blue-500/30 group overflow-hidden relative hover:-translate-y-2 dark:shadow-2xl dark:shadow-slate-900/20">
+                    <Card className="h-full flex flex-col bg-white/80 dark:bg-slate-800/60 backdrop-blur-xl border-white/50 dark:border-slate-700/40 hover:border-blue-300 dark:hover:border-blue-500/50 transition-all duration-500 hover:shadow-xl hover:shadow-blue-500/20 dark:hover:shadow-blue-500/40 group overflow-hidden relative hover:-translate-y-2 dark:shadow-xl dark:shadow-slate-900/30 rounded-2xl">
                       <div
-                        className={`absolute inset-0 bg-gradient-to-br ${tool.color} opacity-0 group-hover:opacity-5 transition-opacity duration-500`}
+                        className={`absolute inset-0 bg-gradient-to-br ${tool.color} opacity-0 group-hover:opacity-10 transition-opacity duration-500`}
                       />
 
-                      <CardHeader className="pb-6 relative">
-                        <div className="flex items-start justify-between mb-6">
+                      {/* Gradient Border Effect */}
+                      <div className={`absolute inset-0 bg-gradient-to-br ${tool.color} opacity-0 group-hover:opacity-20 transition-opacity duration-500 rounded-2xl blur-sm`} />
+
+                      <CardHeader className="pb-4 relative p-6">
+                        <div className="flex items-start justify-between mb-4">
                           <div
-                            className={`p-4 rounded-2xl bg-gradient-to-br ${tool.color} shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:scale-110 group-hover:rotate-3`}
+                            className={`p-3 rounded-2xl bg-gradient-to-br ${tool.color} shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:scale-105 group-hover:rotate-3 relative overflow-hidden`}
                           >
-                            <IconComponent className="w-7 h-7 text-white" />
+                            <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent" />
+                            <IconComponent className="w-6 h-6 text-white relative z-10" />
                           </div>
 
                           <div className="flex flex-col items-end gap-2">
@@ -194,34 +181,34 @@ export default function ToolsPage() {
                               variant={isActive ? "default" : "secondary"}
                               className={`${
                                 isActive
-                                  ? "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 border-green-300 dark:border-green-700"
-                                  : "bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 border-amber-300 dark:border-amber-700"
-                              } font-semibold px-3 py-1`}
+                                  ? "bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-400 border-green-300 dark:border-green-700"
+                                  : "bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-400 border-amber-300 dark:border-amber-700"
+                              } font-semibold px-3 py-1 text-xs rounded-full`}
                             >
                               {tool.status}
                             </Badge>
                             {tool.rating && (
-                              <div className="flex items-center gap-1 text-sm">
-                                <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                              <div className="flex items-center gap-1 text-xs bg-white/50 dark:bg-slate-800/50 px-2 py-1 rounded-full">
+                                <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
                                 <span className="font-semibold text-slate-900 dark:text-white">{tool.rating}</span>
                               </div>
                             )}
                           </div>
                         </div>
 
-                        <CardTitle className="text-2xl font-bold text-slate-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors duration-300 mb-2">
+                        <CardTitle className="text-xl font-bold text-slate-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors duration-300 mb-2">
                           {tool.name}
                         </CardTitle>
 
                         <div className="flex items-center gap-2 mb-4">
                           <Badge
                             variant="outline"
-                            className="text-xs font-medium border-blue-200 dark:border-blue-700 text-blue-700 dark:text-blue-400"
+                            className="text-xs font-medium border-blue-200 dark:border-blue-700 text-blue-700 dark:text-blue-400 px-3 py-1 rounded-full bg-blue-50 dark:bg-blue-900/30"
                           >
                             {tool.category}
                           </Badge>
                           {isActive && (
-                            <div className="flex items-center gap-1 text-xs text-slate-500 dark:text-slate-400">
+                            <div className="flex items-center gap-1 text-xs text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-700 px-2 py-1 rounded-full">
                               <Users className="w-3 h-3" />
                               {tool.users}
                             </div>
@@ -229,24 +216,24 @@ export default function ToolsPage() {
                         </div>
                       </CardHeader>
 
-                      <CardContent className="pt-0 relative flex-1 flex flex-col justify-between">
-                        <div className="mb-6">
+                      <CardContent className="pt-0 relative flex-1 flex flex-col justify-between p-6">
+                        <div className="mb-4">
                           <ul className="space-y-2">
                             {tool.features.map((feature, idx) => (
                               <li key={idx} className="flex items-start gap-2 text-slate-600 dark:text-slate-300">
-                                <div className="w-1.5 h-1.5 rounded-full bg-blue-500 mt-2 flex-shrink-0" />
-                                <span className="text-sm leading-relaxed">{feature}</span>
+                                <div className="w-1.5 h-1.5 rounded-full bg-gradient-to-r from-blue-500 to-indigo-500 mt-2 flex-shrink-0" />
+                                <span className="text-xs leading-relaxed font-medium">{feature}</span>
                               </li>
                             ))}
                           </ul>
                         </div>
 
                         <div className="space-y-4">
-                          <div className="flex flex-wrap gap-2">
+                          <div className="flex flex-wrap gap-1.5">
                             {tool.tags.map((tag) => (
                               <span
                                 key={tag}
-                                className="text-xs px-3 py-1 rounded-full bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-700 font-medium"
+                                className="text-xs px-3 py-1 rounded-full bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/40 dark:to-indigo-900/40 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-700 font-medium shadow-sm hover:shadow-md transition-shadow duration-200"
                               >
                                 {tag}
                               </span>
@@ -255,8 +242,9 @@ export default function ToolsPage() {
 
                           {isActive ? (
                             <Link href={tool.href}>
-                              <Button className="w-full bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white group-hover:scale-[1.02] transition-all duration-300 font-semibold py-3 rounded-xl shadow-lg hover:shadow-xl">
-                                <span className="flex items-center justify-center gap-2">
+                              <Button className="w-full bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white group-hover:scale-[1.02] transition-all duration-300 font-semibold py-3 rounded-xl shadow-lg hover:shadow-xl relative overflow-hidden">
+                                <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                                <span className="flex items-center justify-center gap-2 relative z-10">
                                   <Shield className="w-4 h-4" />
                                   Launch Tool
                                   <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-300" />
@@ -266,7 +254,7 @@ export default function ToolsPage() {
                           ) : (
                             <Button
                               disabled
-                              className="w-full py-3 rounded-xl font-semibold bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400"
+                              className="w-full py-3 rounded-xl font-semibold bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 shadow-md"
                             >
                               <Clock className="w-4 h-4 mr-2" />
                               Coming Soon

@@ -59,7 +59,8 @@ export default function SidebarNavigation() {
             <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-500 via-indigo-500 to-purple-600 flex items-center justify-center shadow-xl relative overflow-hidden group">
               <div className="absolute inset-0 bg-gradient-to-br from-white/30 to-transparent" />
               <div className="absolute inset-0 bg-gradient-to-br from-transparent via-white/10 to-white/20" />
-              <Code className="w-8 h-8 text-white relative z-10 group-hover:scale-110 transition-transform duration-300" />
+              {/* U Letter Logo */}
+              <img src="/u-logo.svg" alt="UGen Pro Logo" className="w-full h-full relative z-10 object-contain group-hover:scale-110 transition-transform duration-300" />
             </div>
               <div className="flex-1">
                 <span className="text-xl font-bold bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 bg-clip-text text-transparent">
