@@ -61,12 +61,12 @@ export default function SidebarNavigation() {
               <div className="absolute inset-0 bg-gradient-to-br from-transparent via-white/10 to-white/20" />
               <Code className="w-8 h-8 text-white relative z-10 group-hover:scale-110 transition-transform duration-300" />
             </div>
-            <div className="flex-1">
-              <span className="text-xl font-bold bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 bg-clip-text text-transparent">
-                Flo Hiv Tool
-              </span>
-              <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">Developer Suite</p>
-            </div>
+              <div className="flex-1">
+                <span className="text-xl font-bold bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 bg-clip-text text-transparent">
+                  UGen Pro
+                </span>
+                <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">Developer Suite</p>
+              </div>
           </div>
 
           {/* Navigation Items */}
@@ -100,7 +100,7 @@ export default function SidebarNavigation() {
                   <Link
                     key={item.name}
                     href={item.href}
-                    className={`flex items-center gap-4 px-4 py-4 rounded-2xl transition-all duration-300 font-medium group relative overflow-hidden ${
+                    className={`flex items-center gap-4 px-4 py-4 rounded-2xl transition-all duration-300 font-medium group relative overflow-hidden min-h-[60px] ${
                       itemIsActive
                         ? "bg-gradient-to-r from-blue-500/25 via-indigo-500/20 to-purple-500/25 text-blue-600 dark:text-blue-400 shadow-xl border border-blue-500/40 backdrop-blur-sm transform scale-[1.02]"
                         : "text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-white/15 dark:hover:bg-gray-800/40 backdrop-blur-sm hover:scale-[1.02] hover:shadow-lg"
@@ -126,8 +126,8 @@ export default function SidebarNavigation() {
                         }`}
                       />
                     </div>
-                    <div className="flex-1 relative z-10">
-                      <div className="text-sm font-semibold">{item.name}</div>
+                    <div className="flex-1 relative z-10 min-w-0">
+                      <div className="text-sm font-semibold whitespace-nowrap truncate">{item.name}</div>
                     </div>
                     {itemIsActive && (
                       <div className="w-3 h-3 rounded-full bg-gradient-to-r from-blue-500 to-indigo-500 animate-pulse relative z-10 shadow-lg" />
@@ -147,7 +147,7 @@ export default function SidebarNavigation() {
               <ThemeToggle />
             </div>
             <div className="text-center space-y-2">
-              <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">Flo Hiv Tool © 2025</p>
+              <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">UGen Pro © 2025</p>
               <p className="text-xs text-slate-400 dark:text-slate-500">Made with ❤️ for developers</p>
             </div>
           </div>

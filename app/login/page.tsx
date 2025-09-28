@@ -542,8 +542,12 @@ export default function LoginPage() {
                     {/* Immediate loading overlay */}
                     {loading && (
                       <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center">
-                        <div className="flex items-center gap-2 bg-black/20 backdrop-blur-sm px-4 py-2 rounded-lg">
-                          <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                        <div className="flex flex-col items-center gap-3 bg-black/20 backdrop-blur-sm px-6 py-4 rounded-xl">
+                          {/* Animated Spinner */}
+                          <div className="relative">
+                            <div className="w-8 h-8 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                            <div className="absolute inset-1 w-6 h-6 border-2 border-white/20 border-t-white/60 rounded-full animate-spin" style={{ animationDirection: 'reverse', animationDuration: '1.5s' }}></div>
+                          </div>
                           <span className="text-white font-semibold drop-shadow-lg">Signing in...</span>
                         </div>
                       </div>

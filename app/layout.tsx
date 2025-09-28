@@ -19,16 +19,16 @@ const inter = Inter({
 })
 
 export const metadata: Metadata = {
-  title: "Flo Hiv Tool - Professional User Agent Generator for iOS & Samsung",
+  title: "UGen Pro - Professional User Agent Generator for iOS & Samsung",
   description:
     "Generate thousands of unique, professional-grade iOS and Samsung user agents for Instagram and Facebook. Fast, secure, and reliable user agent generation tool.",
   keywords:
     "user agent generator, iOS user agent, Samsung user agent, Instagram user agent, Facebook user agent, mobile user agent",
-  authors: [{ name: "Flo Hiv Tool" }],
-  creator: "Flo Hiv Tool",
-  publisher: "Flo Hiv Tool",
+  authors: [{ name: "UGen Pro" }],
+  creator: "UGen Pro",
+  publisher: "UGen Pro",
   generator: "Next.js",
-  applicationName: "Flo Hiv Tool",
+  applicationName: "UGen Pro",
   referrer: "origin-when-cross-origin",
   robots: {
     index: true,
@@ -45,8 +45,8 @@ export const metadata: Metadata = {
     type: "website",
     locale: "en_US",
     url: "https://uagen-pro.vercel.app",
-    siteName: "Flo Hiv Tool",
-    title: "Flo Hiv Tool - Professional User Agent Generator",
+    siteName: "UGen Pro",
+    title: "UGen Pro - Professional User Agent Generator",
     description:
       "Generate thousands of unique, professional-grade iOS and Samsung user agents for Instagram and Facebook. Fast, secure, and reliable user agent generation tool.",
     images: [
@@ -54,24 +54,24 @@ export const metadata: Metadata = {
         url: "/og-image.png",
         width: 1200,
         height: 630,
-        alt: "Flo Hiv Tool - User Agent Generator",
+        alt: "UGen Pro - User Agent Generator",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Flo Hiv Tool - Professional User Agent Generator",
+    title: "UGen Pro - Professional User Agent Generator",
     description:
       "Generate thousands of unique, professional-grade iOS and Samsung user agents for Instagram and Facebook.",
     images: ["/og-image.png"],
-    creator: "@flohivtool",
+    creator: "@ugenpro",
   },
   other: {
-    "application-name": "Flo Hiv Tool",
+    "application-name": "UGen Pro",
     "mobile-web-app-capable": "yes",
     "apple-mobile-web-app-capable": "yes",
     "apple-mobile-web-app-status-bar-style": "default",
-    "apple-mobile-web-app-title": "Flo Hiv Tool",
+    "apple-mobile-web-app-title": "UGen Pro",
     "format-detection": "telephone=no",
   },
 }
@@ -97,8 +97,8 @@ export default function RootLayout({
       <body className={inter.className}>
         <ThemeProvider
           attribute="class"
-          defaultTheme="system"
-          enableSystem
+          defaultTheme="light"
+          enableSystem={false}
           disableTransitionOnChange={true}
           storageKey="devtools-pro-theme"
         >

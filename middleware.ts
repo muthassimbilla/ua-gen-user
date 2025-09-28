@@ -27,10 +27,10 @@ async function handleSessionValidation(request: NextRequest, sessionToken: strin
       currentIP = clientIP
     }
 
-    // Get session with IP info
+    // Get session with IP info - allow multiple concurrent sessions
     const { data: session, error } = await supabase
       .from("user_sessions")
-      .select("id, user_id, ip_address, user_agent, is_active")
+      .select("id, user_id, ip_address, user_agent, is_active, last_accessed")
       .eq("session_token", sessionToken)
       .eq("is_active", true)
       .gt("expires_at", new Date().toISOString())
@@ -40,30 +40,25 @@ async function handleSessionValidation(request: NextRequest, sessionToken: strin
       return false // Session invalid
     }
 
-    // Track IP and User Agent changes for analytics (no logout enforcement)
+    // Update last accessed time without IP/UA enforcement for multi-tab support
     const userAgent = request.headers.get("user-agent") || "Unknown"
-    const needsUpdate = (session.ip_address && currentIP !== session.ip_address && currentIP !== "unknown") ||
-                       (session.user_agent && session.user_agent !== userAgent)
+    const now = new Date().toISOString()
     
-    if (needsUpdate) {
-      console.log(`[v0] Session data changed for user ${session.user_id}:`)
-      if (session.ip_address && currentIP !== session.ip_address) {
-        console.log(`  IP: ${session.ip_address} -> ${currentIP}`)
-      }
-      if (session.user_agent && session.user_agent !== userAgent) {
-        console.log(`  User Agent: ${session.user_agent} -> ${userAgent}`)
-      }
-      
-      // Update session data for tracking purposes
+    // Only update if last access was more than 30 seconds ago to avoid excessive DB calls
+    const lastAccess = new Date(session.last_accessed || 0)
+    const timeDiff = Date.now() - lastAccess.getTime()
+    
+    if (timeDiff > 30000) { // 30 seconds
       try {
         const updateData: any = {
-          last_accessed: new Date().toISOString()
+          last_accessed: now
         }
         
-        if (currentIP !== "unknown") {
+        // Only update IP/UA if they're significantly different (for analytics)
+        if (currentIP !== "unknown" && (!session.ip_address || currentIP !== session.ip_address)) {
           updateData.ip_address = currentIP
         }
-        if (userAgent !== "Unknown") {
+        if (userAgent !== "Unknown" && (!session.user_agent || session.user_agent !== userAgent)) {
           updateData.user_agent = userAgent
         }
         
@@ -71,7 +66,7 @@ async function handleSessionValidation(request: NextRequest, sessionToken: strin
           .from("user_sessions")
           .update(updateData)
           .eq("id", session.id)
-        console.log(`[v0] Updated session data for tracking`)
+        console.log(`[v0] Updated session access time`)
       } catch (updateError) {
         console.warn("[v0] Failed to update session data:", updateError)
       }
@@ -79,7 +74,7 @@ async function handleSessionValidation(request: NextRequest, sessionToken: strin
 
     return true // Session still valid
   } catch (error) {
-    console.error("[v0] IP check error:", error)
+    console.error("[v0] Session validation error:", error)
     return false
   }
 }
@@ -130,9 +125,9 @@ export async function middleware(request: NextRequest) {
         response.cookies.set("session_token", "", {
           path: "/",
           expires: new Date(0),
-          domain: request.nextUrl.hostname,
-          secure: true,
-          sameSite: "strict"
+          domain: request.nextUrl.hostname === 'localhost' ? 'localhost' : `.${request.nextUrl.hostname}`,
+          secure: process.env.NODE_ENV === 'production',
+          sameSite: "lax"
         })
         // Add redirect count header
         response.headers.set("x-redirect-count", (parseInt(redirectCount) + 1).toString())

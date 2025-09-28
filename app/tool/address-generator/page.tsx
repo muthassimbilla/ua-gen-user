@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Loader2, MapPin, Navigation, RotateCcw, Copy, Check } from "lucide-react";
+import { Loader2, MapPin, Navigation, RotateCcw, Copy, Check, CheckCircle } from "lucide-react";
 import { toast } from "sonner";
 
 interface AddressData {
@@ -28,6 +28,7 @@ export default function AddressGeneratorPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [activeTab, setActiveTab] = useState("ip");
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
+  const [copiedField, setCopiedField] = useState<string | null>(null);
 
   // Paste from clipboard function
   const pasteFromClipboard = async () => {
@@ -156,7 +157,9 @@ export default function AddressGeneratorPage() {
   const copyAddressPart = async (part: string, partName: string) => {
     try {
       await navigator.clipboard.writeText(part);
+      setCopiedField(partName);
       toast.success(`${partName} copied to clipboard`);
+      setTimeout(() => setCopiedField(null), 2000);
     } catch (err) {
       toast.error("Failed to copy");
     }
@@ -180,8 +183,8 @@ export default function AddressGeneratorPage() {
       const stateZip = parts[2];
       const country = parts[3];
       
-      // Extract state and ZIP from "NY 10001" format
-      const stateZipMatch = stateZip.match(/^([A-Z]{2})\s+(\d{5}(?:-\d{4})?)$/);
+      // Extract state and ZIP from "NY 10001" or "Ohio 43402" format
+      const stateZipMatch = stateZip.match(/^([A-Za-z]+)\s+(\d{5}(?:-\d{4})?)$/);
       const state = stateZipMatch ? stateZipMatch[1] : stateZip;
       const zip = stateZipMatch ? stateZipMatch[2] : '';
       
@@ -194,14 +197,36 @@ export default function AddressGeneratorPage() {
         fullAddress: address
       };
     } else if (parts.length >= 3) {
-      // Format: "123 Main St, New York, NY 10001"
+      // Format: "123 Main St, New York, NY 10001" or "924 Ridge Street, Bowling Green, Ohio 43402"
       const street = parts[0];
       const city = parts[1];
       const stateZip = parts[2];
       
-      const stateZipMatch = stateZip.match(/^([A-Z]{2})\s+(\d{5}(?:-\d{4})?)$/);
-      const state = stateZipMatch ? stateZipMatch[1] : stateZip;
-      const zip = stateZipMatch ? stateZipMatch[2] : '';
+      // Try different patterns for state and ZIP
+      let state = '';
+      let zip = '';
+      
+      // Pattern 1: "NY 10001" or "Ohio 43402" format (state name + ZIP)
+      const stateZipMatch = stateZip.match(/^([A-Za-z]+)\s+(\d{5}(?:-\d{4})?)$/);
+      if (stateZipMatch) {
+        state = stateZipMatch[1];
+        zip = stateZipMatch[2];
+      } else {
+        // Pattern 2: Just state or just ZIP
+        if (/^\d{5}(?:-\d{4})?$/.test(stateZip)) {
+          // It's just a ZIP code
+          zip = stateZip;
+          state = '';
+        } else if (/^[A-Za-z]+$/.test(stateZip)) {
+          // It's just a state name
+          state = stateZip;
+          zip = '';
+        } else {
+          // Fallback - treat as state
+          state = stateZip;
+          zip = '';
+        }
+      }
       
       return {
         street,
@@ -211,7 +236,35 @@ export default function AddressGeneratorPage() {
         country: 'United States',
         fullAddress: address
       };
+    } else if (parts.length === 2) {
+      // Format: "123 Main St, New York" or "New York, NY 10001"
+      const first = parts[0];
+      const second = parts[1];
+      
+      // Check if second part is state+zip
+      const stateZipMatch = second.match(/^([A-Za-z]+)\s+(\d{5}(?:-\d{4})?)$/);
+      if (stateZipMatch) {
+        return {
+          street: first,
+          city: '',
+          state: stateZipMatch[1],
+          zip: stateZipMatch[2],
+          country: 'United States',
+          fullAddress: address
+        };
+      } else {
+        // Treat as street and city
+        return {
+          street: first,
+          city: second,
+          state: '',
+          zip: '',
+          country: 'United States',
+          fullAddress: address
+        };
+      }
     }
+    
     return {
       street: address,
       city: '',
@@ -229,18 +282,9 @@ export default function AddressGeneratorPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
       <div className="container mx-auto px-4 py-8">
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold mb-2 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-            Address Generator
-          </h1>
-          <p className="text-muted-foreground text-lg">
-            Generate real addresses from IP addresses or ZIP codes
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 xl:grid-cols-5 gap-6 lg:gap-8 min-h-[600px]">
-          {/* Left Side - Input Section (2/5) */}
-          <div className="xl:col-span-2 space-y-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8 min-h-[600px]">
+          {/* Left Side - Input Section */}
+          <div className="space-y-6">
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
               <TabsList className="grid w-full grid-cols-2 mb-6">
                 <TabsTrigger value="ip" className="text-sm">IP → Address</TabsTrigger>
@@ -351,11 +395,11 @@ export default function AddressGeneratorPage() {
             </Tabs>
           </div>
 
-          {/* Right Side - Output Section (3/5) */}
-          <div className="xl:col-span-3">
+          {/* Right Side - Output Section */}
+          <div className="space-y-6">
             {addressData.addresses.length > 0 && currentAddress ? (
-              <Card className="h-full">
-                <CardHeader className="pb-4">
+              <Card className="h-full flex flex-col">
+                <CardHeader className="pb-4 flex-shrink-0">
                   <div className="flex items-center justify-between">
                     <div>
                       <CardTitle className="flex items-center gap-2 text-xl">
@@ -371,7 +415,7 @@ export default function AddressGeneratorPage() {
                     </Badge>
                   </div>
                 </CardHeader>
-                <CardContent className="space-y-6 h-full">
+                <CardContent className="space-y-4 flex-1 overflow-y-auto">
                   {/* Address Parts */}
                   <div className="space-y-4">
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -382,12 +426,24 @@ export default function AddressGeneratorPage() {
                             variant="ghost"
                             size="sm"
                             onClick={() => copyAddressPart(currentAddress.street, "Street Address")}
-                            className="h-6 w-6 p-0"
+                            className={`h-8 w-8 p-0 transition-all duration-300 ${
+                              copiedField === "Street Address" 
+                                ? "bg-green-100 dark:bg-green-800/30 scale-110" 
+                                : "hover:bg-blue-100 dark:hover:bg-blue-800/30"
+                            }`}
                           >
-                            <Copy className="h-3 w-3" />
+                            {copiedField === "Street Address" ? (
+                              <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400" />
+                            ) : (
+                              <Copy className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                            )}
                           </Button>
                         </div>
-                        <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                        <div className={`p-4 rounded-lg border transition-all duration-300 ${
+                          copiedField === "Street Address"
+                            ? "bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800 ring-2 ring-green-300 dark:ring-green-700"
+                            : "bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800 hover:bg-blue-100/50 dark:hover:bg-blue-900/30"
+                        }`}>
                           <p className="text-blue-900 dark:text-blue-100 font-medium">
                             {currentAddress.street}
                           </p>
@@ -401,12 +457,24 @@ export default function AddressGeneratorPage() {
                             variant="ghost"
                             size="sm"
                             onClick={() => copyAddressPart(currentAddress.city, "City")}
-                            className="h-6 w-6 p-0"
+                            className={`h-8 w-8 p-0 transition-all duration-300 ${
+                              copiedField === "City" 
+                                ? "bg-green-100 dark:bg-green-800/30 scale-110" 
+                                : "hover:bg-green-100 dark:hover:bg-green-800/30"
+                            }`}
                           >
-                            <Copy className="h-3 w-3" />
+                            {copiedField === "City" ? (
+                              <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400" />
+                            ) : (
+                              <Copy className="h-4 w-4 text-green-600 dark:text-green-400" />
+                            )}
                           </Button>
                         </div>
-                        <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
+                        <div className={`p-4 rounded-lg border transition-all duration-300 ${
+                          copiedField === "City"
+                            ? "bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800 ring-2 ring-green-300 dark:ring-green-700"
+                            : "bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800 hover:bg-green-100/50 dark:hover:bg-green-900/30"
+                        }`}>
                           <p className="text-green-900 dark:text-green-100 font-medium">
                             {currentAddress.city || "N/A"}
                           </p>
@@ -420,12 +488,24 @@ export default function AddressGeneratorPage() {
                             variant="ghost"
                             size="sm"
                             onClick={() => copyAddressPart(currentAddress.state, "State")}
-                            className="h-6 w-6 p-0"
+                            className={`h-8 w-8 p-0 transition-all duration-300 ${
+                              copiedField === "State" 
+                                ? "bg-green-100 dark:bg-green-800/30 scale-110" 
+                                : "hover:bg-purple-100 dark:hover:bg-purple-800/30"
+                            }`}
                           >
-                            <Copy className="h-3 w-3" />
+                            {copiedField === "State" ? (
+                              <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400" />
+                            ) : (
+                              <Copy className="h-4 w-4 text-purple-600 dark:text-purple-400" />
+                            )}
                           </Button>
                         </div>
-                        <div className="p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg border border-purple-200 dark:border-purple-800">
+                        <div className={`p-4 rounded-lg border transition-all duration-300 ${
+                          copiedField === "State"
+                            ? "bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800 ring-2 ring-green-300 dark:ring-green-700"
+                            : "bg-purple-50 dark:bg-purple-900/20 border-purple-200 dark:border-purple-800 hover:bg-purple-100/50 dark:hover:bg-purple-900/30"
+                        }`}>
                           <p className="text-purple-900 dark:text-purple-100 font-medium">
                             {currentAddress.state || "N/A"}
                           </p>
@@ -442,12 +522,24 @@ export default function AddressGeneratorPage() {
                             variant="ghost"
                             size="sm"
                             onClick={() => copyAddressPart(currentAddress.zip, "ZIP Code")}
-                            className="h-6 w-6 p-0"
+                            className={`h-8 w-8 p-0 transition-all duration-300 ${
+                              copiedField === "ZIP Code" 
+                                ? "bg-green-100 dark:bg-green-800/30 scale-110" 
+                                : "hover:bg-orange-100 dark:hover:bg-orange-800/30"
+                            }`}
                           >
-                            <Copy className="h-3 w-3" />
+                            {copiedField === "ZIP Code" ? (
+                              <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400" />
+                            ) : (
+                              <Copy className="h-4 w-4 text-orange-600 dark:text-orange-400" />
+                            )}
                           </Button>
                         </div>
-                        <div className="p-4 bg-orange-50 dark:bg-orange-900/20 rounded-lg border border-orange-200 dark:border-orange-800">
+                        <div className={`p-4 rounded-lg border transition-all duration-300 ${
+                          copiedField === "ZIP Code"
+                            ? "bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800 ring-2 ring-green-300 dark:ring-green-700"
+                            : "bg-orange-50 dark:bg-orange-900/20 border-orange-200 dark:border-orange-800 hover:bg-orange-100/50 dark:hover:bg-orange-900/30"
+                        }`}>
                           <p className="text-orange-900 dark:text-orange-100 font-medium">
                             {currentAddress.zip || "N/A"}
                           </p>
@@ -461,12 +553,24 @@ export default function AddressGeneratorPage() {
                             variant="ghost"
                             size="sm"
                             onClick={() => copyAddressPart(currentAddress.country, "Country")}
-                            className="h-6 w-6 p-0"
+                            className={`h-8 w-8 p-0 transition-all duration-300 ${
+                              copiedField === "Country" 
+                                ? "bg-green-100 dark:bg-green-800/30 scale-110" 
+                                : "hover:bg-cyan-100 dark:hover:bg-cyan-800/30"
+                            }`}
                           >
-                            <Copy className="h-3 w-3" />
+                            {copiedField === "Country" ? (
+                              <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400" />
+                            ) : (
+                              <Copy className="h-4 w-4 text-cyan-600 dark:text-cyan-400" />
+                            )}
                           </Button>
                         </div>
-                        <div className="p-4 bg-cyan-50 dark:bg-cyan-900/20 rounded-lg border border-cyan-200 dark:border-cyan-800">
+                        <div className={`p-4 rounded-lg border transition-all duration-300 ${
+                          copiedField === "Country"
+                            ? "bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800 ring-2 ring-green-300 dark:ring-green-700"
+                            : "bg-cyan-50 dark:bg-cyan-900/20 border-cyan-200 dark:border-cyan-800 hover:bg-cyan-100/50 dark:hover:bg-cyan-900/30"
+                        }`}>
                           <p className="text-cyan-900 dark:text-cyan-100 font-medium">
                             {currentAddress.country || "N/A"}
                           </p>
@@ -482,12 +586,24 @@ export default function AddressGeneratorPage() {
                           variant="ghost"
                           size="sm"
                           onClick={() => copyAddressPart(currentAddress.fullAddress, "Full Address")}
-                          className="h-6 w-6 p-0"
+                          className={`h-8 w-8 p-0 transition-all duration-300 ${
+                            copiedField === "Full Address" 
+                              ? "bg-green-100 dark:bg-green-800/30 scale-110" 
+                              : "hover:bg-orange-100 dark:hover:bg-orange-800/30"
+                          }`}
                         >
-                          <Copy className="h-3 w-3" />
+                          {copiedField === "Full Address" ? (
+                            <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400" />
+                          ) : (
+                            <Copy className="h-4 w-4 text-orange-600 dark:text-orange-400" />
+                          )}
                         </Button>
                       </div>
-                      <Alert className="border-2 border-orange-200 dark:border-orange-800 bg-orange-50 dark:bg-orange-900/20">
+                      <Alert className={`border-2 transition-all duration-300 ${
+                        copiedField === "Full Address"
+                          ? "border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-900/20 ring-2 ring-green-300 dark:ring-green-700"
+                          : "border-orange-200 dark:border-orange-800 bg-orange-50 dark:bg-orange-900/20 hover:bg-orange-100/50 dark:hover:bg-orange-900/30"
+                      }`}>
                         <MapPin className="h-5 w-5 text-orange-600" />
                         <AlertDescription className="text-lg font-medium text-orange-900 dark:text-orange-100">
                           {currentAddress.fullAddress}
@@ -496,14 +612,14 @@ export default function AddressGeneratorPage() {
                     </div>
                   </div>
 
-                  {/* Navigation and Actions */}
-                  <div className="flex flex-col sm:flex-row items-center justify-between pt-4 border-t gap-4">
-                    <div className="flex gap-2 w-full sm:w-auto">
+                  {/* Navigation - Fixed at bottom */}
+                  <div className="flex-shrink-0 pt-4 border-t">
+                    <div className="flex gap-2 w-full justify-center">
                       <Button
                         variant="outline"
                         onClick={showPrevious}
                         disabled={addressData.currentIndex === 0}
-                        className="flex items-center gap-2 flex-1 sm:flex-none"
+                        className="flex items-center gap-2 flex-1 sm:flex-none hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
                       >
                         <Navigation className="h-4 w-4 rotate-180" />
                         <span className="hidden sm:inline">Previous</span>
@@ -513,32 +629,19 @@ export default function AddressGeneratorPage() {
                         variant="outline"
                         onClick={showNext}
                         disabled={addressData.currentIndex === addressData.addresses.length - 1}
-                        className="flex items-center gap-2 flex-1 sm:flex-none"
+                        className="flex items-center gap-2 flex-1 sm:flex-none hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
                       >
                         <span className="hidden sm:inline">Next</span>
                         <span className="sm:hidden">Next</span>
                         <Navigation className="h-4 w-4" />
                       </Button>
                     </div>
-
-                    <Button
-                      variant="default"
-                      onClick={() => copyAddress(currentAddress.fullAddress, addressData.currentIndex)}
-                      className="flex items-center gap-2 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 w-full sm:w-auto"
-                    >
-                      {copiedIndex === addressData.currentIndex ? (
-                        <Check className="h-4 w-4" />
-                      ) : (
-                        <Copy className="h-4 w-4" />
-                      )}
-                      {copiedIndex === addressData.currentIndex ? "Copied!" : "Copy All"}
-                    </Button>
                   </div>
                 </CardContent>
               </Card>
             ) : (
-              <Card className="h-full">
-                <CardContent className="flex flex-col items-center justify-center h-full text-center py-12">
+              <Card className="h-full flex flex-col">
+                <CardContent className="flex flex-col items-center justify-center flex-1 text-center py-12">
                   <div className="w-24 h-24 bg-gradient-to-br from-blue-100 to-purple-100 dark:from-blue-900/30 dark:to-purple-900/30 rounded-full flex items-center justify-center mb-6">
                     <MapPin className="h-12 w-12 text-blue-500" />
                   </div>

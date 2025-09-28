@@ -24,11 +24,36 @@ const ProgressModal = dynamic(() => import("@/components/ProgressModal"), {
 const LoadingSkeleton = memo(() => (
   <Card className="bg-white/60 dark:bg-slate-800/60 backdrop-blur-xl border border-white/30 dark:border-slate-700/30 shadow-2xl rounded-2xl">
     <CardContent className="p-8 text-center">
-      <div className="relative">
-        <div className="absolute inset-0 bg-gradient-to-r from-indigo-400/20 to-blue-400/20 rounded-full blur-xl"></div>
-        <Loader2 className="w-8 h-8 animate-spin text-indigo-600 dark:text-indigo-400 mx-auto mb-4 relative z-10" />
+      <div className="relative mb-6">
+        {/* Outer Ring */}
+        <div className="w-16 h-16 border-4 border-indigo-200 dark:border-indigo-800 rounded-full animate-spin border-t-indigo-600 dark:border-t-indigo-400 mx-auto"></div>
+        
+        {/* Inner Ring */}
+        <div className="absolute inset-2 w-12 h-12 border-4 border-blue-200 dark:border-blue-800 rounded-full animate-spin border-t-blue-600 dark:border-t-blue-400 mx-auto" style={{ animationDirection: 'reverse', animationDuration: '1.5s' }}></div>
+        
+        {/* Center Icon */}
+        <div className="absolute inset-0 flex items-center justify-center">
+          <Smartphone className="w-6 h-6 text-indigo-600 dark:text-indigo-400 animate-pulse" />
+        </div>
+        
+        {/* Sparkle Effects */}
+        <div className="absolute -top-2 -right-2">
+          <div className="w-3 h-3 bg-yellow-400 rounded-full animate-pulse" style={{ animationDelay: '0.5s' }}></div>
+        </div>
+        <div className="absolute -bottom-2 -left-2">
+          <div className="w-2 h-2 bg-pink-400 rounded-full animate-pulse" style={{ animationDelay: '1s' }}></div>
+        </div>
       </div>
-      <p className="text-slate-600 dark:text-slate-300 font-medium">Loading data...</p>
+      
+      <h3 className="text-lg font-semibold text-slate-700 dark:text-slate-300 mb-2">Loading User Agents</h3>
+      <p className="text-slate-500 dark:text-slate-400 mb-4">Generating unique user agents...</p>
+      
+      {/* Animated Dots */}
+      <div className="flex items-center justify-center space-x-1">
+        <div className="w-2 h-2 bg-indigo-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
+        <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
+        <div className="w-2 h-2 bg-purple-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+      </div>
     </CardContent>
   </Card>
 ))
