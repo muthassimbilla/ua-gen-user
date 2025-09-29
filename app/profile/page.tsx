@@ -1,5 +1,8 @@
 "use client"
 
+// Force dynamic rendering to prevent prerender errors
+export const dynamic = 'force-dynamic'
+
 import { useAuth } from "@/lib/auth-context"
 import { ProtectedRoute } from "@/components/protected-route"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"

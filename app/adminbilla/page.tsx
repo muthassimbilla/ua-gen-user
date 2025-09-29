@@ -1,5 +1,8 @@
 "use client"
 
+// Force dynamic rendering to prevent prerender errors
+export const dynamic = 'force-dynamic'
+
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { useAdminAuth } from "@/lib/admin-auth-context"
