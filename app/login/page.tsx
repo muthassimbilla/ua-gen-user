@@ -2,7 +2,11 @@
 
 import type React from "react"
 
+// Force dynamic rendering to prevent prerender errors
+export const dynamic = 'force-dynamic'
+
 import { useState, useEffect } from "react"
+import ClientOnly from "@/components/client-only"
 import { useRouter, useSearchParams } from "next/navigation"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
@@ -278,7 +282,15 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="h-screen flex items-center justify-center p-4 relative overflow-hidden bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 page-enter">
+    <ClientOnly fallback={
+      <div className="h-screen flex items-center justify-center p-4 relative overflow-hidden bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
+        <div className="flex flex-col items-center space-y-6">
+          <div className="w-20 h-20 border-4 border-blue-200 dark:border-blue-800 rounded-full animate-spin border-t-blue-600 dark:border-t-blue-400"></div>
+          <h2 className="text-2xl font-bold text-slate-700 dark:text-slate-300">Loading Login...</h2>
+        </div>
+      </div>
+    }>
+      <div className="h-screen flex items-center justify-center p-4 relative overflow-hidden bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 page-enter">
       {/* Go Back Button - Fixed Position */}
       <div className="absolute top-6 left-6 z-20">
         <Link 
@@ -584,5 +596,6 @@ export default function LoginPage() {
         </div>
       </div>
     </div>
+    </ClientOnly>
   )
 }

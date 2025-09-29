@@ -27,7 +27,7 @@ export function StatusNotificationProvider({ children }: { children: ReactNode }
 
   const handleLogout = useCallback(() => {
     // Logout and redirect to block page
-    if (currentStatus) {
+    if (currentStatus && typeof window !== "undefined") {
       const params = new URLSearchParams({
         type: currentStatus.status,
         message: currentStatus.message,
