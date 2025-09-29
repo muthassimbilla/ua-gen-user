@@ -2,9 +2,6 @@
 
 import type React from "react"
 
-// Force dynamic rendering to prevent prerender errors
-export const dynamic = 'force-dynamic'
-
 import { useState, useEffect } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import Link from "next/link"

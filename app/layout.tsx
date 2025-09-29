@@ -4,12 +4,7 @@ import { Inter } from "next/font/google"
 import "./globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
 import { Toaster } from "@/components/ui/toaster"
-import PageTransition from "@/components/page-transition"
-import AutoUpdateProvider from "@/components/auto-update-provider"
-import { AuthProvider } from "@/lib/auth-context"
-import ConditionalLayout from "@/components/conditional-layout"
-import { StatusNotificationProvider } from "@/components/status-notification-provider"
-import { NetworkProvider } from "@/contexts/network-context"
+import ClientProviders from "@/components/client-providers"
 
 const inter = Inter({
   subsets: ["latin"],
@@ -102,18 +97,10 @@ export default function RootLayout({
           disableTransitionOnChange={true}
           storageKey="devtools-pro-theme"
         >
-          <NetworkProvider>
-            <StatusNotificationProvider>
-              <AuthProvider>
-                <AutoUpdateProvider>
-                  <ConditionalLayout>
-                    <PageTransition>{children}</PageTransition>
-                  </ConditionalLayout>
-                  <Toaster />
-                </AutoUpdateProvider>
-              </AuthProvider>
-            </StatusNotificationProvider>
-          </NetworkProvider>
+          <ClientProviders>
+            {children}
+          </ClientProviders>
+          <Toaster />
         </ThemeProvider>
       </body>
     </html>

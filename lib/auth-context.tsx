@@ -30,32 +30,41 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const getSessionToken = (): string | null => {
     if (typeof window === "undefined") return null
-    return localStorage.getItem("session_token")
+    try {
+      return localStorage.getItem("session_token")
+    } catch (error) {
+      console.warn("[v0] Error accessing localStorage:", error)
+      return null
+    }
   }
 
   const setSessionToken = (token: string | null) => {
     if (typeof window === "undefined") return
 
-    if (token) {
-      localStorage.setItem("session_token", token)
+    try {
+      if (token) {
+        localStorage.setItem("session_token", token)
 
-      // Set cookie with proper domain and security settings for multi-tab support
-      const domain = window.location.hostname === 'localhost' ? 'localhost' : `.${window.location.hostname}`
-      const cookieValue = `session_token=${token}; path=/; max-age=${7 * 24 * 60 * 60}; samesite=lax; domain=${domain}`
-      document.cookie = cookieValue
+        // Set cookie with proper domain and security settings for multi-tab support
+        const domain = window.location.hostname === 'localhost' ? 'localhost' : `.${window.location.hostname}`
+        const cookieValue = `session_token=${token}; path=/; max-age=${7 * 24 * 60 * 60}; samesite=lax; domain=${domain}`
+        document.cookie = cookieValue
 
-      console.log("[v0] Session token set:", token.substring(0, 10) + "...")
+        console.log("[v0] Session token set:", token.substring(0, 10) + "...")
 
-      // Notify other tabs about session change
-      window.dispatchEvent(new CustomEvent('sessionUpdated', { detail: { token } }))
-    } else {
-      localStorage.removeItem("session_token")
-      const domain = window.location.hostname === 'localhost' ? 'localhost' : `.${window.location.hostname}`
-      document.cookie = `session_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; domain=${domain}`
-      console.log("[v0] Session token cleared")
+        // Notify other tabs about session change
+        window.dispatchEvent(new CustomEvent('sessionUpdated', { detail: { token } }))
+      } else {
+        localStorage.removeItem("session_token")
+        const domain = window.location.hostname === 'localhost' ? 'localhost' : `.${window.location.hostname}`
+        document.cookie = `session_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; domain=${domain}`
+        console.log("[v0] Session token cleared")
 
-      // Notify other tabs about session clear
-      window.dispatchEvent(new CustomEvent('sessionUpdated', { detail: { token: null } }))
+        // Notify other tabs about session clear
+        window.dispatchEvent(new CustomEvent('sessionUpdated', { detail: { token: null } }))
+      }
+    } catch (error) {
+      console.warn("[v0] Error setting session token:", error)
     }
   }
 
@@ -238,38 +247,42 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (typeof window !== "undefined") {
-      checkAuth()
+      try {
+        checkAuth()
 
-      // Listen for session updates from other tabs
-      const handleSessionUpdate = (event: CustomEvent) => {
-        const { token } = event.detail
-        console.log("[v0] Session updated from another tab:", token ? "login" : "logout")
-        
-        if (token) {
-          // Another tab logged in, refresh current tab
-          checkAuth()
-        } else {
-          // Another tab logged out, clear current tab
-          setUser(null)
-          setUserStatus(null)
-          setSessionToken(null)
+        // Listen for session updates from other tabs
+        const handleSessionUpdate = (event: CustomEvent) => {
+          const { token } = event.detail
+          console.log("[v0] Session updated from another tab:", token ? "login" : "logout")
+          
+          if (token) {
+            // Another tab logged in, refresh current tab
+            checkAuth()
+          } else {
+            // Another tab logged out, clear current tab
+            setUser(null)
+            setUserStatus(null)
+            setSessionToken(null)
+          }
         }
-      }
 
-      // Listen for storage changes (localStorage sync)
-      const handleStorageChange = (event: StorageEvent) => {
-        if (event.key === 'session_token') {
-          console.log("[v0] Session token changed in localStorage")
-          checkAuth()
+        // Listen for storage changes (localStorage sync)
+        const handleStorageChange = (event: StorageEvent) => {
+          if (event.key === 'session_token') {
+            console.log("[v0] Session token changed in localStorage")
+            checkAuth()
+          }
         }
-      }
 
-      window.addEventListener('sessionUpdated', handleSessionUpdate as EventListener)
-      window.addEventListener('storage', handleStorageChange)
+        window.addEventListener('sessionUpdated', handleSessionUpdate as EventListener)
+        window.addEventListener('storage', handleStorageChange)
 
-      return () => {
-        window.removeEventListener('sessionUpdated', handleSessionUpdate as EventListener)
-        window.removeEventListener('storage', handleStorageChange)
+        return () => {
+          window.removeEventListener('sessionUpdated', handleSessionUpdate as EventListener)
+          window.removeEventListener('storage', handleStorageChange)
+        }
+      } catch (error) {
+        console.warn("[v0] Error in auth useEffect:", error)
       }
     }
   }, [])
