@@ -39,6 +39,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Alert, AlertDescription } from "@/components/ui/alert"
+import TextAnimation from "@/components/text-animation"
 
 // Contact Form Component
 function ContactForm() {
@@ -304,7 +305,7 @@ export default function LandingPage() {
   }
 
   const scrollToContact = () => {
-    document.getElementById("contact")?.scrollIntoView({ behavior: "smooth" })
+    document.getElementById("contact")?.scrollIntoView({ behavior: "smooth", block: "center" })
   }
 
   const toggleLanguage = () => {
@@ -335,7 +336,7 @@ export default function LandingPage() {
         titleHighlight: "প্রিমিয়াম টুলস",
         subtitle: "আপনার CPA মার্কেটিং ক্যাম্পেইন বাড়ান এবং আয় বৃদ্ধি করুন আমাদের শক্তিশালী ও আধুনিক টুলস দিয়ে।",
         benefits: ["CPA মার্কেটারদের জন্য উন্নত টুলস", "রিয়েল-টাইম ক্যাম্পেইন অ্যানালিটিক্স", "নিরাপদ এবং নির্ভরযোগ্য প্ল্যাটফর্ম", "২৪/৭ কাস্টমার সাপোর্ট"],
-        cta1: "আয় শুরু করুন",
+        cta1: "Buy Premium",
         cta2: "টুলস দেখুন",
       },
       features: {
@@ -372,36 +373,6 @@ export default function LandingPage() {
             useCases: ["Security Audit", "Penetration Testing", "Compliance Check", "Risk Assessment"],
             timeToGenerate: "5-10 minutes",
             accuracy: "98%",
-          },
-          {
-            name: "Performance Tools",
-            description: "আপনার ওয়েবসাইটের performance analyze করুন এবং optimization suggestions পান।",
-            users: "7.3K+ users",
-            icon: BarChart3,
-            features: ["Speed Analysis", "Core Web Vitals", "Optimization Tips", "Performance Score"],
-            useCases: ["SEO Optimization", "User Experience", "Performance Audit", "Speed Testing"],
-            timeToGenerate: "1-2 minutes",
-            accuracy: "97%",
-          },
-          {
-            name: "Data Encryption",
-            description: "আপনার গুরুত্বপূর্ণ ডেটা encrypt করুন এবং secure storage এর জন্য প্রস্তুত করুন।",
-            users: "4.1K+ users",
-            icon: Lock,
-            features: ["AES Encryption", "RSA Keys", "Hash Generation", "Secure Storage"],
-            useCases: ["Data Protection", "Secure Communication", "Password Hashing", "File Encryption"],
-            timeToGenerate: "Instant",
-            accuracy: "100%",
-          },
-          {
-            name: "Analytics Tools",
-            description: "আপনার অ্যাপ্লিকেশনের usage analytics দেখুন এবং user behavior analyze করুন।",
-            users: "6.7K+ users",
-            icon: Activity,
-            features: ["Real-time Analytics", "User Tracking", "Custom Reports", "Data Export"],
-            useCases: ["Business Intelligence", "User Behavior", "Performance Metrics", "Data Analysis"],
-            timeToGenerate: "Real-time",
-            accuracy: "99.5%",
           },
         ],
       },
@@ -482,7 +453,7 @@ export default function LandingPage() {
           {
             text: "প্রিমিয়াম ফিচারগুলো সত্যিই গেম চেঞ্জার। আমার প্রজেক্টের কোয়ালিটি অনেক বেড়ে গেছে।",
             name: "মাহমুদ হাসান",
-            role: "ফুল স্ট্যাক ডেভেলপার",
+            role: "ফুল স্ট্যাক ডেভেলপাড",
           },
         ],
       },
@@ -512,7 +483,7 @@ export default function LandingPage() {
           "24/7 customer support",
           "Regular updates and new tools",
         ],
-        cta1: "Start Earning",
+        cta1: "Buy Premium",
         cta2: "View Tools",
       },
       features: {
@@ -552,36 +523,6 @@ export default function LandingPage() {
             useCases: ["Fraud Prevention", "Link Security", "Campaign Protection", "Risk Assessment"],
             timeToGenerate: "5-10 minutes",
             accuracy: "98%",
-          },
-          {
-            name: "Campaign Analytics",
-            description: "Analyze your CPA campaign performance and get detailed insights to maximize your ROI.",
-            users: "9.1K+ users",
-            icon: BarChart3,
-            features: ["ROI Analysis", "Conversion Tracking", "Performance Metrics", "Revenue Reports"],
-            useCases: ["Campaign Optimization", "ROI Analysis", "Performance Tracking", "Revenue Growth"],
-            timeToGenerate: "1-2 minutes",
-            accuracy: "97%",
-          },
-          {
-            name: "Lead Management",
-            description: "Secure and manage your CPA leads with advanced encryption and data protection.",
-            users: "6.8K+ users",
-            icon: Lock,
-            features: ["Lead Encryption", "Secure Storage", "Data Protection", "Privacy Compliance"],
-            useCases: ["Lead Security", "Data Privacy", "Compliance", "Lead Tracking"],
-            timeToGenerate: "Instant",
-            accuracy: "100%",
-          },
-          {
-            name: "Traffic Analytics",
-            description: "Track and analyze your CPA campaign traffic to optimize conversions and maximize earnings.",
-            users: "8.9K+ users",
-            icon: Activity,
-            features: ["Real-time Analytics", "Traffic Tracking", "Custom Reports", "Data Export"],
-            useCases: ["Traffic Analysis", "Conversion Optimization", "Campaign Monitoring", "ROI Tracking"],
-            timeToGenerate: "Real-time",
-            accuracy: "99.5%",
           },
         ],
       },
@@ -833,12 +774,12 @@ export default function LandingPage() {
                   >
                     {t.nav.pricing}
                   </button>
-                  <Link
-                    href="/contact"
+                  <button
+                    onClick={scrollToContact}
                     className="text-muted-foreground hover:text-blue-600 transition-colors font-medium"
                   >
                     Contact
-                  </Link>
+                  </button>
                   <Link
                     href="/login"
                     className="text-muted-foreground hover:text-blue-600 transition-colors font-medium"
@@ -882,13 +823,15 @@ export default function LandingPage() {
                   >
                     {t.nav.pricing}
                   </button>
-                  <Link
-                    href="/contact"
-                    className="text-muted-foreground hover:text-blue-600 transition-colors font-medium"
-                    onClick={() => setIsMenuOpen(false)}
+                  <button
+                    onClick={() => {
+                      scrollToContact()
+                      setIsMenuOpen(false)
+                    }}
+                    className="text-muted-foreground hover:text-blue-600 transition-colors text-left font-medium"
                   >
                     Contact
-                  </Link>
+                  </button>
                   <Link
                     href="/login"
                     className="text-muted-foreground hover:text-blue-600 transition-colors font-medium"
@@ -926,9 +869,14 @@ export default function LandingPage() {
                   <span className="block text-left mb-2 tracking-tight animate-fade-in-scale" style={{ animationDelay: '0.2s' }}>
                     {t.hero.title}
                   </span>
-                  <span className="block bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent text-left tracking-tight animate-fade-in-scale animate-glow" style={{ animationDelay: '0.4s' }}>
-                    {t.hero.titleHighlight}
-                  </span>
+                  <div className="block text-left tracking-tight animate-fade-in-scale animate-glow" style={{ animationDelay: '0.4s' }}>
+                    <TextAnimation 
+                      words={["CPA Marketing", "CPA Tools", "CPA Solutions", "CPA Platform"]}
+                      className="bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent font-bold text-4xl md:text-6xl"
+                      letterDelay={100}
+                      wordDelay={3000}
+                    />
+                  </div>
                 </h1>
 
                 <p className="text-lg text-slate-600 dark:text-slate-400 leading-relaxed max-w-2xl font-medium animate-fade-in-scale" style={{ animationDelay: '0.6s' }}>{t.hero.subtitle}</p>
@@ -950,10 +898,12 @@ export default function LandingPage() {
               <div className="flex flex-col sm:flex-row gap-4 animate-slide-in-bottom" style={{ animationDelay: '1.2s' }}>
                 <Button
                   onClick={scrollToPricing}
-                  className="px-8 py-4 rounded-xl bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white text-lg font-bold transition-all duration-300 shadow-xl hover:shadow-2xl flex items-center justify-center space-x-3 hover:scale-105 transform animate-glow hover-lift"
+                  className="px-8 py-4 rounded-xl bg-gradient-to-r from-amber-500 via-yellow-500 to-orange-500 hover:from-amber-600 hover:via-yellow-600 hover:to-orange-600 text-white text-lg font-bold transition-all duration-300 shadow-xl hover:shadow-2xl flex items-center justify-center space-x-3 hover:scale-105 transform premium-glow premium-shine relative overflow-hidden group"
                 >
-                  <span>{t.hero.cta1}</span>
-                  <ArrowRight className="w-5 h-5 animate-bounce" />
+                  <div className="absolute inset-0 bg-gradient-to-r from-yellow-400/20 to-orange-400/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                  <Crown className="w-5 h-5 animate-pulse relative z-10" />
+                  <span className="relative z-10 font-bold tracking-wide">{t.hero.cta1}</span>
+                  <Sparkles className="w-5 h-5 animate-bounce relative z-10" />
                 </Button>
                 <Button
                   onClick={scrollToFeatures}
@@ -1436,10 +1386,13 @@ export default function LandingPage() {
                   </button>
                 </li>
                 <li>
-                        <Link href="/contact" className="text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors text-sm flex items-center group">
+                        <button 
+                          onClick={scrollToContact} 
+                          className="text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors text-sm flex items-center group"
+                        >
                           <div className="w-1.5 h-1.5 bg-blue-500 dark:bg-blue-400 rounded-full mr-3 group-hover:bg-slate-900 dark:group-hover:bg-white transition-colors" />
                           Contact
-                        </Link>
+                        </button>
                       </li>
                       <li>
                         <Link href="/login" className="text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors text-sm flex items-center group">

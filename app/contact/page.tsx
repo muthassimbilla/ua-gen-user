@@ -21,6 +21,7 @@ export default function ContactPage() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitStatus, setSubmitStatus] = useState<"idle" | "success" | "error">("idle")
   const [errors, setErrors] = useState<string[]>([])
+  const [debugInfo, setDebugInfo] = useState<string | null>(null)
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target
@@ -106,10 +107,12 @@ ${formData.message}
       } else {
         const errorResult = await response.json()
         console.error("Form submission error:", errorResult)
+        setDebugInfo(`HTTP ${response.status}: ${errorResult.message || 'Unknown error'}`)
         setSubmitStatus("error")
       }
     } catch (error) {
       console.error("Error submitting form:", error)
+      setDebugInfo(`Network error: ${error instanceof Error ? error.message : 'Unknown error'}`)
       setSubmitStatus("error")
     } finally {
       setIsSubmitting(false)

@@ -4,7 +4,6 @@ import type React from "react"
 import { AuthProvider } from "@/lib/auth-context"
 import { StatusNotificationProvider } from "@/components/status-notification-provider"
 import { NetworkProvider } from "@/contexts/network-context"
-import AutoUpdateProvider from "@/components/auto-update-provider"
 import ConditionalLayout from "@/components/conditional-layout"
 import PageTransition from "@/components/page-transition"
 
@@ -17,11 +16,9 @@ export default function ClientProviders({ children }: ClientProvidersProps) {
     <NetworkProvider>
       <StatusNotificationProvider>
         <AuthProvider>
-          <AutoUpdateProvider>
-            <ConditionalLayout>
-              <PageTransition>{children}</PageTransition>
-            </ConditionalLayout>
-          </AutoUpdateProvider>
+          <ConditionalLayout>
+            <PageTransition>{children}</PageTransition>
+          </ConditionalLayout>
         </AuthProvider>
       </StatusNotificationProvider>
     </NetworkProvider>

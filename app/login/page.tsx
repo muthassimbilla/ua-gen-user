@@ -233,6 +233,13 @@ export default function LoginPage() {
       console.log("[v0] Contains 'is pending approval':", errorMsg.includes("is pending approval"))
       console.log("[v0] Contains 'waiting for admin approval':", errorMsg.includes("waiting for admin approval"))
       console.log("[v0] Contains 'requires admin approval':", errorMsg.includes("requires admin approval"))
+      console.log("[v0] Contains 'মেয়াদ শেষ':", errorMsg.includes("মেয়াদ শেষ"))
+      console.log("[v0] Contains 'expired':", errorMsg.includes("expired"))
+      console.log("[v0] Contains 'account has expired':", errorMsg.includes("account has expired"))
+      console.log("[v0] Contains 'expiration':", errorMsg.includes("expiration"))
+      console.log("[v0] Contains 'মেয়াদ':", errorMsg.includes("মেয়াদ"))
+      console.log("[v0] Contains 'মেয়াদ শেষ হয়ে গেছে':", errorMsg.includes("মেয়াদ শেষ হয়ে গেছে"))
+      console.log("[v0] Original error message:", error.message)
 
       if (
         errorMsg.includes("pending approval") ||
@@ -248,6 +255,16 @@ export default function LoginPage() {
       } else if (errorMsg.includes("deactivated") || errorMsg.includes("account is deactivated")) {
         console.log("[v0] Setting deactivated error")
         setErrors(["Your account has been deactivated. Please contact support."])
+      } else if (
+        errorMsg.includes("মেয়াদ শেষ") ||
+        errorMsg.includes("expired") ||
+        errorMsg.includes("account has expired") ||
+        errorMsg.includes("expiration") ||
+        errorMsg.includes("মেয়াদ") ||
+        errorMsg.includes("মেয়াদ শেষ হয়ে গেছে")
+      ) {
+        console.log("[v0] Setting expired error")
+        setErrors(["আপনার একাউন্টের মেয়াদ শেষ হয়ে গেছে। দয়া করে অ্যাডমিনের সাথে যোগাযোগ করুন।"])
       } else if (
         errorMsg.includes("suspended") ||
         errorMsg.includes("account has been suspended") ||
@@ -272,6 +289,8 @@ export default function LoginPage() {
         setErrors(["Network connection error. Please check your internet connection and try again."])
       } else {
         console.log("[v0] Setting generic error:", error.message)
+        // Show the actual error message from the server, or fallback to generic message
+        // For debugging, let's show the actual error message
         setErrors([error.message || "Login failed. Please try again."])
       }
     } finally {

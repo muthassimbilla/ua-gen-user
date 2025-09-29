@@ -19,16 +19,16 @@
 
 Create a `.env.local` file in your project root:
 
-```env
+\`\`\`env
 TELEGRAM_BOT_TOKEN=your_bot_token_here
 TELEGRAM_CHAT_ID=your_chat_id_here
-```
+\`\`\`
 
 Example:
-```env
+\`\`\`env
 TELEGRAM_BOT_TOKEN=1234567890:ABCdefGHIjklMNOpqrsTUVwxyz
 TELEGRAM_CHAT_ID=123456789
-```
+\`\`\`
 
 ## 4. Test the Setup
 

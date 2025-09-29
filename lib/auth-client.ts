@@ -221,7 +221,9 @@ export class AuthService {
       console.log("[v0] Looking up user by telegram username...")
       const { data: user, error: userError } = await supabase
         .from("users")
-        .select("id, full_name, telegram_username, password_hash, is_approved, account_status, is_active, expiration_date")
+        .select(
+          "id, full_name, telegram_username, password_hash, is_approved, account_status, is_active, expiration_date",
+        )
         .eq("telegram_username", credentials.telegram_username)
         .single()
 
@@ -249,6 +251,17 @@ export class AuthService {
       if (!user) {
         console.error("[v0] No user found")
         throw new Error("Invalid Telegram username or password")
+      }
+
+      // Check if account is expired FIRST
+      if (user.expiration_date && new Date(user.expiration_date) < new Date()) {
+        console.error("[v0] Account is expired")
+        console.error("[v0] Expiration date:", user.expiration_date)
+        console.error("[v0] Current date:", new Date().toISOString())
+        console.error("[v0] Date comparison:", new Date(user.expiration_date) < new Date())
+        const errorMessage = "আপনার একাউন্টের মেয়াদ শেষ হয়ে গেছে। দয়া করে অ্যাডমিনের সাথে যোগাযোগ করুন।"
+        console.error("[v0] Throwing error:", errorMessage)
+        throw new Error(errorMessage)
       }
 
       if (user.account_status === "suspended") {
@@ -291,8 +304,8 @@ export class AuthService {
 
         currentIP = await Promise.race([ipPromise, timeoutPromise])
         console.log("[v0] Current IP:", currentIP)
-       } catch (error: any) {
-         console.warn("[v0] IP detection failed, using fallback:", error.message)
+      } catch (error: any) {
+        console.warn("[v0] IP detection failed, using fallback:", error.message)
         currentIP = "unknown"
       }
 
@@ -300,16 +313,14 @@ export class AuthService {
       if (currentIP && currentIP !== "unknown") {
         try {
           console.log("[v0] Tracking IP for analytics:", currentIP)
-          
+
           // Update IP history for tracking
-          const { error: ipHistoryError } = await supabase
-            .from("user_ip_history")
-            .insert({
-              user_id: user.id,
-              ip_address: currentIP,
-              is_current: true,
-            })
-          
+          const { error: ipHistoryError } = await supabase.from("user_ip_history").insert({
+            user_id: user.id,
+            ip_address: currentIP,
+            is_current: true,
+          })
+
           if (ipHistoryError) {
             console.warn("[v0] IP history tracking failed:", ipHistoryError)
           } else {
@@ -385,7 +396,6 @@ export class AuthService {
     } catch (error: any) {
       console.error("[v0] Login error:", error)
 
-      // Pass through specific error messages
       if (
         error.message.includes("Supabase") ||
         error.message.includes("Invalid Telegram") ||
@@ -393,7 +403,10 @@ export class AuthService {
         error.message.includes("Pending Approval") ||
         error.message.includes("deactivated") ||
         error.message.includes("Database error") ||
-        error.message.includes("suspended")
+        error.message.includes("suspended") ||
+        error.message.includes("মেয়াদ শেষ") ||
+        error.message.includes("একাউন্টের মেয়াদ") ||
+        error.message.includes("অ্যাডমিনের সাথে যোগাযোগ")
       ) {
         throw error
       }
@@ -506,7 +519,9 @@ export class AuthService {
 
       const { data: user, error: userError } = await supabase
         .from("users")
-        .select("id, full_name, telegram_username, created_at, updated_at, is_approved, account_status, is_active, expiration_date")
+        .select(
+          "id, full_name, telegram_username, created_at, updated_at, is_approved, account_status, is_active, expiration_date",
+        )
         .eq("id", session.user_id)
         .single()
 

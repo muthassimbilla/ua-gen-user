@@ -265,7 +265,7 @@ export default function UserManagementPage() {
       case "suspended":
         return { variant: "destructive" as const, text: "Suspended", color: "text-red-600" }
       case "expired":
-        return { variant: "secondary" as const, text: "Expired", color: "text-orange-600" }
+        return { variant: "destructive" as const, text: "Expired", color: "text-red-600" }
       case "pending":
         return { variant: "outline" as const, text: "Pending Approval", color: "text-yellow-600" }
       default:
@@ -375,6 +375,18 @@ export default function UserManagementPage() {
             </div>
             <div className="w-10 h-10 lg:w-12 lg:h-12 rounded-xl bg-gradient-to-br from-yellow-500 to-orange-600 flex items-center justify-center">
               <Clock className="w-5 h-5 lg:w-6 lg:h-6 text-white" />
+            </div>
+          </div>
+        </div>
+
+        <div className="glass-card p-4 lg:p-6 rounded-2xl">
+          <div className="flex items-center justify-between">
+            <div>
+              <div className="text-xl lg:text-2xl font-bold text-red-600">{expiredUsers}</div>
+              <div className="text-xs lg:text-sm text-muted-foreground">Expired Accounts</div>
+            </div>
+            <div className="w-10 h-10 lg:w-12 lg:h-12 rounded-xl bg-gradient-to-br from-red-500 to-red-600 flex items-center justify-center">
+              <AlertTriangle className="w-5 h-5 lg:w-6 lg:h-6 text-white" />
             </div>
           </div>
         </div>

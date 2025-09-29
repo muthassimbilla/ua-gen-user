@@ -23,56 +23,56 @@
 ### **পদ্ধতি ১: Image Logo ব্যবহার**
 
 1. **নতুন লোগো ফাইল যোগ করুন:**
-   ```
+   \`\`\`
    public/your-logo.png
    public/your-logo.svg
-   ```
+   \`\`\`
 
 2. **Landing Page এ চেঞ্জ করুন:**
-   ```tsx
+   \`\`\`tsx
    {/* Option 1: Use your custom logo image */}
    <img src="/your-logo.png" alt="Logo" className="w-8 h-8 relative z-10" />
-   ```
+   \`\`\`
 
 3. **Sidebar এ চেঞ্জ করুন:**
-   ```tsx
+   \`\`\`tsx
    <img src="/your-logo.png" alt="Logo" className="w-8 h-8 relative z-10" />
-   ```
+   \`\`\`
 
 ### **পদ্ধতি ২: Icon চেঞ্জ করা**
 
 1. **Lucide React icons ব্যবহার করুন:**
-   ```tsx
+   \`\`\`tsx
    import { YourIcon } from "lucide-react"
    
    <YourIcon className="w-7 h-7 text-white relative z-10" />
-   ```
+   \`\`\`
 
 2. **Custom SVG ব্যবহার করুন:**
-   ```tsx
+   \`\`\`tsx
    <svg className="w-7 h-7 text-white relative z-10">
      {/* Your SVG content */}
    </svg>
-   ```
+   \`\`\`
 
 ### **পদ্ধতি ৩: Text Logo চেঞ্জ**
 
 1. **Company name চেঞ্জ করুন:**
-   ```tsx
+   \`\`\`tsx
    <span className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
      Your Company Name
    </span>
-   ```
+   \`\`\`
 
 2. **Tagline চেঞ্জ করুন:**
-   ```tsx
+   \`\`\`tsx
    <p className="text-xs text-muted-foreground -mt-1">Your Tagline</p>
-   ```
+   \`\`\`
 
 ## 🎨 Color Scheme চেঞ্জ:
 
 ### **Gradient Colors:**
-```tsx
+\`\`\`tsx
 // Blue to Indigo
 bg-gradient-to-br from-blue-500 to-indigo-600
 
@@ -84,16 +84,16 @@ bg-gradient-to-br from-purple-500 to-pink-600
 
 // Custom colors
 bg-gradient-to-br from-[#your-color-1] to-[#your-color-2]
-```
+\`\`\`
 
 ### **Text Colors:**
-```tsx
+\`\`\`tsx
 // Blue gradient text
 bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent
 
 // Green gradient text
 bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent
-```
+\`\`\`
 
 ## 📝 Step-by-Step Instructions:
 
@@ -122,22 +122,22 @@ bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent
 ## 🚀 Quick Start:
 
 1. **Logo file যোগ করুন:**
-   ```bash
+   \`\`\`bash
    # public/ folder এ আপনার লোগো রাখুন
    cp your-logo.png public/logo.png
-   ```
+   \`\`\`
 
 2. **Landing page আপডেট করুন:**
-   ```tsx
+   \`\`\`tsx
    <img src="/logo.png" alt="Your Company" className="w-8 h-8 relative z-10" />
-   ```
+   \`\`\`
 
 3. **Company name চেঞ্জ করুন:**
-   ```tsx
+   \`\`\`tsx
    <span className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
      Your Company Name
    </span>
-   ```
+   \`\`\`
 
 ## 💡 Tips:
 

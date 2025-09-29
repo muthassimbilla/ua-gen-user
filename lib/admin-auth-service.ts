@@ -1,4 +1,6 @@
 import type { Admin, AdminLoginCredentials } from "./admin-types"
+
+export type { Admin, AdminLoginCredentials }
 import { supabase, isSupabaseAvailable } from "./supabase"
 import bcrypt from "bcryptjs"
 

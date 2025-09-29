@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge"
 export default function AccountBlockedPage() {
   const router = useRouter()
   const [statusType, setStatusType] = useState<"suspended" | "expired" | "unknown">("unknown")
-  const [message, setMessage] = useState("There is a problem with your account.")
+  const [message, setMessage] = useState("আপনার একাউন্টে সমস্যা রয়েছে।")
 
   useEffect(() => {
     // Read status type from URL parameters
@@ -37,9 +37,9 @@ export default function AccountBlockedPage() {
           titleColor: "text-red-800",
           textColor: "text-red-700",
           badgeVariant: "destructive" as const,
-          title: "Account Suspended",
-          subtitle: "Your account has been temporarily deactivated",
-          actionText: "Contact Admin",
+          title: "একাউন্ট স্থগিত",
+          subtitle: "আপনার একাউন্ট সাময়িকভাবে নিষ্ক্রিয় করা হয়েছে",
+          actionText: "অ্যাডমিনের সাথে যোগাযোগ করুন",
         }
       case "expired":
         return {
@@ -51,9 +51,9 @@ export default function AccountBlockedPage() {
           titleColor: "text-orange-800",
           textColor: "text-orange-700",
           badgeVariant: "secondary" as const,
-          title: "Account Expired",
-          subtitle: "Your account has expired",
-          actionText: "Contact for Extension",
+          title: "একাউন্টের মেয়াদ শেষ",
+          subtitle: "আপনার একাউন্টের মেয়াদ শেষ হয়ে গেছে",
+          actionText: "মেয়াদ বৃদ্ধির জন্য যোগাযোগ করুন",
         }
       default:
         return {
@@ -65,9 +65,9 @@ export default function AccountBlockedPage() {
           titleColor: "text-gray-800",
           textColor: "text-gray-700",
           badgeVariant: "outline" as const,
-          title: "Account Problem",
-          subtitle: "There is a problem with your account",
-          actionText: "Contact for Support",
+          title: "একাউন্টে সমস্যা",
+          subtitle: "আপনার একাউন্টে সমস্যা রয়েছে",
+          actionText: "সহায়তার জন্য যোগাযোগ করুন",
         }
     }
   }
@@ -81,8 +81,7 @@ export default function AccountBlockedPage() {
 
   const handleContactAdmin = () => {
     // Here you can open admin contact information or email client
-    window.location.href =
-      "mailto:admin@example.com?subject=Account Problem&body=There is a problem with my account. Please help."
+    window.location.href = "mailto:admin@example.com?subject=একাউন্ট সমস্যা&body=আমার একাউন্টে সমস্যা রয়েছে। দয়া করে সাহায্য করুন।"
   }
 
   return (
@@ -101,7 +100,7 @@ export default function AccountBlockedPage() {
           <div className="text-center mb-4">
             <h1 className={`text-xl font-bold ${config.titleColor} mb-2`}>{config.title}</h1>
             <Badge variant={config.badgeVariant} className="mb-3">
-              {statusType === "suspended" ? "Suspended" : statusType === "expired" ? "Expired" : "Problem"}
+              {statusType === "suspended" ? "স্থগিত" : statusType === "expired" ? "মেয়াদোত্তীর্ণ" : "সমস্যা"}
             </Badge>
             <p className={`text-sm ${config.textColor}`}>{config.subtitle}</p>
           </div>
@@ -123,18 +122,18 @@ export default function AccountBlockedPage() {
 
             <Button variant="outline" onClick={handleGoHome} className="w-full bg-transparent">
               <Home className="w-4 h-4 mr-2" />
-              Return to Home Page
+              হোম পেজে ফিরে যান
             </Button>
           </div>
 
           {/* Additional Info */}
           <div className="mt-6 pt-4 border-t border-gray-200">
             <div className="text-center">
-              <p className="text-xs text-gray-500 mb-2">Contact admin to resolve the issue</p>
+              <p className="text-xs text-gray-500 mb-2">সমস্যা সমাধানের জন্য অ্যাডমিনের সাথে যোগাযোগ করুন</p>
               <div className="flex items-center justify-center gap-4 text-xs text-gray-400">
-                <span>Help: admin@example.com</span>
+                <span>সহায়তা: admin@example.com</span>
                 <span>•</span>
-                <span>Phone: +8801700000000</span>
+                <span>ফোন: +8801700000000</span>
               </div>
             </div>
           </div>
@@ -142,7 +141,7 @@ export default function AccountBlockedPage() {
 
         {/* Footer */}
         <div className="text-center mt-6">
-          <p className="text-xs text-gray-500">This message is displayed for your account security</p>
+          <p className="text-xs text-gray-500">এই বার্তাটি আপনার একাউন্টের নিরাপত্তার জন্য প্রদর্শিত হচ্ছে</p>
         </div>
       </div>
     </div>
