@@ -9,7 +9,17 @@ import { Smartphone, Copy, Download, Loader2 } from "lucide-react"
 import dynamic from "next/dynamic"
 import type { GenerationHistory } from "@/lib/supabase" // Declared the variable here
 
+import GeneratorControls from "@/components/GeneratorControls"
 
+const CustomModal = dynamic(() => import("@/components/CustomModal"), {
+  loading: () => null,
+  ssr: false,
+})
+
+const ProgressModal = dynamic(() => import("@/components/ProgressModal"), {
+  loading: () => null,
+  ssr: false,
+})
 
 const LoadingSkeleton = memo(() => (
   <Card className="bg-white/60 dark:bg-slate-800/60 backdrop-blur-xl border border-white/30 dark:border-slate-700/30 shadow-2xl rounded-2xl">
@@ -121,6 +131,14 @@ export default function UserAgentGenerator() {
   })
 
   // Progress Modal state
+  const [progressModal, setProgressModal] = useState({
+    isOpen: false,
+    title: "",
+    message: "",
+    progress: 0,
+    type: "info",
+    showCancel: false,
+  })
 
   const [dataState, setDataState] = useState({
     deviceModels: [],
@@ -204,6 +222,20 @@ export default function UserAgentGenerator() {
     })
   }, [])
 
+  const showProgressModal = useCallback((title, message, progress = 0, type = "info", showCancel = false) => {
+    setProgressModal({
+      isOpen: true,
+      title,
+      message,
+      progress,
+      type,
+      showCancel,
+    })
+  }, [])
+
+  const hideProgressModal = useCallback(() => {
+    setProgressModal((prev) => ({ ...prev, isOpen: false }))
+  }, [])
 
   const loadData = useCallback(async () => {
     if (!supabaseModules || isDataLoaded) return
@@ -1053,7 +1085,7 @@ export default function UserAgentGenerator() {
     setGenerationProgress(0)
     setUserAgents([])
 
-    // Generation started
+    showProgressModal("🚀 User Agent Generation Started", "Processing started...", 0, "info", true)
 
     try {
       const newUserAgents = []
@@ -1137,7 +1169,11 @@ export default function UserAgentGenerator() {
 
           startTransition(() => {
             setGenerationProgress(progress)
-            // Progress updated
+            setProgressModal((prev) => ({
+              ...prev,
+              progress,
+              message: `⚡ ${newUserAgents.length}/${quantity} unique user agents generated\n📊 Success rate: ${successRate}%\n🔄 Attempts: ${attempts}/${maxAttempts}`,
+            }))
           })
 
           await new Promise((resolve) => setTimeout(resolve, 1))
@@ -1164,17 +1200,62 @@ export default function UserAgentGenerator() {
       })
 
       if (actualGenerated === quantity) {
-        // Generation completed successfully
+        setProgressModal((prev) => ({
+          ...prev,
+          progress: 100,
+          title: "✅ Job Successful",
+          message: `🎉 ${quantity} unique user agents generated successfully!\n⚡ Total attempts: ${attempts}\n✨ Job completed!`,
+          type: "success",
+          showCancel: false,
+        }))
+
+        // Auto close after 2 seconds
+        setTimeout(() => {
+          hideProgressModal()
+        }, 2000)
       } else if (actualGenerated > 0) {
-        // Generation partially completed
+        setProgressModal((prev) => ({
+          ...prev,
+          progress: Math.round((actualGenerated / quantity) * 100),
+          title: "⚠️ Job Partially Successful",
+          message: `📊 ${actualGenerated} out of ${quantity} unique user agents generated\nWarning: Could not generate more due to blacklist and duplicate avoidance`,
+          type: "warning",
+          showCancel: false,
+        }))
+
+        setTimeout(() => {
+          hideProgressModal()
+        }, 3000)
       } else {
-        // Generation failed
+        setProgressModal((prev) => ({
+          ...prev,
+          progress: 0,
+          title: "❌ Job Failed",
+          message: `💥 No unique user agents could be generated\n🚫 All possible combinations may be blacklisted or used`,
+          type: "error",
+          showCancel: false,
+        }))
+
+        setTimeout(() => {
+          hideProgressModal()
+        }, 3000)
       }
 
       console.log(`[v0] Generation completed: ${actualGenerated}/${quantity} generated in ${attempts} attempts`)
     } catch (error) {
       console.error("Error generating user agents:", error)
-      // Generation error occurred
+      setProgressModal((prev) => ({
+        ...prev,
+        progress: 0,
+        title: "❌ Job Failed",
+        message: `💥 Error occurred while generating user agents\n🔄 Please try again`,
+        type: "error",
+        showCancel: false,
+      }))
+
+      setTimeout(() => {
+        hideProgressModal()
+      }, 3000)
     } finally {
       setIsGenerating(false)
     }
@@ -1198,10 +1279,13 @@ export default function UserAgentGenerator() {
     resolutionDpis,
     deviceType,
     showModal,
+    showProgressModal,
+    hideProgressModal,
     setUserAgents,
     setGenerationProgress,
     setIsGenerating,
     startTransition,
+    setProgressModal,
   ])
 
   const addToBlacklist = async () => {
@@ -1210,7 +1294,7 @@ export default function UserAgentGenerator() {
     try {
       console.log(`Adding ${userAgents.length} user agents to blacklist...`)
 
-      // Blacklisting started
+      showProgressModal("⚙️ Processing", "Blacklisting user agents...", 0, "info", false)
 
       const finalAppType = platform === "android" ? `android_${appType}` : appType
       const { BlacklistedUserAgent } = supabaseModules
@@ -1254,7 +1338,11 @@ export default function UserAgentGenerator() {
 
         const progress = Math.round(((batch + 1) / totalBatches) * 100)
         startTransition(() => {
-          // Progress updated
+          setProgressModal((prev) => ({
+            ...prev,
+            progress,
+            message: `🔒 ${batchEnd}/${userAgents.length} user agents processed...`,
+          }))
         })
 
         // No delay needed with bulk operations
@@ -1264,11 +1352,11 @@ export default function UserAgentGenerator() {
 
       await loadData()
 
-      // Blacklisting completed
+      hideProgressModal()
       return true
     } catch (error) {
       console.error("Error during blacklisting process:", error)
-      // Blacklisting error occurred
+      hideProgressModal()
       return false
     }
   }
@@ -1507,6 +1595,81 @@ export default function UserAgentGenerator() {
         </div>
       </div>
 
+      {/* Progress Modal */}
+      {progressModal.isOpen && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700 max-w-md w-full mx-4 overflow-hidden transform transition-all duration-300 scale-100">
+            <div
+              className={`px-6 py-4 ${
+                progressModal.type === "success"
+                  ? "bg-gradient-to-r from-green-500 to-emerald-500"
+                  : progressModal.type === "error"
+                    ? "bg-gradient-to-r from-red-500 to-rose-500"
+                    : progressModal.type === "warning"
+                      ? "bg-gradient-to-r from-yellow-500 to-orange-500"
+                      : "bg-gradient-to-r from-indigo-500 to-blue-500"
+              }`}
+            >
+              <div className="flex items-center justify-between">
+                <h3 className="text-xl font-bold text-white">{progressModal.title}</h3>
+                {(progressModal.type === "success" ||
+                  progressModal.type === "error" ||
+                  progressModal.type === "warning") && (
+                  <button
+                    onClick={hideProgressModal}
+                    className="text-white hover:text-gray-200 transition-colors p-1 rounded-full hover:bg-white/20"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                )}
+              </div>
+            </div>
+
+            <div className="p-6">
+              <div className="mb-4">
+                <div className="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-4 mb-3 overflow-hidden">
+                  <div
+                    className={`h-4 rounded-full transition-all duration-500 ease-out ${
+                      progressModal.type === "success"
+                        ? "bg-gradient-to-r from-green-400 to-emerald-500"
+                        : progressModal.type === "error"
+                          ? "bg-gradient-to-r from-red-400 to-rose-500"
+                          : progressModal.type === "warning"
+                            ? "bg-gradient-to-r from-yellow-400 to-orange-500"
+                            : "bg-gradient-to-r from-indigo-400 to-blue-500"
+                    }`}
+                    style={{ width: `${progressModal.progress}%` }}
+                  ></div>
+                </div>
+                <div className="text-center text-sm font-medium text-slate-600 dark:text-slate-400">
+                  {progressModal.progress}%
+                </div>
+              </div>
+
+              <div className="bg-slate-50 dark:bg-slate-700/50 rounded-lg p-4 mb-4">
+                <div className="text-sm text-slate-700 dark:text-slate-300 whitespace-pre-line leading-relaxed">
+                  {progressModal.message}
+                </div>
+              </div>
+
+              {progressModal.showCancel && (
+                <div className="flex justify-center">
+                  <Button
+                    onClick={hideProgressModal}
+                    variant="outline"
+                    size="sm"
+                    className="px-6 py-2 font-medium bg-transparent"
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Regular Modal */}
       {modal.isOpen && (

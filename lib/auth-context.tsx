@@ -5,6 +5,7 @@ import { createContext, useContext, useEffect, useState } from "react"
 import type { User } from "./auth-client"
 import { AuthService } from "./auth-client"
 import { useStatusMiddleware } from "./status-middleware"
+import { useStatusNotification } from "@/components/status-notification-provider"
 import type { UserStatus } from "./user-status-service"
 
 interface AuthContextType {
@@ -25,6 +26,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [userStatus, setUserStatus] = useState<UserStatus | null>(null)
   const [isLoginInProgress, setIsLoginInProgress] = useState(false)
 
+  const { showNotification } = useStatusNotification()
 
   const getSessionToken = (): string | null => {
     if (typeof window === "undefined") return null
@@ -210,7 +212,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     console.log("[v0] User status invalid:", status.message)
     setUserStatus(status)
 
-    // Status invalid - user will be redirected
+    // Show notification to user
+    showNotification(status)
 
     // Only trigger logout for actual account issues, not network problems
     if (
@@ -236,7 +239,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setUserStatus(status)
 
       if (!status.is_valid) {
-        // Status invalid - user will be redirected
+        showNotification(status)
       }
     }
     return status

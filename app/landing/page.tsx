@@ -39,6 +39,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Alert, AlertDescription } from "@/components/ui/alert"
+import TextAnimation from "@/components/text-animation"
 import CounterAnimation from "@/components/counter-animation"
 
 // Contact Form Component
@@ -275,6 +276,7 @@ export default function LandingPage() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [language, setLanguage] = useState<"bn" | "en">("en") // Default to English
   const [selectedTool, setSelectedTool] = useState<number | null>(null)
+  // const [currentSlide, setCurrentSlide] = useState(0) // This was commented out in the original code, keeping it commented
 
   const [scrollPosition, setScrollPosition] = useState(0)
   const [isPaused, setIsPaused] = useState(false)
@@ -1023,7 +1025,7 @@ export default function LandingPage() {
                   <h1 className="text-5xl md:text-7xl font-black text-slate-900 dark:text-white leading-tight">
                     <div className="block text-left">
                       <span className="inline-block mr-4 animate-text-shimmer">Premium Tools</span>
-                      <span className="inline-block text-slate-500 dark:text-slate-400 font-medium text-4xl md:text-6xl">For</span>
+                      <span className="inline-block text-slate-500 dark:text-slate-400 font-medium text-4xl md:text-6xl">for</span>
                       <div className="inline-block ml-4">
                         <span 
                           id="animated-text"
