@@ -24,7 +24,6 @@ import {
   Zap,
   Heart
 } from "lucide-react"
-import { UserIPDisplay } from "@/components/user-ip-display"
 import { useState, useEffect } from "react"
 
 export default function ProfilePage() {
@@ -361,7 +360,10 @@ export default function ProfilePage() {
                 <CardDescription>Your current IP address and device information</CardDescription>
               </CardHeader>
               <CardContent>
-                <UserIPDisplay />
+                <div className="text-center py-8">
+                  <Globe className="w-12 h-12 text-blue-500 mx-auto mb-4" />
+                  <p className="text-slate-600 dark:text-slate-400">IP display component removed</p>
+                </div>
               </CardContent>
             </Card>
           </div>
