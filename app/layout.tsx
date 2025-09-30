@@ -25,6 +25,14 @@ export const metadata: Metadata = {
   generator: "Next.js",
   applicationName: "UGen Pro",
   referrer: "origin-when-cross-origin",
+  icons: {
+    icon: [
+      { url: "/images/favicon.jpg", sizes: "32x32", type: "image/jpeg" },
+      { url: "/images/favicon.jpg", sizes: "16x16", type: "image/jpeg" },
+    ],
+    apple: [{ url: "/images/logo.jpg", sizes: "180x180", type: "image/jpeg" }],
+    shortcut: "/images/favicon.jpg",
+  },
   robots: {
     index: true,
     follow: true,
@@ -46,7 +54,7 @@ export const metadata: Metadata = {
       "Generate thousands of unique, professional-grade iOS and Samsung user agents for Instagram and Facebook. Fast, secure, and reliable user agent generation tool.",
     images: [
       {
-        url: "/og-image.png",
+        url: "/images/logo.jpg",
         width: 1200,
         height: 630,
         alt: "UGen Pro - User Agent Generator",
@@ -58,7 +66,7 @@ export const metadata: Metadata = {
     title: "UGen Pro - Professional User Agent Generator",
     description:
       "Generate thousands of unique, professional-grade iOS and Samsung user agents for Instagram and Facebook.",
-    images: ["/og-image.png"],
+    images: ["/images/logo.jpg"],
     creator: "@ugenpro",
   },
   other: {
@@ -97,9 +105,7 @@ export default function RootLayout({
           disableTransitionOnChange={true}
           storageKey="devtools-pro-theme"
         >
-          <ClientProviders>
-            {children}
-          </ClientProviders>
+          <ClientProviders>{children}</ClientProviders>
           <Toaster />
         </ThemeProvider>
       </body>

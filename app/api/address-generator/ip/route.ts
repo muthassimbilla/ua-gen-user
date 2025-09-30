@@ -97,7 +97,7 @@ export async function POST(request: NextRequest) {
     const addresses = await coordsToAddresses(coords.lon, coords.lat, 5)
 
     if (addresses.length === 0) {
-      return NextResponse.json({ success: false, error: "কোনো এড্রেস পাওয়া যায়নি" }, { status: 400 })
+      return NextResponse.json({ success: false, error: "কোনো এড্রেস পাওয়া য���য়নি" }, { status: 400 })
     }
 
     return NextResponse.json({

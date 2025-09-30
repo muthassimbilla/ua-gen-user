@@ -7,11 +7,11 @@
   .page-enter {
     animation: pageEnter 0.3s ease-out forwards;
   }
-  
+
   .page-exit {
     animation: pageExit 0.2s ease-in forwards;
   }
-  
+
   @keyframes pageEnter {
     from {
       opacity: 0;
@@ -22,7 +22,7 @@
       transform: translateY(0) scale(1);
     }
   }
-  
+
   @keyframes pageExit {
     from {
       opacity: 1;
@@ -37,29 +37,29 @@
 
 @layer base {
   :root {
-    /* Enhanced color palette for light mode with better contrast */
+    /* Updated color palette inspired by Studio Herrstrom dark theme */
     --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    --foreground: 0 0% 3.9%;
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card-foreground: 0 0% 3.9%;
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-    --primary: 221.2 83.2% 53.3%;
-    --primary-foreground: 210 40% 98%;
-    --secondary: 210 40% 96%;
-    --secondary-foreground: 222.2 84% 4.9%;
-    --muted: 210 40% 96%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 210 40% 96%;
-    --accent-foreground: 222.2 84% 4.9%;
+    --popover-foreground: 0 0% 3.9%;
+    --primary: 262.1 83.3% 57.8%;
+    --primary-foreground: 210 20% 98%;
+    --secondary: 220 14.3% 95.9%;
+    --secondary-foreground: 220.9 39.3% 11%;
+    --muted: 220 14.3% 95.9%;
+    --muted-foreground: 220 8.9% 46.1%;
+    --accent: 220 14.3% 95.9%;
+    --accent-foreground: 220.9 39.3% 11%;
     --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 221.2 83.2% 53.3%;
+    --destructive-foreground: 210 20% 98%;
+    --border: 220 13% 91%;
+    --input: 220 13% 91%;
+    --ring: 262.1 83.3% 57.8%;
     --radius: 0.75rem;
 
-    /* Glassmorphism specific variables for light mode */
+    /* Enhanced glassmorphism variables */
     --glass-bg: rgba(255, 255, 255, 0.8);
     --glass-border: rgba(0, 0, 0, 0.1);
     --glass-shadow: rgba(0, 0, 0, 0.1);
@@ -68,33 +68,33 @@
   }
 
   .dark {
-    /* Enhanced color palette for dark mode with better contrast */
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-    --primary: 142 76% 36%;
-    --primary-foreground: 355 7% 97%;
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
+    /* Dark theme inspired by modern design systems */
+    --background: 0 0% 3.9%;
+    --foreground: 0 0% 98%;
+    --card: 0 0% 3.9%;
+    --card-foreground: 0 0% 98%;
+    --popover: 0 0% 3.9%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 262.1 83.3% 57.8%;
+    --primary-foreground: 210 20% 98%;
+    --secondary: 215 27.9% 16.9%;
+    --secondary-foreground: 210 20% 98%;
+    --muted: 215 27.9% 16.9%;
+    --muted-foreground: 217.9 10.6% 64.9%;
+    --accent: 215 27.9% 16.9%;
+    --accent-foreground: 210 20% 98%;
     --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 142 76% 36%;
+    --destructive-foreground: 210 20% 98%;
+    --border: 215 27.9% 16.9%;
+    --input: 215 27.9% 16.9%;
+    --ring: 262.1 83.3% 57.8%;
 
-    /* Dark mode glassmorphism variables with better contrast */
-    --glass-bg: rgba(15, 23, 42, 0.9);
-    --glass-border: rgba(148, 163, 184, 0.2);
-    --glass-shadow: rgba(0, 0, 0, 0.5);
+    /* Dark mode glassmorphism with better contrast */
+    --glass-bg: rgba(10, 10, 10, 0.95);
+    --glass-border: rgba(255, 255, 255, 0.1);
+    --glass-shadow: rgba(0, 0, 0, 0.8);
     --backdrop-blur: blur(20px);
-    --glass-gradient: linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 41, 59, 0.9) 100%);
+    --glass-gradient: linear-gradient(135deg, rgba(10, 10, 10, 0.95) 0%, rgba(20, 20, 20, 0.9) 100%);
   }
 }
 
@@ -108,7 +108,7 @@
     scrollbar-gutter: stable both-edges;
     width: 100vw;
     overflow-x: hidden;
-    /* Removed all transitions for instant page changes */
+    scroll-behavior: smooth;
   }
 
   body {
@@ -122,11 +122,8 @@
     scrollbar-gutter: stable both-edges;
     width: 100%;
     min-height: 100vh;
-    /* Removed scroll-behavior smooth for instant navigation */
-    /* Simple background without complex gradients */
+    scroll-behavior: smooth;
     background: hsl(var(--background));
-    /* Removed background animation for instant loading */
-    /* Removed all transitions for instant page changes */
   }
 
   /* Custom animations for tool page */
@@ -145,50 +142,97 @@
     animation: fade-in-up 0.6s ease-out forwards;
   }
 
-  /* Removed all universal transitions for instant interactions */
-}
-
-/* Enhanced scrollbar styles with better contrast */
-::-webkit-scrollbar {
-  width: 12px;
-}
-
-::-webkit-scrollbar-track {
-  background: hsl(var(--muted));
-  border-radius: 6px;
-  border: 1px solid hsl(var(--border));
-}
-
-::-webkit-scrollbar-thumb {
-  background: hsl(var(--accent));
-  border-radius: 6px;
-  border: 1px solid hsl(var(--border));
-  min-height: 40px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: hsl(var(--accent-foreground) / 0.2);
-  /* Removed transform scale for instant hover */
-}
-
-* {
-  scrollbar-width: thin;
-  scrollbar-color: hsl(var(--accent)) hsl(var(--muted));
-}
-
-/* Respect user's motion preferences */
-@media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-    scroll-behavior: auto !important;
+  /* Added new scroll animations */
+  @keyframes slide-in-left {
+    from {
+      opacity: 0;
+      transform: translateX(-50px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
   }
 
-  body {
-    animation: none !important;
+  @keyframes slide-in-right {
+    from {
+      opacity: 0;
+      transform: translateX(50px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  @keyframes slide-in-bottom {
+    from {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  .animate-slide-in-left {
+    animation: slide-in-left 0.8s ease-out forwards;
+  }
+
+  .animate-slide-in-right {
+    animation: slide-in-right 0.8s ease-out forwards;
+  }
+
+  .animate-slide-in-bottom {
+    animation: slide-in-bottom 0.6s ease-out forwards;
+  }
+
+  .animate-fade-in {
+    animation: fade-in 0.6s ease-out forwards;
+  }
+
+  /* Scroll animation classes */
+  .scroll-animate {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
+
+  .scroll-animate.animate {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* Added letterReveal keyframe animation for text animation component */
+  @keyframes letterReveal {
+    from {
+      opacity: 0;
+      transform: translateY(-20px) rotateX(90deg) scale(0.8);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) rotateX(0deg) scale(1);
+    }
+  }
+
+  /* Hover lift effect */
+  .hover-lift {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  .hover-lift:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
   }
 }
 
@@ -213,7 +257,6 @@
     background: radial-gradient(circle at 30% 20%, hsl(var(--primary) / 0.1) 0%, transparent 50%),
       radial-gradient(circle at 70% 80%, hsl(var(--accent) / 0.1) 0%, transparent 50%);
     pointer-events: none;
-    /* Removed floating orbs animation for instant loading */
   }
 
   /* Enhanced glassmorphism card styles */
@@ -238,7 +281,6 @@
   }
 
   .glass-card:hover {
-    /* Removed transform and transitions for instant hover */
     box-shadow: 0 12px 40px var(--glass-shadow), inset 0 1px 0 hsl(var(--accent) / 0.2);
     border-color: hsl(var(--primary) / 0.3);
   }
@@ -261,7 +303,6 @@
     background: radial-gradient(circle at 20% 30%, hsl(var(--primary) / 0.05) 0%, transparent 50%),
       radial-gradient(circle at 80% 70%, hsl(var(--accent) / 0.05) 0%, transparent 50%);
     pointer-events: none;
-    /* Removed floating orbs animation for instant loading */
   }
 
   .auth-form {
@@ -292,7 +333,6 @@
     border-radius: var(--radius);
     box-shadow: inset 0 2px 8px hsl(var(--muted) / 0.3);
     color: hsl(var(--foreground));
-    /* Removed transition for instant input changes */
   }
 
   .auth-input:focus {
@@ -315,31 +355,26 @@
     color: hsl(var(--primary-foreground));
     position: relative;
     overflow: hidden;
-    /* Removed transition for instant button interactions */
   }
 
   .auth-button:hover {
-    /* Removed transform and transitions for instant hover */
     box-shadow: 0 6px 20px hsl(var(--primary) / 0.4), inset 0 1px 0 hsl(var(--primary-foreground) / 0.2);
     background: linear-gradient(135deg, hsl(var(--primary) / 0.9) 0%, hsl(var(--primary) / 0.7) 100%);
   }
 
   .auth-button:active {
-    /* Removed transform for instant click feedback */
     box-shadow: 0 2px 8px hsl(var(--primary) / 0.3), inset 0 1px 0 hsl(var(--primary-foreground) / 0.1);
   }
 
   .auth-button:disabled {
     opacity: 0.6;
     cursor: not-allowed;
-    /* Removed transform for instant disabled state */
   }
 
   /* Enhanced link styles with proper contrast */
   .auth-link {
     color: hsl(var(--primary));
     text-decoration: none;
-    /* Removed transition for instant link interactions */
     position: relative;
   }
 
@@ -356,7 +391,6 @@
     width: 0;
     height: 1px;
     background: hsl(var(--primary));
-    /* Removed transition for instant underline */
   }
 
   .auth-link:hover::after {
@@ -366,12 +400,10 @@
   /* Enhanced theme toggle animation */
   .theme-toggle-icon {
     transform-origin: center;
-    /* Removed transition for instant theme toggle */
     color: hsl(var(--foreground));
   }
 
   .theme-toggle-icon:hover {
-    /* Removed transform and filter for instant hover */
   }
 
   /* Enhanced text contrast for better readability */
@@ -436,7 +468,7 @@
   }
 
   .premium-shine::before {
-    content: '';
+    content: "";
     position: absolute;
     top: 0;
     left: -100%;
@@ -462,5 +494,217 @@
     100% {
       left: 100%;
     }
+  }
+
+  /* New bento grid layout styles */
+  .bento-grid {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    grid-template-rows: repeat(8, 80px);
+    gap: 1rem;
+    width: 100%;
+    height: 100%;
+  }
+
+  .bento-item {
+    background: var(--glass-bg);
+    backdrop-filter: var(--backdrop-blur);
+    border: 1px solid hsl(var(--border));
+    border-radius: var(--radius);
+    box-shadow: 0 8px 32px var(--glass-shadow);
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
+  }
+
+  .bento-item:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 40px var(--glass-shadow);
+    border-color: hsl(var(--primary) / 0.3);
+  }
+
+  .bento-large {
+    grid-column: span 6;
+    grid-row: span 4;
+  }
+
+  .bento-medium {
+    grid-column: span 4;
+    grid-row: span 3;
+  }
+
+  .bento-small {
+    grid-column: span 3;
+    grid-row: span 2;
+  }
+
+  .bento-tall {
+    grid-column: span 3;
+    grid-row: span 4;
+  }
+
+  /* 3D card effects */
+  .card-3d {
+    transform-style: preserve-3d;
+    transition: transform 0.6s;
+  }
+
+  .card-3d:hover {
+    transform: rotateY(10deg) rotateX(5deg);
+  }
+
+  .card-3d-inner {
+    transform: translateZ(20px);
+  }
+
+  /* Floating animation keyframes */
+  @keyframes float-gentle {
+    0%,
+    100% {
+      transform: translateY(0px);
+    }
+    50% {
+      transform: translateY(-10px);
+    }
+  }
+
+  @keyframes float-reverse {
+    0%,
+    100% {
+      transform: translateY(0px);
+    }
+    50% {
+      transform: translateY(10px);
+    }
+  }
+
+  @keyframes pulse-glow {
+    0%,
+    100% {
+      box-shadow: 0 0 20px hsl(var(--primary) / 0.3);
+    }
+    50% {
+      box-shadow: 0 0 40px hsl(var(--primary) / 0.6);
+    }
+  }
+
+  @keyframes text-shimmer {
+    0% {
+      background-position: -200% center;
+    }
+    100% {
+      background-position: 200% center;
+    }
+  }
+
+  .animate-float-gentle {
+    animation: float-gentle 6s ease-in-out infinite;
+  }
+
+  .animate-float-reverse {
+    animation: float-reverse 8s ease-in-out infinite;
+  }
+
+  .animate-pulse-glow {
+    animation: pulse-glow 3s ease-in-out infinite;
+  }
+
+  .animate-text-shimmer {
+    background: linear-gradient(90deg, hsl(var(--foreground)), hsl(var(--primary)), hsl(var(--foreground)));
+    background-size: 200% auto;
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: text-shimmer 3s linear infinite;
+  }
+
+  /* Morphing background shapes */
+  @keyframes morph {
+    0%,
+    100% {
+      border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;
+    }
+    50% {
+      border-radius: 30% 60% 70% 40% / 50% 60% 30% 60%;
+    }
+  }
+
+  .animate-morph {
+    animation: morph 8s ease-in-out infinite;
+  }
+
+  /* Interactive hover effects */
+  .interactive-card {
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+
+  .interactive-card:hover {
+    transform: scale(1.02) translateY(-2px);
+  }
+
+  .interactive-card:active {
+    transform: scale(0.98);
+  }
+
+  /* Added continuous horizontal scrolling animation for testimonials */
+  @keyframes scroll-rtl {
+    0% {
+      transform: translateX(0);
+    }
+    100% {
+      transform: translateX(-50%);
+    }
+  }
+
+  .animate-scroll-rtl {
+    animation: scroll-rtl 30s linear infinite;
+  }
+
+  .pause-animation {
+    animation-play-state: paused;
+  }
+}
+
+/* Enhanced scrollbar styles with better contrast */
+::-webkit-scrollbar {
+  width: 12px;
+}
+
+::-webkit-scrollbar-track {
+  background: hsl(var(--muted));
+  border-radius: 6px;
+  border: 1px solid hsl(var(--border));
+}
+
+::-webkit-scrollbar-thumb {
+  background: hsl(var(--accent));
+  border-radius: 6px;
+  border: 1px solid hsl(var(--border));
+  min-height: 40px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--accent-foreground) / 0.2);
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: hsl(var(--accent)) hsl(var(--muted));
+}
+
+/* Respect user's motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  body {
+    animation: none !important;
   }
 }

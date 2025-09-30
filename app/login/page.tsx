@@ -301,14 +301,7 @@ export default function LoginPage() {
   }
 
   return (
-    <ClientOnly fallback={
-      <div className="h-screen flex items-center justify-center p-4 relative overflow-hidden bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
-        <div className="flex flex-col items-center space-y-6">
-          <div className="w-20 h-20 border-4 border-blue-200 dark:border-blue-800 rounded-full animate-spin border-t-blue-600 dark:border-t-blue-400"></div>
-          <h2 className="text-2xl font-bold text-slate-700 dark:text-slate-300">Loading Login...</h2>
-        </div>
-      </div>
-    }>
+    <ClientOnly>
       <div className="h-screen flex items-center justify-center p-4 relative overflow-hidden bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 page-enter">
       {/* Go Back Button - Fixed Position */}
       <div className="absolute top-6 left-6 z-20">
@@ -372,14 +365,7 @@ export default function LoginPage() {
           {/* Left Side - Branding */}
           <div className="hidden lg:block space-y-8">
             <div className="space-y-4">
-              <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center shadow-lg relative overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent" />
-                {/* U Letter Logo */}
-                <img src="/u-logo.svg" alt="UGen Pro Logo" className="w-full h-full relative z-10 object-contain" />
-                <div className="absolute -top-1 -right-1">
-                  <Sparkles className="w-4 h-4 text-yellow-400 animate-pulse" />
-                </div>
-              </div>
+              <img src="/images/logo.jpg" alt="UGen Pro Logo" className="w-20 h-20 object-cover rounded-2xl shadow-lg" />
               <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
                 Welcome Back
               </h1>

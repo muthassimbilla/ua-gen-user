@@ -193,14 +193,7 @@ export default function SignupPage() {
           {/* Left Side - Branding */}
           <div className="hidden lg:block space-y-8">
             <div className="space-y-4">
-              <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center shadow-lg relative overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent" />
-                {/* U Letter Logo */}
-                <img src="/u-logo.svg" alt="UGen Pro Logo" className="w-full h-full relative z-10 object-contain" />
-                <div className="absolute -top-1 -right-1">
-                  <Sparkles className="w-4 h-4 text-yellow-400 animate-pulse" />
-                </div>
-              </div>
+              <img src="/images/logo.jpg" alt="UGen Pro Logo" className="w-20 h-20 object-cover rounded-2xl shadow-lg" />
               <h1 className="text-4xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
                 Join Our Community
               </h1>
