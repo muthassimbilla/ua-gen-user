@@ -22,7 +22,8 @@ import {
   XCircle,
   Crown,
   Zap,
-  Heart
+  Heart,
+  Lock
 } from "lucide-react"
 import { UserIPDisplay } from "@/components/user-ip-display"
 import { useState, useEffect } from "react"
@@ -157,14 +158,24 @@ export default function ProfilePage() {
                       </div>
                     </div>
             </div>
-                  <Button 
-                    variant="outline" 
-                    onClick={handleLogout}
-                    className="bg-white/50 backdrop-blur-sm border-white/20 hover:bg-white/70 transition-all duration-300"
-                  >
-              <LogOut className="w-4 h-4 mr-2" />
-              Logout
-            </Button>
+                  <div className="flex gap-3">
+                    <Button 
+                      variant="outline" 
+                      onClick={() => window.location.href = '/change-password'}
+                      className="bg-white/50 backdrop-blur-sm border-white/20 hover:bg-white/70 transition-all duration-300"
+                    >
+                      <Lock className="w-4 h-4 mr-2" />
+                      Change Password
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      onClick={handleLogout}
+                      className="bg-white/50 backdrop-blur-sm border-white/20 hover:bg-white/70 transition-all duration-300"
+                    >
+                      <LogOut className="w-4 h-4 mr-2" />
+                      Logout
+                    </Button>
+                  </div>
                 </div>
               </div>
             </div>
