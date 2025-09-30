@@ -1023,7 +1023,7 @@ export default function LandingPage() {
                   <h1 className="text-5xl md:text-7xl font-black text-slate-900 dark:text-white leading-tight">
                     <div className="block text-left">
                       <span className="inline-block mr-4 animate-text-shimmer">Premium Tools</span>
-                      <span className="inline-block text-slate-500 dark:text-slate-400 font-medium text-4xl md:text-6xl">for</span>
+                      <span className="inline-block text-slate-500 dark:text-slate-400 font-medium text-4xl md:text-6xl">For</span>
                       <div className="inline-block ml-4">
                         <span 
                           id="animated-text"

@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { useAdminAuth } from "@/lib/admin-auth-context"
-import { Users, Settings, Shield, Activity, Clock, CheckCircle, Smartphone, RefreshCw, LogIn, AlertTriangle, Globe, UserPlus } from "lucide-react"
+import { Users, Activity, Clock, CheckCircle, Smartphone, RefreshCw, LogIn, AlertTriangle, Globe, UserPlus } from "lucide-react"
 import Link from "next/link"
 import { AdminUserService, type AdminUser } from "@/lib/admin-user-service"
 import { Button } from "@/components/ui/button"
@@ -110,24 +110,6 @@ export default function AdminDashboard() {
       gradient: "from-purple-500 to-pink-600",
       bgColor: "bg-purple-500/10",
       textColor: "text-purple-600 dark:text-purple-400",
-    },
-    {
-      title: "System Settings",
-      description: "System configuration and settings",
-      icon: Settings,
-      href: "/adminbilla/settings",
-      gradient: "from-green-500 to-emerald-600",
-      bgColor: "bg-green-500/10",
-      textColor: "text-green-600 dark:text-green-400",
-    },
-    {
-      title: "Security",
-      description: "Security settings and logs",
-      icon: Shield,
-      href: "/adminbilla/security",
-      gradient: "from-red-500 to-orange-600",
-      bgColor: "bg-red-500/10",
-      textColor: "text-red-600 dark:text-red-400",
     },
   ]
 

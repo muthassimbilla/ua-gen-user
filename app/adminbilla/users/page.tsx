@@ -564,7 +564,10 @@ export default function UserManagementPage() {
                       </>
                     )}
                   </Button>
+                </div>
 
+                {/* Secondary Actions Row */}
+                <div className="flex items-center gap-2">
                   <Button
                     variant="outline"
                     size="sm"
@@ -574,10 +577,6 @@ export default function UserManagementPage() {
                     <Eye className="h-3 w-3 mr-1.5" />
                     View
                   </Button>
-                </div>
-
-                {/* Secondary Actions Row */}
-                <div className="flex items-center gap-2">
                   <Button
                     variant="outline"
                     size="sm"

@@ -5,7 +5,8 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { useAdminAuth } from "@/lib/admin-auth-context"
 import { Button } from "@/components/ui/button"
-import { Home, Users, Settings, BarChart3, Shield, LogOut, User, Menu, X } from "lucide-react"
+import { Home, Users, LogOut, User, Menu, X, Shield } from "lucide-react"
+import ThemeToggle from "@/components/theme-toggle"
 
 export function AdminNavigation() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
@@ -15,9 +16,6 @@ export function AdminNavigation() {
   const navigationItems = [
     { name: "Dashboard", href: "/adminbilla", icon: Home },
     { name: "User Management", href: "/adminbilla/users", icon: Users },
-    { name: "Settings", href: "/adminbilla/settings", icon: Settings },
-    { name: "Analytics", href: "/adminbilla/analytics", icon: BarChart3 },
-    { name: "Security", href: "/adminbilla/security", icon: Shield },
   ]
 
   const toggleSidebar = () => {
@@ -60,14 +58,17 @@ export function AdminNavigation() {
           </div>
 
           {/* Logo */}
-          <div className="flex items-center gap-3 px-6 py-6 border-b border-white/10 relative">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-red-500 to-orange-600 flex items-center justify-center shadow-lg relative overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent" />
-              <Shield className="w-6 h-6 text-white relative z-10" />
+          <div className="flex items-center justify-between px-6 py-6 border-b border-white/10 relative">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-red-500 to-orange-600 flex items-center justify-center shadow-lg relative overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent" />
+                <Shield className="w-6 h-6 text-white relative z-10" />
+              </div>
+              <span className="text-xl font-bold bg-gradient-to-r from-red-600 to-orange-600 bg-clip-text text-transparent">
+                Admin Panel
+              </span>
             </div>
-            <span className="text-xl font-bold bg-gradient-to-r from-red-600 to-orange-600 bg-clip-text text-transparent">
-              Admin Panel
-            </span>
+            <ThemeToggle />
           </div>
 
           {/* Navigation Items */}
