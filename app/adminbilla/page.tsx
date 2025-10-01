@@ -232,27 +232,44 @@ export default function AdminDashboard() {
   }
 
   return (
-    <div className="space-y-4 lg:space-y-6">
-      <div className="glass-card p-3 lg:p-4 rounded-2xl">
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+    <div className="space-y-6 lg:space-y-8 pb-8">
+      {/* Modern Header with Gradient */}
+      <div className="relative glass-card p-6 lg:p-8 rounded-3xl overflow-hidden">
+        {/* Background Gradient */}
+        <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 via-purple-500/5 to-pink-500/10 pointer-events-none" />
+        <div className="absolute -top-24 -right-24 w-64 h-64 bg-blue-500/10 rounded-full blur-3xl" />
+        <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-purple-500/10 rounded-full blur-3xl" />
+        
+        <div className="relative z-10 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div>
-            <h1 className="text-2xl lg:text-3xl font-bold text-foreground mb-2">Admin Dashboard</h1>
-            <p className="text-muted-foreground text-sm lg:text-base">Welcome, {admin?.full_name}</p>
-            <div className="flex items-center gap-2 mt-1">
-              <Clock className="w-3 h-3 text-muted-foreground" />
-              <span className="text-xs text-muted-foreground">Last updated: {lastUpdated.toLocaleTimeString()}</span>
+            <div className="flex items-center gap-3 mb-3">
+              <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center shadow-lg">
+                <Shield className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <h1 className="text-3xl lg:text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                  Admin Dashboard
+                </h1>
+                <p className="text-muted-foreground text-sm lg:text-base">Welcome back, {admin?.full_name}</p>
+              </div>
+            </div>
+            <div className="flex flex-wrap items-center gap-3 mt-2">
+              <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-background/50 backdrop-blur-sm">
+                <Clock className="w-3.5 h-3.5 text-muted-foreground" />
+                <span className="text-xs text-muted-foreground">Updated: {lastUpdated.toLocaleTimeString()}</span>
+              </div>
               {autoRefresh && (
-                <Badge variant="secondary" className="text-xs">
-                  <Activity className="w-3 h-3 mr-1" />
+                <Badge variant="secondary" className="text-xs px-3 py-1.5 bg-green-500/10 text-green-600 dark:text-green-400 border-green-500/20">
+                  <Activity className="w-3.5 h-3.5 mr-1.5 animate-pulse" />
                   Live
                 </Badge>
               )}
             </div>
           </div>
-          <div className="flex items-center gap-2">
-            <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-background/50 backdrop-blur-sm border border-border/50">
               <Switch checked={autoRefresh} onCheckedChange={setAutoRefresh} id="auto-refresh-dashboard" />
-              <label htmlFor="auto-refresh-dashboard" className="text-sm text-muted-foreground">
+              <label htmlFor="auto-refresh-dashboard" className="text-sm font-medium text-foreground cursor-pointer">
                 Auto Refresh
               </label>
             </div>
@@ -274,44 +291,51 @@ export default function AdminDashboard() {
               }}
               variant="outline"
               size="sm"
+              className="px-4 py-2 h-auto bg-background/50 hover:bg-background transition-all duration-200 hover:scale-105"
             >
-              <RefreshCw className="w-4 h-4 mr-2" />
+              <RefreshCw className={`w-4 h-4 mr-2 ${isLoadingData ? 'animate-spin' : ''}`} />
               Refresh
             </Button>
           </div>
         </div>
       </div>
 
+      {/* Stats Cards */}
       {isLoadingData ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4">
-          {[1, 2, 3, 4].map((i) => (
-            <div key={i} className="glass-card p-4 lg:p-6 rounded-2xl animate-pulse">
-              <div className="h-20 bg-muted/50 rounded"></div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="glass-card p-6 lg:p-8 rounded-3xl animate-pulse">
+              <div className="h-24 bg-muted/50 rounded-2xl"></div>
             </div>
           ))}
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
           {stats.map((stat, index) => {
             const Icon = stat.icon
             return (
               <div
                 key={index}
-                className="glass-card p-4 lg:p-6 rounded-2xl hover:shadow-lg transition-all duration-300"
+                className="relative group glass-card p-6 lg:p-8 rounded-3xl hover:shadow-2xl hover:shadow-primary/10 transition-all duration-300 overflow-hidden"
               >
-                <div className="flex items-center justify-between mb-3 lg:mb-4">
-                  <div
-                    className={`w-10 h-10 lg:w-12 lg:h-12 rounded-xl bg-gradient-to-br ${stat.gradient} flex items-center justify-center shadow-lg`}
-                  >
-                    <Icon className="w-5 h-5 lg:w-6 lg:h-6 text-white" />
+                {/* Gradient Background */}
+                <div className={`absolute inset-0 bg-gradient-to-br ${stat.gradient} opacity-0 group-hover:opacity-5 transition-opacity duration-300`} />
+                
+                <div className="relative z-10">
+                  <div className="flex items-center justify-between mb-4 lg:mb-6">
+                    <div
+                      className={`w-14 h-14 lg:w-16 lg:h-16 rounded-2xl bg-gradient-to-br ${stat.gradient} flex items-center justify-center shadow-lg shadow-primary/20 group-hover:scale-110 transition-transform duration-300`}
+                    >
+                      <Icon className="w-7 h-7 lg:w-8 lg:h-8 text-white" />
+                    </div>
+                    <div className={`px-3 py-1.5 rounded-full text-xs font-semibold ${stat.bgColor} ${stat.textColor} border border-current/20`}>
+                      {stat.change}
+                    </div>
                   </div>
-                  <div className={`px-2 py-1 rounded-full text-xs font-medium ${stat.bgColor} ${stat.textColor}`}>
-                    {stat.change}
+                  <div className="space-y-2">
+                    <div className="text-3xl lg:text-4xl font-bold text-foreground">{stat.value}</div>
+                    <div className="text-sm lg:text-base text-muted-foreground font-medium">{stat.title}</div>
                   </div>
-                </div>
-                <div className="space-y-1">
-                  <div className="text-xl lg:text-2xl font-bold text-foreground">{stat.value}</div>
-                  <div className="text-xs lg:text-sm text-muted-foreground">{stat.title}</div>
                 </div>
               </div>
             )
@@ -319,25 +343,35 @@ export default function AdminDashboard() {
         </div>
       )}
 
+      {/* Quick Actions */}
       <div>
-        <h2 className="text-lg lg:text-xl font-semibold text-foreground mb-4 lg:mb-6">Quick Actions</h2>
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 lg:gap-4">
+        <h2 className="text-2xl lg:text-3xl font-bold text-foreground mb-6 lg:mb-8">Quick Actions</h2>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
           {menuItems.map((item) => {
             const Icon = item.icon
             return (
               <Link key={item.href} href={item.href}>
-                <div className="glass-card p-4 lg:p-6 rounded-2xl hover:shadow-lg transition-all duration-300 group cursor-pointer">
-                  <div className="flex items-start space-x-3 lg:space-x-4">
+                <div className="relative group glass-card p-6 lg:p-8 rounded-3xl hover:shadow-2xl hover:shadow-primary/10 transition-all duration-300 cursor-pointer overflow-hidden">
+                  {/* Hover Background */}
+                  <div className={`absolute inset-0 bg-gradient-to-br ${item.gradient} opacity-0 group-hover:opacity-5 transition-opacity duration-300`} />
+                  
+                  <div className="relative z-10 flex items-start space-x-4 lg:space-x-5">
                     <div
-                      className={`w-12 h-12 lg:w-14 lg:h-14 rounded-xl bg-gradient-to-br ${item.gradient} flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300`}
+                      className={`w-16 h-16 lg:w-20 lg:h-20 rounded-2xl bg-gradient-to-br ${item.gradient} flex items-center justify-center shadow-xl group-hover:scale-110 group-hover:rotate-3 transition-all duration-300`}
                     >
-                      <Icon className="w-6 h-6 lg:w-7 lg:h-7 text-white" />
+                      <Icon className="w-8 h-8 lg:w-10 lg:h-10 text-white" />
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <h3 className="text-base lg:text-lg font-semibold text-foreground mb-1 lg:mb-2 group-hover:text-primary transition-colors">
+                    <div className="flex-1 min-w-0 pt-2">
+                      <h3 className="text-lg lg:text-xl font-bold text-foreground mb-2 group-hover:bg-gradient-to-r group-hover:from-blue-600 group-hover:to-purple-600 group-hover:bg-clip-text group-hover:text-transparent transition-all duration-300">
                         {item.title}
                       </h3>
-                      <p className="text-xs lg:text-sm text-muted-foreground leading-relaxed">{item.description}</p>
+                      <p className="text-sm lg:text-base text-muted-foreground leading-relaxed">{item.description}</p>
+                      <div className="mt-3 text-sm font-semibold text-primary opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center gap-1">
+                        View Details
+                        <svg className="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                        </svg>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -347,28 +381,32 @@ export default function AdminDashboard() {
         </div>
       </div>
 
-      <div className="glass-card p-4 lg:p-6 rounded-2xl">
-        <div className="flex items-center justify-between mb-4 lg:mb-6">
-          <h2 className="text-lg lg:text-xl font-semibold text-foreground">Recent Activity</h2>
+      {/* Recent Activity */}
+      <div className="glass-card p-6 lg:p-8 rounded-3xl">
+        <div className="flex items-center justify-between mb-6 lg:mb-8">
+          <div>
+            <h2 className="text-2xl lg:text-3xl font-bold text-foreground mb-1">Recent Activity</h2>
+            <p className="text-sm text-muted-foreground">Latest system events and user actions</p>
+          </div>
           <Button
             onClick={loadRecentActivities}
             variant="outline"
             size="sm"
             disabled={isLoadingActivities}
-            className="text-xs bg-transparent"
+            className="text-sm bg-background/50 hover:bg-background transition-all duration-200 hover:scale-105"
           >
-            <RefreshCw className={`w-3 h-3 mr-2 ${isLoadingActivities ? "animate-spin" : ""}`} />
+            <RefreshCw className={`w-4 h-4 mr-2 ${isLoadingActivities ? "animate-spin spinner" : ""}`} />
             Refresh
           </Button>
         </div>
 
         {isLoadingActivities ? (
-          <div className="space-y-3 lg:space-y-4">
-            {[1, 2, 3, 4, 5].map((i) => (
-              <div key={i} className="animate-pulse">
-                <div className="flex items-center space-x-3 lg:space-x-4 p-2 lg:p-3">
-                  <div className="w-8 h-8 lg:w-10 lg:h-10 rounded-full bg-muted/50"></div>
-                  <div className="flex-1 space-y-2">
+          <div className="space-y-4">
+            {[1, 2, 3, 4].map((i) => (
+              <div key={i} className="animate-pulse p-4 rounded-2xl bg-muted/10">
+                <div className="flex items-center space-x-4">
+                  <div className="w-12 h-12 rounded-2xl bg-muted/50"></div>
+                  <div className="flex-1 space-y-3">
                     <div className="h-4 bg-muted/50 rounded w-3/4"></div>
                     <div className="h-3 bg-muted/50 rounded w-1/2"></div>
                   </div>
@@ -377,43 +415,48 @@ export default function AdminDashboard() {
             ))}
           </div>
         ) : (
-          <div className="space-y-3 lg:space-y-4">
+          <div className="space-y-3">
             {recentActivities.length > 0 ? (
               recentActivities.map((activity, index) => (
                 <div
                   key={activity.id || index}
-                  className="flex items-center space-x-3 lg:space-x-4 p-3 lg:p-4 rounded-xl hover:bg-muted/50 transition-all duration-200 border border-transparent hover:border-border/50"
+                  className="group flex items-center space-x-4 p-4 lg:p-5 rounded-2xl hover:bg-muted/30 transition-all duration-300 border border-border/50 hover:border-primary/30 hover:shadow-lg"
                 >
                   <div
-                    className={`w-10 h-10 lg:w-12 lg:h-12 rounded-full flex items-center justify-center ${getActivityColor(activity.color)}`}
+                    className={`w-12 h-12 lg:w-14 lg:h-14 rounded-2xl flex items-center justify-center ${getActivityColor(activity.color)} group-hover:scale-110 transition-transform duration-300`}
                   >
                     {getActivityIcon(activity.icon)}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-1">
-                      <div className="text-sm font-semibold text-foreground truncate">{activity.action}</div>
+                    <div className="flex items-center gap-2 mb-2">
+                      <div className="text-sm lg:text-base font-bold text-foreground truncate">{activity.action}</div>
                       <Badge
                         variant="outline"
-                        className={`text-xs ${getActivityColor(activity.color).replace("bg-", "bg-").replace("text-", "text-")}`}
+                        className={`text-xs ${getActivityColor(activity.color).replace("bg-", "bg-").replace("text-", "text-")} border-current/30`}
                       >
                         {activity.type}
                       </Badge>
                     </div>
-                    <div className="text-xs text-muted-foreground truncate mb-1">
-                      {activity.user} {activity.username && `(@${activity.username})`}
+                    <div className="text-sm text-muted-foreground truncate mb-1 font-medium">
+                      {activity.user} {activity.username && <span className="text-primary">@{activity.username}</span>}
                     </div>
                     {activity.details && (
-                      <div className="text-xs text-muted-foreground/80 truncate">{activity.details}</div>
+                      <div className="text-xs text-muted-foreground/80 truncate mb-2">{activity.details}</div>
                     )}
-                    <div className="text-xs text-muted-foreground/60 mt-1">{getTimeAgo(activity.time)}</div>
+                    <div className="flex items-center gap-2">
+                      <Clock className="w-3 h-3 text-muted-foreground/60" />
+                      <div className="text-xs text-muted-foreground/60 font-medium">{getTimeAgo(activity.time)}</div>
+                    </div>
                   </div>
                 </div>
               ))
             ) : (
-              <div className="text-center py-12">
-                <Activity className="w-16 h-16 text-muted-foreground/50 mx-auto mb-4" />
-                <h3 className="text-lg font-medium text-foreground mb-2">No Recent Activity</h3>
-                <p className="text-muted-foreground text-sm">
+              <div className="text-center py-16">
+                <div className="w-20 h-20 rounded-3xl bg-gradient-to-br from-blue-500/10 to-purple-500/10 flex items-center justify-center mx-auto mb-6">
+                  <Activity className="w-10 h-10 text-muted-foreground/50" />
+                </div>
+                <h3 className="text-xl font-bold text-foreground mb-2">No Recent Activity</h3>
+                <p className="text-muted-foreground text-sm max-w-sm mx-auto">
                   Activity will appear here as users interact with the system
                 </p>
               </div>
