@@ -53,14 +53,22 @@ export class AdminUserService {
           let uniqueIPCount = 0
           let userAgent = "Unknown"
           let lastLogin = null
-          let userEmail = "unknown@unknown.com"
+          let userEmail = profile.email || "unknown@unknown.com" // Try profile email first
           let telegramUsername = undefined
 
           try {
-            const { data: authUser } = await supabase.auth.admin.getUserById(profile.id)
-            if (authUser?.user?.email) {
+            // Try to get email from Supabase Auth
+            const { data: authUser, error: authError } = await supabase.auth.admin.getUserById(profile.id)
+            if (authError) {
+              console.warn("[v0] Auth API error for user:", profile.id, authError.message)
+              // Continue with profile email if auth fails
+            } else if (authUser?.user?.email) {
               userEmail = authUser.user.email
+              console.log("[v0] Email found in auth for user:", profile.id, userEmail)
+            } else {
+              console.warn("[v0] No email found in auth for user:", profile.id)
             }
+            
             if (authUser?.user?.user_metadata?.telegram_username) {
               telegramUsername = authUser.user.user_metadata.telegram_username
             }
@@ -219,14 +227,20 @@ export class AdminUserService {
 
       const usersWithEmail = await Promise.all(
         (profiles || []).map(async (profile) => {
-          let userEmail = "unknown@unknown.com"
+          let userEmail = profile.email || "unknown@unknown.com" // Try profile email first
           try {
-            const { data: authUser } = await supabase.auth.admin.getUserById(profile.id)
-            if (authUser?.user?.email) {
+            const { data: authUser, error: authError } = await supabase.auth.admin.getUserById(profile.id)
+            if (authError) {
+              console.warn("[v0] Auth API error for pending user:", profile.id, authError.message)
+              // Continue with profile email if auth fails
+            } else if (authUser?.user?.email) {
               userEmail = authUser.user.email
+              console.log("[v0] Email found in auth for pending user:", profile.id, userEmail)
+            } else {
+              console.warn("[v0] No email found in auth for pending user:", profile.id)
             }
           } catch (error) {
-            console.error("[v0] Error getting email for user:", profile.id)
+            console.error("[v0] Error getting email for user:", profile.id, error)
           }
           
           return {
@@ -282,12 +296,27 @@ export class AdminUserService {
       // Get email from auth
       let userEmail = "unknown@unknown.com"
       try {
-        const { data: authUser } = await supabase.auth.admin.getUserById(userId)
-        if (authUser?.user?.email) {
+        const { data: authUser, error: authError } = await supabase.auth.admin.getUserById(userId)
+        if (authError) {
+          console.warn("[v0] Auth API error when updating user:", userId, authError.message)
+          // Try to get email from the updated profile data
+          if (data.email) {
+            userEmail = data.email
+          }
+        } else if (authUser?.user?.email) {
           userEmail = authUser.user.email
+          console.log("[v0] Email found in auth when updating user:", userId, userEmail)
+        } else if (data.email) {
+          // Fallback to profile email
+          userEmail = data.email
+          console.warn("[v0] No email found in auth, using profile email for user:", userId)
         }
       } catch (error) {
-        console.error("[v0] Error getting email for user:", userId)
+        console.error("[v0] Error getting email for user:", userId, error)
+        // Fallback to profile email if available
+        if (data.email) {
+          userEmail = data.email
+        }
       }
 
       return {
