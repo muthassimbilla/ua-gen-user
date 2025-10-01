@@ -79,8 +79,10 @@ export default function UserManagementPage() {
 
   const filteredUsers = users.filter((user) => {
     const matchesSearch =
-      user.full_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.email.toLowerCase().includes(searchTerm.toLowerCase())
+      user.full_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      user.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      user.telegram_username?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      false
 
     const matchesStatus =
       statusFilter === "all" ||
@@ -463,7 +465,9 @@ export default function UserManagementPage() {
                   </div>
                   <div className="min-w-0 flex-1">
                     <h3 className="font-semibold text-foreground text-sm lg:text-base truncate">{user.full_name}</h3>
-                    <p className="text-xs lg:text-sm text-muted-foreground truncate">{user.email}</p>
+                    <p className="text-xs lg:text-sm text-muted-foreground truncate">
+                      {user.email || `@${user.telegram_username}` || 'No contact info'}
+                    </p>
                   </div>
                 </div>
                 <Badge variant={statusInfo.variant} className="text-xs flex-shrink-0">
@@ -639,7 +643,9 @@ export default function UserManagementPage() {
                 </div>
                 <div className="flex-1">
                   <h3 className="text-2xl font-bold text-foreground">{selectedUser.full_name}</h3>
-                  <p className="text-lg text-muted-foreground">{selectedUser.email}</p>
+                  <p className="text-lg text-muted-foreground">
+                    {selectedUser.email || `@${selectedUser.telegram_username}` || 'No contact info'}
+                  </p>
                   <div className="flex items-center gap-2 mt-2">
                     <Badge variant={getStatusInfo(selectedUser.current_status).variant} className="text-sm">
                       {getStatusInfo(selectedUser.current_status).text}
@@ -672,8 +678,12 @@ export default function UserManagementPage() {
                       <span className="text-sm text-foreground font-medium">{selectedUser.full_name}</span>
                     </div>
                     <div className="flex justify-between items-center py-2 border-b border-border">
-                      <span className="text-sm font-medium text-muted-foreground">Email Address</span>
-                      <span className="text-sm text-foreground font-medium">{selectedUser.email}</span>
+                      <span className="text-sm font-medium text-muted-foreground">
+                        {selectedUser.email ? 'Email Address' : 'Telegram Username'}
+                      </span>
+                      <span className="text-sm text-foreground font-medium">
+                        {selectedUser.email || `@${selectedUser.telegram_username}` || 'N/A'}
+                      </span>
                     </div>
                     <div className="flex justify-between items-center py-2 border-b border-border">
                       <span className="text-sm font-medium text-muted-foreground">Account Status</span>
