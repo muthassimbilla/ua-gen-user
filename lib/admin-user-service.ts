@@ -3,7 +3,8 @@ import { createBrowserClient } from "@supabase/ssr"
 export interface AdminUser {
   id: string
   full_name: string
-  telegram_username: string
+  email: string
+  telegram_username?: string
   is_active: boolean
   is_approved: boolean
   approved_at?: string | null
@@ -52,10 +53,14 @@ export class AdminUserService {
           let uniqueIPCount = 0
           let userAgent = "Unknown"
           let lastLogin = null
-          let telegramUsername = "unknown"
+          let userEmail = "unknown@unknown.com"
+          let telegramUsername = undefined
 
           try {
             const { data: authUser } = await supabase.auth.admin.getUserById(profile.id)
+            if (authUser?.user?.email) {
+              userEmail = authUser.user.email
+            }
             if (authUser?.user?.user_metadata?.telegram_username) {
               telegramUsername = authUser.user.user_metadata.telegram_username
             }
@@ -94,6 +99,7 @@ export class AdminUserService {
           return {
             id: profile.id,
             full_name: profile.full_name,
+            email: userEmail,
             telegram_username: telegramUsername,
             is_active: profile.is_active ?? true,
             is_approved: profile.is_approved ?? false,
@@ -211,20 +217,36 @@ export class AdminUserService {
         throw new Error("Failed to load pending users")
       }
 
-      return (profiles || []).map((profile) => ({
-        id: profile.id,
-        full_name: profile.full_name,
-        telegram_username: "unknown",
-        is_active: profile.is_active ?? true,
-        is_approved: profile.is_approved ?? false,
-        approved_at: profile.approved_at,
-        approved_by: profile.approved_by,
-        account_status: profile.account_status || "active",
-        expiration_date: profile.expiration_date,
-        current_status: this.calculateCurrentStatus(profile),
-        created_at: profile.created_at,
-        updated_at: profile.updated_at || profile.created_at,
-      }))
+      const usersWithEmail = await Promise.all(
+        (profiles || []).map(async (profile) => {
+          let userEmail = "unknown@unknown.com"
+          try {
+            const { data: authUser } = await supabase.auth.admin.getUserById(profile.id)
+            if (authUser?.user?.email) {
+              userEmail = authUser.user.email
+            }
+          } catch (error) {
+            console.error("[v0] Error getting email for user:", profile.id)
+          }
+          
+          return {
+            id: profile.id,
+            full_name: profile.full_name,
+            email: userEmail,
+            is_active: profile.is_active ?? true,
+            is_approved: profile.is_approved ?? false,
+            approved_at: profile.approved_at,
+            approved_by: profile.approved_by,
+            account_status: profile.account_status || "active",
+            expiration_date: profile.expiration_date,
+            current_status: this.calculateCurrentStatus(profile),
+            created_at: profile.created_at,
+            updated_at: profile.updated_at || profile.created_at,
+          }
+        })
+      )
+      
+      return usersWithEmail
     } catch (error: any) {
       console.error("[v0] Error getting pending users:", error)
       throw error
@@ -257,10 +279,22 @@ export class AdminUserService {
         throw new Error("Failed to update user")
       }
 
+      // Get email from auth
+      let userEmail = "unknown@unknown.com"
+      try {
+        const { data: authUser } = await supabase.auth.admin.getUserById(userId)
+        if (authUser?.user?.email) {
+          userEmail = authUser.user.email
+        }
+      } catch (error) {
+        console.error("[v0] Error getting email for user:", userId)
+      }
+
       return {
         id: data.id,
         full_name: data.full_name,
-        telegram_username: userData.telegram_username || "unknown",
+        email: userEmail,
+        telegram_username: userData.telegram_username,
         is_active: data.is_active,
         is_approved: data.is_approved || false,
         approved_at: data.approved_at,
@@ -434,7 +468,8 @@ export class AdminUserService {
 
   static async createUser(userData: {
     full_name: string
-    telegram_username: string
+    email: string
+    telegram_username?: string
     is_active?: boolean
     is_approved?: boolean
     account_status?: "active" | "suspended"
@@ -450,7 +485,7 @@ export class AdminUserService {
       }
 
       const { data: authData, error: authError } = await supabase.auth.signUp({
-        email: `${userData.telegram_username}@temp.local`,
+        email: userData.email,
         password: Math.random().toString(36).slice(-12),
         options: {
           data: {
@@ -489,6 +524,7 @@ export class AdminUserService {
       return {
         id: data.id,
         full_name: data.full_name,
+        email: userData.email,
         telegram_username: userData.telegram_username,
         is_active: data.is_active,
         is_approved: data.is_approved || false,
