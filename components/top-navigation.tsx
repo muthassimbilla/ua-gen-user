@@ -38,16 +38,6 @@ export default function TopNavigation() {
     <div className="fixed top-0 left-0 right-0 z-40 h-16 bg-gradient-to-r from-white/95 via-white/90 to-white/95 dark:from-slate-900/95 dark:via-slate-900/90 dark:to-slate-900/95 backdrop-blur-2xl border-b border-white/40 dark:border-slate-700/50 lg:left-64 shadow-xl">
       <div className="flex items-center justify-between h-full px-6">
         <div className="flex items-center gap-4">
-          <div className="hidden sm:block">
-            <h1 className="text-lg font-bold bg-gradient-to-r from-slate-800 to-slate-600 dark:from-slate-200 dark:to-slate-400 bg-clip-text text-transparent">
-              Welcome, {user.full_name}
-            </h1>
-          </div>
-          <div className="sm:hidden">
-            <h1 className="text-base font-bold bg-gradient-to-r from-slate-800 to-slate-600 dark:from-slate-200 dark:to-slate-400 bg-clip-text text-transparent">
-              {user.full_name}
-            </h1>
-          </div>
         </div>
 
         {/* Right side - Profile dropdown */}
@@ -77,7 +67,6 @@ export default function TopNavigation() {
                     <User className="w-7 h-7 text-white relative z-10 group-hover:scale-110 transition-transform duration-300" />
                   </div>
                   <div className="flex-1">
-                    <h3 className="font-bold text-slate-800 dark:text-slate-200 text-lg">{user.full_name}</h3>
                   </div>
                 </div>
               </div>
