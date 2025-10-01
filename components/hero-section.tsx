@@ -1,31 +1,7 @@
-import { memo } from "react"
 import { Button } from "@/components/ui/button"
 import { ArrowRight } from "lucide-react"
-import Link from "next/link"
 
-interface HeroSectionProps {
-  title?: string
-  subtitle?: string
-  description?: string
-  primaryButtonText?: string
-  primaryButtonHref?: string
-  secondaryButtonText?: string
-  secondaryButtonHref?: string
-  badgeText?: string
-  disclaimerText?: string
-}
-
-const HeroSection = memo(function HeroSection({
-  title = "The complete platform to manage projects.",
-  subtitle = "Introducing TaskFlow 2.0",
-  description = "Your team's toolkit to stop configuring and start innovating. Streamline workflows, boost productivity, and deliver projects faster than ever.",
-  primaryButtonText = "Get Started Free",
-  primaryButtonHref = "/signup",
-  secondaryButtonText = "Watch Demo",
-  secondaryButtonHref = "#demo",
-  badgeText = "✨ Introducing TaskFlow 2.0",
-  disclaimerText = "No credit card required • Free 14-day trial"
-}: HeroSectionProps) {
+export function HeroSection() {
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-16">
       {/* Background gradient */}
@@ -37,42 +13,31 @@ const HeroSection = memo(function HeroSection({
       <div className="container relative z-10 mx-auto px-4 py-32">
         <div className="mx-auto max-w-4xl text-center space-y-8">
           <div className="inline-flex items-center rounded-full border border-border bg-muted px-4 py-1.5 text-sm">
-            <span className="text-muted-foreground">{badgeText}</span>
+            <span className="text-muted-foreground">✨ Introducing TaskFlow 2.0</span>
           </div>
 
           <h1 className="text-5xl md:text-7xl font-bold tracking-tight text-balance">
-            {title.split(' ').map((word, index) => 
-              word === 'manage' ? (
-                <span key={index} className="text-primary"> {word} </span>
-              ) : (
-                <span key={index}> {word} </span>
-              )
-            )}
+            The complete platform to <span className="text-primary">manage projects</span>.
           </h1>
 
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto text-balance leading-relaxed">
-            {description}
+            Your team's toolkit to stop configuring and start innovating. Streamline workflows, boost productivity, and
+            deliver projects faster than ever.
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
-            <Button asChild size="lg" className="text-base px-8">
-              <Link href={primaryButtonHref}>
-                {primaryButtonText}
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Link>
+            <Button size="lg" className="text-base px-8">
+              Get Started Free
+              <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
-            <Button asChild size="lg" variant="outline" className="text-base px-8 bg-transparent">
-              <Link href={secondaryButtonHref}>
-                {secondaryButtonText}
-              </Link>
+            <Button size="lg" variant="outline" className="text-base px-8 bg-transparent">
+              Watch Demo
             </Button>
           </div>
 
-          <div className="pt-8 text-sm text-muted-foreground">{disclaimerText}</div>
+          <div className="pt-8 text-sm text-muted-foreground">No credit card required • Free 14-day trial</div>
         </div>
       </div>
     </section>
   )
-})
-
-export { HeroSection }
+}
