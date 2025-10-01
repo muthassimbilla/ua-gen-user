@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-import { useState, useEffect, useCallback, useMemo } from "react"
+import { useState, useEffect, useCallback } from "react"
 import ClientOnly from "@/components/client-only"
 import { useRouter, useSearchParams } from "next/navigation"
 import Link from "next/link"
@@ -70,6 +70,95 @@ export default function LoginPage() {
     }
   }
 
+  const handleInputChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const { name, value } = e.target
+      setFormData((prev) => ({ ...prev, [name]: value }))
+
+      if (errors.length > 0) {
+        setErrors([])
+        setPendingApproval(false)
+      }
+    },
+    [errors.length],
+  )
+
+  const validateForm = useCallback(() => {
+    const newErrors: string[] = []
+
+    if (!formData.email.trim()) {
+      newErrors.push("Email is required")
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      newErrors.push("Please enter a valid email address")
+    }
+
+    if (!formData.password.trim()) {
+      newErrors.push("Password is required")
+    }
+
+    return newErrors
+  }, [formData.email, formData.password])
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+
+    if (isSubmitting) return
+
+    setIsSubmitting(true)
+    setLoading(true)
+    setErrors([])
+    setSuccessMessage("")
+    setPendingApproval(false)
+
+    try {
+      const validationErrors = validateForm()
+      if (validationErrors.length > 0) {
+        setErrors(validationErrors)
+        return
+      }
+
+      const loginTimeout = setTimeout(() => {
+        console.error("[v0] Login timeout")
+        setLoading(false)
+        setIsSubmitting(false)
+        setErrors(["Login is taking longer than expected. Please try again."])
+      }, 10000)
+
+      try {
+        await login(formData.email.trim(), formData.password)
+
+        clearTimeout(loginTimeout)
+
+        const redirectTo = searchParams.get("redirect") || "/tool"
+        setTimeout(() => {
+          router.push(redirectTo)
+        }, 100)
+      } catch (loginError) {
+        clearTimeout(loginTimeout)
+        throw loginError
+      }
+    } catch (error: any) {
+      console.error("[v0] Login error:", error)
+
+      const errorMsg = error.message?.toLowerCase() || ""
+
+      if (errorMsg.includes("deactivated")) {
+        setErrors(["Your account has been deactivated. Please contact support."])
+      } else if (errorMsg.includes("suspended")) {
+        setErrors(["Your account suspended by admin"])
+      } else if (errorMsg.includes("invalid") || errorMsg.includes("credentials")) {
+        setErrors(["Invalid email or password. Please check your credentials and try again."])
+      } else if (errorMsg.includes("email not confirmed")) {
+        setErrors(["Please verify your email address before logging in. Check your inbox for the verification link."])
+      } else {
+        setErrors([error.message || "Login failed. Please try again."])
+      }
+    } finally {
+      setLoading(false)
+      setIsSubmitting(false)
+    }
+  }
+
   useEffect(() => {
     const message = searchParams.get("message")
     const reason = searchParams.get("reason")
@@ -120,92 +209,6 @@ export default function LoginPage() {
 
   if (!isOnline) {
     return <NoInternet onRetry={retryConnection} isReconnecting={isReconnecting} />
-  }
-
-  const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target
-    setFormData((prev) => ({ ...prev, [name]: value }))
-
-    if (errors.length > 0) {
-      setErrors([])
-      setPendingApproval(false)
-    }
-  }, [errors.length])
-
-  const validateForm = useCallback(() => {
-    const newErrors: string[] = []
-
-    if (!formData.email.trim()) {
-      newErrors.push("Email is required")
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      newErrors.push("Please enter a valid email address")
-    }
-
-    if (!formData.password.trim()) {
-      newErrors.push("Password is required")
-    }
-
-    return newErrors
-  }, [formData.email, formData.password])
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-
-    if (isSubmitting) return
-
-    setIsSubmitting(true)
-    setLoading(true)
-    setErrors([])
-    setSuccessMessage("")
-    setPendingApproval(false)
-
-    try {
-      const validationErrors = validateForm()
-      if (validationErrors.length > 0) {
-        setErrors(validationErrors)
-        return
-      }
-
-      const loginTimeout = setTimeout(() => {
-        console.error("[v0] Login timeout")
-        setLoading(false)
-        setIsSubmitting(false)
-        setErrors(["Login is taking longer than expected. Please try again."])
-      }, 10000)
-
-      try {
-        await login(formData.email.trim(), formData.password)
-
-        clearTimeout(loginTimeout)
-
-        const redirectTo = searchParams.get("redirect") || "/premium-tools"
-        setTimeout(() => {
-          router.push(redirectTo)
-        }, 100)
-      } catch (loginError) {
-        clearTimeout(loginTimeout)
-        throw loginError
-      }
-    } catch (error: any) {
-      console.error("[v0] Login error:", error)
-
-      const errorMsg = error.message?.toLowerCase() || ""
-
-      if (errorMsg.includes("deactivated")) {
-        setErrors(["Your account has been deactivated. Please contact support."])
-      } else if (errorMsg.includes("suspended")) {
-        setErrors(["Your account suspended by admin"])
-      } else if (errorMsg.includes("invalid") || errorMsg.includes("credentials")) {
-        setErrors(["Invalid email or password. Please check your credentials and try again."])
-      } else if (errorMsg.includes("email not confirmed")) {
-        setErrors(["Please verify your email address before logging in. Check your inbox for the verification link."])
-      } else {
-        setErrors([error.message || "Login failed. Please try again."])
-      }
-    } finally {
-      setLoading(false)
-      setIsSubmitting(false)
-    }
   }
 
   return (
@@ -449,9 +452,25 @@ export default function LoginPage() {
                     >
                       {loading ? (
                         <div className="flex items-center justify-center gap-2">
-                          <svg className="animate-spin spinner h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                          <svg
+                            className="animate-spin spinner h-5 w-5 text-white"
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                          >
+                            <circle
+                              className="opacity-25"
+                              cx="12"
+                              cy="12"
+                              r="10"
+                              stroke="currentColor"
+                              strokeWidth="4"
+                            ></circle>
+                            <path
+                              className="opacity-75"
+                              fill="currentColor"
+                              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                            ></path>
                           </svg>
                           <span>Signing in...</span>
                         </div>

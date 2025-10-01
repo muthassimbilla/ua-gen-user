@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server"
+import { type NextRequest, NextResponse } from "next/server"
 import { createClient } from "@supabase/supabase-js"
 
 export async function POST(request: NextRequest) {
@@ -13,30 +13,30 @@ export async function POST(request: NextRequest) {
     if (!supabaseUrl || !supabaseKey) {
       return NextResponse.json({
         success: false,
-        error: "Environment variables not configured"
+        error: "Environment variables not configured",
       })
     }
 
     const supabase = createClient(supabaseUrl, supabaseKey)
 
     if (action === "approve") {
-      // Approve user
       const { data, error } = await supabase
-        .from("users")
+        .from("profiles")
         .update({
           is_approved: true,
           account_status: "active",
           is_active: true,
-          approved_at: new Date().toISOString()
+          approved_at: new Date().toISOString(),
         })
         .eq("id", user_id)
         .select()
 
       if (error) {
+        console.error("[v0] Approve user error:", error)
         return NextResponse.json({
           success: false,
           error: "Failed to approve user",
-          details: error.message
+          details: error.message,
         })
       }
 
@@ -44,27 +44,28 @@ export async function POST(request: NextRequest) {
         success: true,
         data: {
           message: "User approved successfully",
-          user: data[0]
-        }
+          user: data[0],
+        },
       })
     } else if (action === "reject") {
-      // Reject user
       const { data, error } = await supabase
-        .from("users")
+        .from("profiles")
         .update({
           is_approved: false,
           account_status: "inactive",
           is_active: false,
-          rejected_at: new Date().toISOString()
+          approved_at: null,
+          approved_by: null,
         })
         .eq("id", user_id)
         .select()
 
       if (error) {
+        console.error("[v0] Reject user error:", error)
         return NextResponse.json({
           success: false,
           error: "Failed to reject user",
-          details: error.message
+          details: error.message,
         })
       }
 
@@ -72,22 +73,21 @@ export async function POST(request: NextRequest) {
         success: true,
         data: {
           message: "User rejected successfully",
-          user: data[0]
-        }
+          user: data[0],
+        },
       })
     } else {
       return NextResponse.json({
         success: false,
-        error: "Invalid action. Use 'approve' or 'reject'"
+        error: "Invalid action. Use 'approve' or 'reject'",
       })
     }
-
   } catch (error: any) {
     console.error("[v0] Admin action error:", error)
     return NextResponse.json({
       success: false,
       error: "Admin action failed",
-      details: error.message
+      details: error.message,
     })
   }
 }

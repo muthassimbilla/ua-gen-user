@@ -130,10 +130,17 @@ export default function PremiumToolsPage() {
     }
 
     if (user) {
-      // Determine user status
       const isPending = !user.is_approved
       const isExpired = user.expiration_date && new Date(user.expiration_date) < new Date()
+      const isSuspended = user.status === "suspended"
 
+      // If user is approved and not expired/suspended, redirect to tools page
+      if (user.is_approved && !isExpired && !isSuspended) {
+        router.push("/tool")
+        return
+      }
+
+      // Determine user status for display
       if (isPending) {
         setUserStatus("pending")
       } else if (isExpired) {

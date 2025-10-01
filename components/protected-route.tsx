@@ -25,8 +25,9 @@ export function ProtectedRoute({ children, redirectTo = "/login", requireApprove
     if (!loading && user && requireApproved) {
       const isPending = !user.is_approved
       const isExpired = user.expiration_date && new Date(user.expiration_date) < new Date()
+      const isSuspended = user.status === "suspended"
 
-      if (isPending || isExpired) {
+      if (isPending || isExpired || isSuspended) {
         router.push("/premium-tools")
         return
       }
@@ -46,8 +47,9 @@ export function ProtectedRoute({ children, redirectTo = "/login", requireApprove
   if (requireApproved) {
     const isPending = !user.is_approved
     const isExpired = user.expiration_date && new Date(user.expiration_date) < new Date()
+    const isSuspended = user.status === "suspended"
 
-    if (isPending || isExpired) {
+    if (isPending || isExpired || isSuspended) {
       return <LoadingSpinner />
     }
   }
