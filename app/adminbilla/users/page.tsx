@@ -80,7 +80,7 @@ export default function UserManagementPage() {
   const filteredUsers = users.filter((user) => {
     const matchesSearch =
       user.full_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.telegram_username.toLowerCase().includes(searchTerm.toLowerCase())
+      user.email.toLowerCase().includes(searchTerm.toLowerCase())
 
     const matchesStatus =
       statusFilter === "all" ||
@@ -237,7 +237,7 @@ export default function UserManagementPage() {
 
   const handleSaveNewUser = async (userData: {
     full_name: string
-    telegram_username: string
+    email: string
     is_active: boolean
     account_status: "active" | "suspended"
     expiration_date?: string | null
@@ -422,7 +422,7 @@ export default function UserManagementPage() {
           <div className="flex-1 relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Search by name or telegram username..."
+              placeholder="Search by name or email address..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-10 text-sm"
@@ -463,7 +463,7 @@ export default function UserManagementPage() {
                   </div>
                   <div className="min-w-0 flex-1">
                     <h3 className="font-semibold text-foreground text-sm lg:text-base truncate">{user.full_name}</h3>
-                    <p className="text-xs lg:text-sm text-muted-foreground truncate">@{user.telegram_username}</p>
+                    <p className="text-xs lg:text-sm text-muted-foreground truncate">{user.email}</p>
                   </div>
                 </div>
                 <Badge variant={statusInfo.variant} className="text-xs flex-shrink-0">
@@ -639,7 +639,7 @@ export default function UserManagementPage() {
                 </div>
                 <div className="flex-1">
                   <h3 className="text-2xl font-bold text-foreground">{selectedUser.full_name}</h3>
-                  <p className="text-lg text-muted-foreground">@{selectedUser.telegram_username}</p>
+                  <p className="text-lg text-muted-foreground">{selectedUser.email}</p>
                   <div className="flex items-center gap-2 mt-2">
                     <Badge variant={getStatusInfo(selectedUser.current_status).variant} className="text-sm">
                       {getStatusInfo(selectedUser.current_status).text}
@@ -672,8 +672,8 @@ export default function UserManagementPage() {
                       <span className="text-sm text-foreground font-medium">{selectedUser.full_name}</span>
                     </div>
                     <div className="flex justify-between items-center py-2 border-b border-border">
-                      <span className="text-sm font-medium text-muted-foreground">Telegram Username</span>
-                      <span className="text-sm text-foreground font-medium">@{selectedUser.telegram_username}</span>
+                      <span className="text-sm font-medium text-muted-foreground">Email Address</span>
+                      <span className="text-sm text-foreground font-medium">{selectedUser.email}</span>
                     </div>
                     <div className="flex justify-between items-center py-2 border-b border-border">
                       <span className="text-sm font-medium text-muted-foreground">Account Status</span>
@@ -1160,7 +1160,7 @@ function EditUserForm({
 }) {
   const [formData, setFormData] = useState({
     full_name: user.full_name,
-    telegram_username: user.telegram_username,
+    email: user.email,
     is_active: user.is_active,
   })
 
@@ -1186,11 +1186,13 @@ function EditUserForm({
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="telegram_username">টেলিগ্রাম ইউজারনেম</Label>
+        <Label htmlFor="email">ইমেইল ঠিকানা</Label>
         <Input
-          id="telegram_username"
-          value={formData.telegram_username}
-          onChange={(e) => setFormData((prev) => ({ ...prev, telegram_username: e.target.value }))}
+          id="email"
+          type="email"
+          value={formData.email}
+          onChange={(e) => setFormData((prev) => ({ ...prev, email: e.target.value }))}
+          placeholder="user@gmail.com"
           required
         />
       </div>
@@ -1227,7 +1229,7 @@ function CreateUserForm({
 }: {
   onSave: (userData: {
     full_name: string
-    telegram_username: string
+    email: string
     is_active: boolean
     account_status: "active" | "suspended"
     expiration_date?: string | null
@@ -1236,7 +1238,7 @@ function CreateUserForm({
 }) {
   const [formData, setFormData] = useState({
     full_name: "",
-    telegram_username: "",
+    email: "",
     is_active: true,
     account_status: "active" as "active" | "suspended",
     hasExpiration: false,
@@ -1252,10 +1254,10 @@ function CreateUserForm({
       newErrors.push("Full name is required")
     }
 
-    if (!formData.telegram_username.trim()) {
-      newErrors.push("Telegram username is required")
-    } else if (!/^[a-zA-Z0-9_]{5,32}$/.test(formData.telegram_username)) {
-      newErrors.push("Telegram username must be 5-32 characters and contain only letters, numbers, and underscores")
+    if (!formData.email.trim()) {
+      newErrors.push("Email address is required")
+    } else if (!/^[^\s@]+@gmail\.com$/.test(formData.email.toLowerCase())) {
+      newErrors.push("Only Gmail addresses (@gmail.com) are accepted")
     }
 
     if (formData.hasExpiration && !formData.expiration_date) {
@@ -1275,7 +1277,7 @@ function CreateUserForm({
 
     const userData = {
       full_name: formData.full_name.trim(),
-      telegram_username: formData.telegram_username.trim(),
+      email: formData.email.trim().toLowerCase(),
       is_active: formData.is_active,
       account_status: formData.account_status,
       expiration_date:
@@ -1321,15 +1323,16 @@ function CreateUserForm({
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="create_telegram_username">টেলিগ্রাম ইউজারনেম *</Label>
+          <Label htmlFor="create_email">ইমেইল ঠিকানা (শুধুমাত্র Gmail) *</Label>
           <Input
-            id="create_telegram_username"
-            value={formData.telegram_username}
-            onChange={(e) => setFormData((prev) => ({ ...prev, telegram_username: e.target.value }))}
-            placeholder="টেলিগ্রাম ইউজারনেম (@ ছাড়া)"
+            id="create_email"
+            type="email"
+            value={formData.email}
+            onChange={(e) => setFormData((prev) => ({ ...prev, email: e.target.value }))}
+            placeholder="yourname@gmail.com"
             required
           />
-          <p className="text-xs text-muted-foreground">৫-৩২ অক্ষরের হতে হবে, শুধুমাত্র অক্ষর, সংখ্যা ও আন্ডারস্কোর ব্যবহার করুন</p>
+          <p className="text-xs text-muted-foreground">শুধুমাত্র Gmail ঠিকানা (@gmail.com) গ্রহণযোগ্য</p>
         </div>
       </div>
 

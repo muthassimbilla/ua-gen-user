@@ -438,7 +438,7 @@ export default function AdminDashboard() {
                       </Badge>
                     </div>
                     <div className="text-sm text-muted-foreground truncate mb-1 font-medium">
-                      {activity.user} {activity.username && <span className="text-primary">@{activity.username}</span>}
+                      {activity.user} {activity.email && <span className="text-primary">({activity.email})</span>}
                     </div>
                     {activity.details && (
                       <div className="text-xs text-muted-foreground/80 truncate mb-2">{activity.details}</div>
