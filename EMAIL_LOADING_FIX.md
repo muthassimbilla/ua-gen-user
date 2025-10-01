@@ -31,18 +31,18 @@ Added better error messages and warnings to help diagnose issues:
 
 ### 1. Check Supabase Configuration
 Ensure that the following environment variables are properly set:
-```
+\`\`\`
 NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
-```
+\`\`\`
 
 ### 2. Verify Database Structure
 Make sure the profiles table has an email column:
-```sql
+\`\`\`sql
 SELECT column_name, data_type 
 FROM information_schema.columns 
 WHERE table_name = 'profiles' AND column_name = 'email';
-```
+\`\`\`
 
 ### 3. Check Supabase Auth Setup
 Verify that users are properly created in the auth.users table and that the profiles table is correctly linked.

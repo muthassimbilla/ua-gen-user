@@ -80,21 +80,21 @@
 ### যদি আরও অপ্টিমাইজেশন করতে চান:
 
 1. **Lazy Loading**
-   ```typescript
+   \`\`\`typescript
    const AuthThemeToggle = dynamic(() => import('@/components/auth-theme-toggle'), {
      ssr: false
    })
-   ```
+   \`\`\`
 
 2. **Debounce Email Validation**
-   ```typescript
+   \`\`\`typescript
    const debouncedEmailCheck = useMemo(
      () => debounce((email) => {
        // Validation logic
      }, 300),
      []
    )
-   ```
+   \`\`\`
 
 3. **Virtual Scrolling** (if adding long lists)
 

@@ -1,9 +1,9 @@
 # 🔧 Console Error Fix - Backward Compatibility
 
 ## সমস্যা
-```
+\`\`\`
 TypeError: Cannot read properties of undefined (reading 'toLowerCase')
-```
+\`\`\`
 
 Database এ এখনও `telegram_username` field আছে কিন্তু code `user.email` expect করছিল।
 
@@ -14,7 +14,7 @@ Database এ এখনও `telegram_username` field আছে কিন্তু
 ### **1. Safe Filter with Optional Chaining**
 
 **আগে:**
-```typescript
+\`\`\`typescript
 const filteredUsers = users.filter((user) => {
   const matchesSearch =
     user.full_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -22,10 +22,10 @@ const filteredUsers = users.filter((user) => {
     
   return matchesSearch && matchesStatus
 })
-```
+\`\`\`
 
 **এখন:**
-```typescript
+\`\`\`typescript
 const filteredUsers = users.filter((user) => {
   const matchesSearch =
     user.full_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -35,26 +35,26 @@ const filteredUsers = users.filter((user) => {
     
   return matchesSearch && matchesStatus
 })
-```
+\`\`\`
 
 ### **2. Safe Display with Fallback**
 
 **User Card Display:**
-```tsx
+\`\`\`tsx
 <p className="text-xs lg:text-sm text-muted-foreground truncate">
   {user.email || `@${user.telegram_username}` || 'No contact info'}
 </p>
-```
+\`\`\`
 
 **User Details View:**
-```tsx
+\`\`\`tsx
 <p className="text-lg text-muted-foreground">
   {selectedUser.email || `@${selectedUser.telegram_username}` || 'No contact info'}
 </p>
-```
+\`\`\`
 
 **Info Section:**
-```tsx
+\`\`\`tsx
 <div className="flex justify-between items-center py-2 border-b border-border">
   <span className="text-sm font-medium text-muted-foreground">
     {selectedUser.email ? 'Email Address' : 'Telegram Username'}
@@ -63,17 +63,17 @@ const filteredUsers = users.filter((user) => {
     {selectedUser.email || `@${selectedUser.telegram_username}` || 'N/A'}
   </span>
 </div>
-```
+\`\`\`
 
 ### **3. Dashboard Activity Display**
 
-```tsx
+\`\`\`tsx
 <div className="text-sm text-muted-foreground truncate mb-1 font-medium">
   {activity.user} 
   {activity.email && <span className="text-primary">({activity.email})</span>}
   {!activity.email && activity.username && <span className="text-primary">(@{activity.username})</span>}
 </div>
-```
+\`\`\`
 
 ---
 
@@ -101,58 +101,58 @@ Label changes based on data:
 ## 📊 Migration Strategy
 
 ### **Phase 1: Dual Support** ✅ (Current)
-```typescript
+\`\`\`typescript
 // Support both fields
 {user.email || `@${user.telegram_username}` || 'No contact info'}
-```
+\`\`\`
 
 ### **Phase 2: Database Migration** (Next)
-```sql
+\`\`\`sql
 -- Add email column
 ALTER TABLE users ADD COLUMN email VARCHAR(255);
 
 -- Migrate existing users
 -- Manual process to collect emails
-```
+\`\`\`
 
 ### **Phase 3: Email Only** (Future)
-```typescript
+\`\`\`typescript
 // Remove telegram_username support
 {user.email || 'No email'}
-```
+\`\`\`
 
 ---
 
 ## 🔍 Other Console Errors
 
 ### **1. 403 Forbidden Errors**
-```
+\`\`\`
 tusbcjynjmiwomfmvjom.supabase.co/auth/v1/admin/users/{id}: 403
-```
+\`\`\`
 
 **Cause:** Admin API calls require service role key  
 **Solution:** Backend API routes need to use service role, not anon key
 
 ### **2. 406 Not Acceptable Errors**
-```
+\`\`\`
 tusbcjynjmiwomfmvjom.supabase.co/rest/v1/user_sessions: 406
-```
+\`\`\`
 
 **Cause:** Missing or incorrect Accept headers  
 **Solution:** Add proper headers to Supabase queries:
-```typescript
+\`\`\`typescript
 const { data } = await supabase
   .from('user_sessions')
   .select('*')
   .headers({
     'Accept': 'application/json'
   })
-```
+\`\`\`
 
 ### **3. Multiple GoTrueClient Warning**
-```
+\`\`\`
 Multiple GoTrueClient instances detected...
-```
+\`\`\`
 
 **Cause:** Multiple Supabase client instances  
 **Solution:** Use singleton pattern for Supabase client

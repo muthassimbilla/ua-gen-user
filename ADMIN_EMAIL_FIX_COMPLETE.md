@@ -11,22 +11,22 @@ Screenshot এ দেখা যাচ্ছিল:
 ## ✅ সমাধান - Phase 1: Frontend Fix
 
 ### **1. User Display (users/page.tsx)**
-```typescript
+\`\`\`typescript
 // User card display - with fallback
 {user.email || `@${user.telegram_username}` || 'No contact info'}
 
 // User details - dynamic label
 {selectedUser.email ? 'Email Address' : 'Telegram Username'}
 {selectedUser.email || `@${selectedUser.telegram_username}` || 'N/A'}
-```
+\`\`\`
 
 ### **2. Search Functionality**
-```typescript
+\`\`\`typescript
 // Support both email and telegram_username
 user.full_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
 user.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
 user.telegram_username?.toLowerCase().includes(searchTerm.toLowerCase())
-```
+\`\`\`
 
 ### **3. Forms**
 - Edit form: Email field with validation
@@ -38,7 +38,7 @@ user.telegram_username?.toLowerCase().includes(searchTerm.toLowerCase())
 ## ✅ সমাধান - Phase 2: Backend Fix (admin-user-service.ts)
 
 ### **1. Interface Update**
-```typescript
+\`\`\`typescript
 export interface AdminUser {
   id: string
   full_name: string
@@ -46,10 +46,10 @@ export interface AdminUser {
   telegram_username?: string       // ✅ Optional now
   // ... rest of fields
 }
-```
+\`\`\`
 
 ### **2. getAllUsers() - Email Fetch**
-```typescript
+\`\`\`typescript
 // Fetch email from Supabase Auth
 const { data: authUser } = await supabase.auth.admin.getUserById(profile.id)
 if (authUser?.user?.email) {
@@ -61,10 +61,10 @@ return {
   email: userEmail,
   telegram_username: telegramUsername,  // Optional fallback
 }
-```
+\`\`\`
 
 ### **3. getPendingUsers() - Email Fetch**
-```typescript
+\`\`\`typescript
 const usersWithEmail = await Promise.all(
   (profiles || []).map(async (profile) => {
     let userEmail = "unknown@unknown.com"
@@ -85,10 +85,10 @@ const usersWithEmail = await Promise.all(
     }
   })
 )
-```
+\`\`\`
 
 ### **4. updateUser() - Email Fetch**
-```typescript
+\`\`\`typescript
 // Get email from auth after update
 let userEmail = "unknown@unknown.com"
 try {
@@ -105,10 +105,10 @@ return {
   email: userEmail,
   telegram_username: userData.telegram_username,
 }
-```
+\`\`\`
 
 ### **5. createUser() - Email Support**
-```typescript
+\`\`\`typescript
 // Interface updated
 static async createUser(userData: {
   full_name: string
@@ -135,21 +135,21 @@ return {
   email: userData.email,
   telegram_username: userData.telegram_username,
 }
-```
+\`\`\`
 
 ---
 
 ## 🔍 Data Flow
 
 ### **Before:**
-```
+\`\`\`
 Database (profiles) 
   → telegram_username: "unknown"
   → Show: @unknown ❌
-```
+\`\`\`
 
 ### **After:**
-```
+\`\`\`
 Database (profiles) 
   ↓
 Supabase Auth (auth.users)
@@ -163,7 +163,7 @@ AdminUser Interface
 Display
   → Primary: user@gmail.com ✅
   → Fallback: @username (if email missing)
-```
+\`\`\`
 
 ---
 
@@ -206,24 +206,24 @@ Display
 ## 🔄 Backward Compatibility
 
 ### **Existing Users (with telegram_username only):**
-```tsx
+\`\`\`tsx
 // Display shows fallback
 {user.email || `@${user.telegram_username}` || 'No contact info'}
 // Shows: @their_username
-```
+\`\`\`
 
 ### **New Users (with email):**
-```tsx
+\`\`\`tsx
 // Display shows email
 {user.email || `@${user.telegram_username}` || 'No contact info'}
 // Shows: user@gmail.com
-```
+\`\`\`
 
 ### **Search Works for Both:**
-```typescript
+\`\`\`typescript
 user.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
 user.telegram_username?.toLowerCase().includes(searchTerm.toLowerCase())
-```
+\`\`\`
 
 ---
 
@@ -245,26 +245,26 @@ user.telegram_username?.toLowerCase().includes(searchTerm.toLowerCase())
 ## 🎉 Expected Result
 
 ### **User Details Dialog:**
-```
+\`\`\`
 Md Rokonuzzaman
 user@gmail.com              ✅ (not @unknown)
 
 Basic Information:
 Email Address: user@gmail.com    ✅
-```
+\`\`\`
 
 ### **User Card:**
-```
+\`\`\`
 Md Rokonuzzaman
 user@gmail.com              ✅ (not @unknown)
-```
+\`\`\`
 
 ### **Search:**
-```
+\`\`\`
 "rokon" → ✅ Found
 "user@gmail.com" → ✅ Found
 "gmail" → ✅ Found
-```
+\`\`\`
 
 ---
 
@@ -273,7 +273,7 @@ user@gmail.com              ✅ (not @unknown)
 ### **Optional: Database Migration**
 যদি `profiles` table এ email column add করতে চান:
 
-```sql
+\`\`\`sql
 -- Add email column to profiles
 ALTER TABLE profiles ADD COLUMN email VARCHAR(255);
 
@@ -282,7 +282,7 @@ CREATE INDEX idx_profiles_email ON profiles(email);
 
 -- Update existing records (manual process)
 -- UPDATE profiles SET email = [get from auth.users]
-```
+\`\`\`
 
 ### **Benefits:**
 - Faster queries (no need to call `auth.admin.getUserById`)

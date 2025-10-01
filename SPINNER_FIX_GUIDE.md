@@ -8,7 +8,7 @@
 ### ১. Custom CSS Animation যোগ করা হয়েছে
 **File**: `app/globals.css`
 
-```css
+\`\`\`css
 /* Spinner animation - always enabled */
 @keyframes spin {
   from {
@@ -22,12 +22,12 @@
 .spinner {
   animation: spin 1s linear infinite !important;
 }
-```
+\`\`\`
 
 ### ২. Reduced Motion Media Query ফিক্স
 Spinner animations কে `prefers-reduced-motion` থেকে exclude করা হয়েছে:
 
-```css
+\`\`\`css
 @media (prefers-reduced-motion: reduce) {
   *:not(.animate-spin):not(.spinner),
   *:not(.animate-spin):not(.spinner)::before,
@@ -45,17 +45,17 @@ Spinner animations কে `prefers-reduced-motion` থেকে exclude কর�
     animation-iteration-count: infinite !important;
   }
 }
-```
+\`\`\`
 
 ### ৩. SVG Spinner Implementation
 সব auth pages এ নিম্নলিখিত spinner pattern ব্যবহার করা হয়েছে:
 
-```tsx
+\`\`\`tsx
 <svg className="animate-spin spinner h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
   <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
 </svg>
-```
+\`\`\`
 
 ## ✅ Fixed Pages
 
@@ -86,10 +86,10 @@ Spinner animations কে `prefers-reduced-motion` থেকে exclude কর�
 3. Spinner ঘুরছে কিনা দেখুন
 
 ### Browser DevTools দিয়ে test:
-```javascript
+\`\`\`javascript
 // Reduced motion emulate করুন
 // Chrome DevTools > Rendering > Emulate CSS media feature prefers-reduced-motion
-```
+\`\`\`
 
 Spinner এখনও ঘুরতে থাকবে কারণ আমরা explicitly override করেছি।
 

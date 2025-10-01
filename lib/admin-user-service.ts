@@ -53,26 +53,10 @@ export class AdminUserService {
           let uniqueIPCount = 0
           let userAgent = "Unknown"
           let lastLogin = null
-          let userEmail = profile.email || "unknown@unknown.com" // Try profile email first
-          let telegramUsername = undefined
+          const userEmail = profile.email || "No email"
+          const telegramUsername = profile.telegram_username
 
           try {
-            // Try to get email from Supabase Auth
-            const { data: authUser, error: authError } = await supabase.auth.admin.getUserById(profile.id)
-            if (authError) {
-              console.warn("[v0] Auth API error for user:", profile.id, authError.message)
-              // Continue with profile email if auth fails
-            } else if (authUser?.user?.email) {
-              userEmail = authUser.user.email
-              console.log("[v0] Email found in auth for user:", profile.id, userEmail)
-            } else {
-              console.warn("[v0] No email found in auth for user:", profile.id)
-            }
-            
-            if (authUser?.user?.user_metadata?.telegram_username) {
-              telegramUsername = authUser.user.user_metadata.telegram_username
-            }
-
             // Count unique IP addresses for this user
             const { data: ipHistory, error: ipError } = await supabase
               .from("user_ip_history")
@@ -225,41 +209,21 @@ export class AdminUserService {
         throw new Error("Failed to load pending users")
       }
 
-      const usersWithEmail = await Promise.all(
-        (profiles || []).map(async (profile) => {
-          let userEmail = profile.email || "unknown@unknown.com" // Try profile email first
-          try {
-            const { data: authUser, error: authError } = await supabase.auth.admin.getUserById(profile.id)
-            if (authError) {
-              console.warn("[v0] Auth API error for pending user:", profile.id, authError.message)
-              // Continue with profile email if auth fails
-            } else if (authUser?.user?.email) {
-              userEmail = authUser.user.email
-              console.log("[v0] Email found in auth for pending user:", profile.id, userEmail)
-            } else {
-              console.warn("[v0] No email found in auth for pending user:", profile.id)
-            }
-          } catch (error) {
-            console.error("[v0] Error getting email for user:", profile.id, error)
-          }
-          
-          return {
-            id: profile.id,
-            full_name: profile.full_name,
-            email: userEmail,
-            is_active: profile.is_active ?? true,
-            is_approved: profile.is_approved ?? false,
-            approved_at: profile.approved_at,
-            approved_by: profile.approved_by,
-            account_status: profile.account_status || "active",
-            expiration_date: profile.expiration_date,
-            current_status: this.calculateCurrentStatus(profile),
-            created_at: profile.created_at,
-            updated_at: profile.updated_at || profile.created_at,
-          }
-        })
-      )
-      
+      const usersWithEmail = (profiles || []).map((profile) => ({
+        id: profile.id,
+        full_name: profile.full_name,
+        email: profile.email || "No email",
+        is_active: profile.is_active ?? true,
+        is_approved: profile.is_approved ?? false,
+        approved_at: profile.approved_at,
+        approved_by: profile.approved_by,
+        account_status: profile.account_status || "active",
+        expiration_date: profile.expiration_date,
+        current_status: this.calculateCurrentStatus(profile),
+        created_at: profile.created_at,
+        updated_at: profile.updated_at || profile.created_at,
+      }))
+
       return usersWithEmail
     } catch (error: any) {
       console.error("[v0] Error getting pending users:", error)
@@ -281,6 +245,7 @@ export class AdminUserService {
         .from("profiles")
         .update({
           full_name: userData.full_name,
+          email: userData.email, // Update email in profiles table
           is_active: userData.is_active,
           updated_at: new Date().toISOString(),
         })
@@ -293,37 +258,11 @@ export class AdminUserService {
         throw new Error("Failed to update user")
       }
 
-      // Get email from auth
-      let userEmail = "unknown@unknown.com"
-      try {
-        const { data: authUser, error: authError } = await supabase.auth.admin.getUserById(userId)
-        if (authError) {
-          console.warn("[v0] Auth API error when updating user:", userId, authError.message)
-          // Try to get email from the updated profile data
-          if (data.email) {
-            userEmail = data.email
-          }
-        } else if (authUser?.user?.email) {
-          userEmail = authUser.user.email
-          console.log("[v0] Email found in auth when updating user:", userId, userEmail)
-        } else if (data.email) {
-          // Fallback to profile email
-          userEmail = data.email
-          console.warn("[v0] No email found in auth, using profile email for user:", userId)
-        }
-      } catch (error) {
-        console.error("[v0] Error getting email for user:", userId, error)
-        // Fallback to profile email if available
-        if (data.email) {
-          userEmail = data.email
-        }
-      }
-
       return {
         id: data.id,
         full_name: data.full_name,
-        email: userEmail,
-        telegram_username: userData.telegram_username,
+        email: data.email || "No email",
+        telegram_username: data.telegram_username,
         is_active: data.is_active,
         is_approved: data.is_approved || false,
         approved_at: data.approved_at,
@@ -533,6 +472,7 @@ export class AdminUserService {
       const { data, error } = await supabase
         .from("profiles")
         .update({
+          email: userData.email, // Ensure email is stored in profile
           is_active: userData.is_active ?? true,
           is_approved: userData.is_approved ?? true,
           account_status: userData.account_status ?? "active",

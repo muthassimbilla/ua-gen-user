@@ -11,14 +11,14 @@ Admin Panel এ Telegram username system থেকে Email (Gmail) system এ �
 
 #### **A. Search & Filter System** 🔍
 **আগে:**
-```typescript
+\`\`\`typescript
 user.telegram_username.toLowerCase().includes(searchTerm.toLowerCase())
-```
+\`\`\`
 
 **এখন:**
-```typescript
+\`\`\`typescript
 user.email.toLowerCase().includes(searchTerm.toLowerCase())
-```
+\`\`\`
 
 **Search Placeholder:**
 - ❌ "Search by name or telegram username..."
@@ -29,7 +29,7 @@ user.email.toLowerCase().includes(searchTerm.toLowerCase())
 #### **B. User Display** 👤
 
 **User Card Display:**
-```tsx
+\`\`\`tsx
 // আগে
 <p className="text-xs lg:text-sm text-muted-foreground truncate">
   @{user.telegram_username}
@@ -39,10 +39,10 @@ user.email.toLowerCase().includes(searchTerm.toLowerCase())
 <p className="text-xs lg:text-sm text-muted-foreground truncate">
   {user.email}
 </p>
-```
+\`\`\`
 
 **User Details View:**
-```tsx
+\`\`\`tsx
 // আগে
 <h3>{selectedUser.full_name}</h3>
 <p>@{selectedUser.telegram_username}</p>
@@ -50,10 +50,10 @@ user.email.toLowerCase().includes(searchTerm.toLowerCase())
 // এখন
 <h3>{selectedUser.full_name}</h3>
 <p>{selectedUser.email}</p>
-```
+\`\`\`
 
 **Info Section:**
-```tsx
+\`\`\`tsx
 // আগে
 <span>Telegram Username</span>
 <span>@{selectedUser.telegram_username}</span>
@@ -61,14 +61,14 @@ user.email.toLowerCase().includes(searchTerm.toLowerCase())
 // এখন
 <span>Email Address</span>
 <span>{selectedUser.email}</span>
-```
+\`\`\`
 
 ---
 
 #### **C. Edit User Form** ✏️
 
 **Form Data:**
-```typescript
+\`\`\`typescript
 // আগে
 const [formData, setFormData] = useState({
   full_name: user.full_name,
@@ -82,10 +82,10 @@ const [formData, setFormData] = useState({
   email: user.email,
   is_active: user.is_active,
 })
-```
+\`\`\`
 
 **Input Field:**
-```tsx
+\`\`\`tsx
 // আগে
 <Label>টেলিগ্রাম ইউজারনেম</Label>
 <Input
@@ -103,14 +103,14 @@ const [formData, setFormData] = useState({
   onChange={(e) => setFormData((prev) => ({ ...prev, email: e.target.value }))}
   placeholder="user@gmail.com"
 />
-```
+\`\`\`
 
 ---
 
 #### **D. Create User Form** ➕
 
 **Type Definition:**
-```typescript
+\`\`\`typescript
 // আগে
 onSave: (userData: {
   full_name: string
@@ -128,10 +128,10 @@ onSave: (userData: {
   account_status: "active" | "suspended"
   expiration_date?: string | null
 }) => void
-```
+\`\`\`
 
 **Form Validation:**
-```typescript
+\`\`\`typescript
 // আগে
 if (!formData.telegram_username.trim()) {
   newErrors.push("Telegram username is required")
@@ -145,10 +145,10 @@ if (!formData.email.trim()) {
 } else if (!/^[^\s@]+@gmail\.com$/.test(formData.email.toLowerCase())) {
   newErrors.push("Only Gmail addresses (@gmail.com) are accepted")
 }
-```
+\`\`\`
 
 **Input Field:**
-```tsx
+\`\`\`tsx
 // আগে
 <Label>টেলিগ্রাম ইউজারনেম *</Label>
 <Input
@@ -167,10 +167,10 @@ if (!formData.email.trim()) {
   placeholder="yourname@gmail.com"
 />
 <p>শুধুমাত্র Gmail ঠিকানা (@gmail.com) গ্রহণযোগ্য</p>
-```
+\`\`\`
 
 **Data Submission:**
-```typescript
+\`\`\`typescript
 // আগে
 const userData = {
   full_name: formData.full_name.trim(),
@@ -188,7 +188,7 @@ const userData = {
   account_status: formData.account_status,
   expiration_date: ...
 }
-```
+\`\`\`
 
 ---
 
@@ -196,7 +196,7 @@ const userData = {
 
 #### **Recent Activity Display** 📊
 
-```tsx
+\`\`\`tsx
 // আগে
 <div className="text-sm text-muted-foreground">
   {activity.user} {activity.username && <span>@{activity.username}</span>}
@@ -206,7 +206,7 @@ const userData = {
 <div className="text-sm text-muted-foreground">
   {activity.user} {activity.email && <span>({activity.email})</span>}
 </div>
-```
+\`\`\`
 
 ---
 
@@ -255,7 +255,7 @@ const userData = {
 ### **Database Schema:**
 যদি database এ `telegram_username` field থাকে, তাহলে migrate করতে হবে:
 
-```sql
+\`\`\`sql
 -- Add email column if not exists
 ALTER TABLE users ADD COLUMN email VARCHAR(255);
 
@@ -264,7 +264,7 @@ ALTER TABLE users ADD COLUMN email VARCHAR(255);
 
 -- Optional: Remove old column
 -- ALTER TABLE users DROP COLUMN telegram_username;
-```
+\`\`\`
 
 ### **API Endpoints:**
 সব API endpoints যেখানে `telegram_username` ব্যবহার হয়, সেগুলোও update করতে হবে:

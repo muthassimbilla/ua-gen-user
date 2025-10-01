@@ -89,14 +89,14 @@
 প্রতিটি ফর্ম সাবমিট বাটনে:
 
 ### Pattern:
-```tsx
+\`\`\`tsx
 <Button disabled={loading}>
   {loading && (
     <div className="animate-spin">...</div>
   )}
   Button Text
 </Button>
-```
+\`\`\`
 
 ### Locations:
 - ✅ Login button
@@ -184,24 +184,24 @@
 ## 🔍 Animation Details
 
 ### Type 1: Simple Spinner
-```tsx
+\`\`\`tsx
 <div className="animate-spin">
   <Loader2 className="w-5 h-5" />
 </div>
-```
+\`\`\`
 **Usage**: Most buttons (12+ locations)
 
 ### Type 2: Double Ring Spinner
-```tsx
+\`\`\`tsx
 <div className="animate-spin">Outer</div>
 <div className="animate-spin reverse">Inner</div>
-```
+\`\`\`
 **Usage**: Loading pages (3 locations)
 
 ### Type 3: Complex Spinner
-```tsx
+\`\`\`tsx
 Outer Ring + Inner Ring + Center Icon + Sparkles + Bouncing Dots
-```
+\`\`\`
 **Usage**: `loading-spinner.tsx` (1 location)
 
 ---
