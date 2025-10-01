@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
+import { useAdminAuth } from "@/lib/admin-auth-context"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -34,6 +35,7 @@ interface PricingPlan {
 export default function AdminPricingPage() {
   const router = useRouter()
   const { toast } = useToast()
+  const { admin, isLoading: authLoading } = useAdminAuth()
   const [landingPlans, setLandingPlans] = useState<PricingPlan[]>([])
   const [premiumPlans, setPremiumPlans] = useState<PricingPlan[]>([])
   const [loading, setLoading] = useState(true)
@@ -41,15 +43,15 @@ export default function AdminPricingPage() {
   const [isDialogOpen, setIsDialogOpen] = useState(false)
 
   useEffect(() => {
-    // Check admin authentication
-    const adminToken = localStorage.getItem("adminToken")
-    if (!adminToken) {
+    if (!authLoading && !admin) {
       router.push("/adminbilla/login")
       return
     }
 
-    fetchPlans()
-  }, [router])
+    if (admin) {
+      fetchPlans()
+    }
+  }, [admin, authLoading, router])
 
   async function fetchPlans() {
     try {
@@ -212,6 +214,18 @@ export default function AdminPricingPage() {
       </CardContent>
     </Card>
   )
+
+  if (authLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <p>Loading...</p>
+      </div>
+    )
+  }
+
+  if (!admin) {
+    return null
+  }
 
   if (loading) {
     return (
