@@ -37,7 +37,6 @@ export default function TopNavigation() {
   return (
     <div className="fixed top-0 left-0 right-0 z-40 h-16 bg-gradient-to-r from-white/95 via-white/90 to-white/95 dark:from-slate-900/95 dark:via-slate-900/90 dark:to-slate-900/95 backdrop-blur-2xl border-b border-white/40 dark:border-slate-700/50 lg:left-64 shadow-xl">
       <div className="flex items-center justify-between h-full px-6">
-        {/* Left side - User's full name */}
         <div className="flex items-center gap-4">
           <div className="hidden sm:block">
             <h1 className="text-lg font-bold bg-gradient-to-r from-slate-800 to-slate-600 dark:from-slate-200 dark:to-slate-400 bg-clip-text text-transparent">
@@ -68,9 +67,8 @@ export default function TopNavigation() {
             />
           </button>
 
-          {/* Profile dropdown card */}
           {isProfileOpen && (
-            <div className="absolute right-0 top-full mt-3 w-80 bg-gradient-to-br from-white/95 to-white/90 dark:from-slate-800/95 dark:to-slate-900/90 rounded-3xl shadow-2xl border border-white/40 dark:border-slate-700/50 backdrop-blur-2xl overflow-hidden animate-in slide-in-from-top-2 duration-300">
+            <div className="absolute right-0 top-full mt-3 w-72 bg-gradient-to-br from-white/95 to-white/90 dark:from-slate-800/95 dark:to-slate-900/90 rounded-3xl shadow-2xl border border-white/40 dark:border-slate-700/50 backdrop-blur-2xl overflow-hidden animate-in slide-in-from-top-2 duration-300">
               {/* Profile header */}
               <div className="p-6 bg-gradient-to-br from-blue-50/80 to-indigo-50/80 dark:from-slate-800/80 dark:to-slate-700/80 border-b border-slate-200/50 dark:border-slate-600/50">
                 <div className="flex items-center gap-4">
@@ -87,24 +85,7 @@ export default function TopNavigation() {
                 </div>
               </div>
 
-              {/* Profile info */}
-              <div className="p-6 space-y-6">
-                <div className="space-y-4">
-                  <div className="flex justify-between items-center text-sm p-3 rounded-xl bg-slate-50/50 dark:bg-slate-800/50">
-                    <span className="text-slate-600 dark:text-slate-400 font-medium">Account Created:</span>
-                    <span className="text-slate-800 dark:text-slate-200 font-semibold">
-                      {new Date(user.created_at).toLocaleDateString("en-US")}
-                    </span>
-                  </div>
-                  <div className="flex justify-between items-center text-sm p-3 rounded-xl bg-slate-50/50 dark:bg-slate-800/50">
-                    <span className="text-slate-600 dark:text-slate-400 font-medium">Last Updated:</span>
-                    <span className="text-slate-800 dark:text-slate-200 font-semibold">
-                      {new Date(user.updated_at).toLocaleDateString("en-US")}
-                    </span>
-                  </div>
-                </div>
-
-                {/* Action buttons */}
+              <div className="p-6">
                 <div className="space-y-3">
                   <Link
                     href="/profile"
