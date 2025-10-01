@@ -16,29 +16,29 @@ export function Navigation() {
             <Sparkles className="h-5 w-5 text-primary-foreground" />
           </div>
           <span className="font-bold text-2xl bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
-            TaskFlow
+            UGen Pro
           </span>
         </Link>
 
         <div className="hidden md:flex items-center space-x-10">
-          <Link
+          <a
             href="#features"
-            className="relative text-sm font-medium text-muted-foreground hover:text-foreground transition-colors after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 after:bg-primary after:transition-all after:duration-300 hover:after:w-full"
+            className="relative text-sm font-medium text-muted-foreground hover:text-foreground transition-colors after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 after:bg-primary after:transition-all after:duration-300 hover:after:w-full cursor-pointer"
           >
             Features
-          </Link>
-          <Link
+          </a>
+          <a
             href="#pricing"
-            className="relative text-sm font-medium text-muted-foreground hover:text-foreground transition-colors after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 after:bg-primary after:transition-all after:duration-300 hover:after:w-full"
+            className="relative text-sm font-medium text-muted-foreground hover:text-foreground transition-colors after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 after:bg-primary after:transition-all after:duration-300 hover:after:w-full cursor-pointer"
           >
             Pricing
-          </Link>
-          <Link
+          </a>
+          <a
             href="#testimonials"
-            className="relative text-sm font-medium text-muted-foreground hover:text-foreground transition-colors after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 after:bg-primary after:transition-all after:duration-300 hover:after:w-full"
+            className="relative text-sm font-medium text-muted-foreground hover:text-foreground transition-colors after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 after:bg-primary after:transition-all after:duration-300 hover:after:w-full cursor-pointer"
           >
             Testimonials
-          </Link>
+          </a>
         </div>
 
         <div className="flex items-center space-x-3">
@@ -74,27 +74,27 @@ export function Navigation() {
       {mobileMenuOpen && (
         <div className="md:hidden border-t border-border/40 bg-background/95 backdrop-blur-xl">
           <div className="container mx-auto px-4 py-6 space-y-4">
-            <Link
+            <a
               href="#features"
-              className="block text-sm font-medium text-muted-foreground hover:text-foreground transition-colors py-2"
+              className="block text-sm font-medium text-muted-foreground hover:text-foreground transition-colors py-2 cursor-pointer"
               onClick={() => setMobileMenuOpen(false)}
             >
               Features
-            </Link>
-            <Link
+            </a>
+            <a
               href="#pricing"
-              className="block text-sm font-medium text-muted-foreground hover:text-foreground transition-colors py-2"
+              className="block text-sm font-medium text-muted-foreground hover:text-foreground transition-colors py-2 cursor-pointer"
               onClick={() => setMobileMenuOpen(false)}
             >
               Pricing
-            </Link>
-            <Link
+            </a>
+            <a
               href="#testimonials"
-              className="block text-sm font-medium text-muted-foreground hover:text-foreground transition-colors py-2"
+              className="block text-sm font-medium text-muted-foreground hover:text-foreground transition-colors py-2 cursor-pointer"
               onClick={() => setMobileMenuOpen(false)}
             >
               Testimonials
-            </Link>
+            </a>
           </div>
         </div>
       )}

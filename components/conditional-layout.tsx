@@ -17,12 +17,12 @@ export default function ConditionalLayout({ children }: ConditionalLayoutProps) 
 
   // Routes that don't need sidebar (auth pages, landing, premium-tools, and account-blocked)
   const authRoutes = ["/login", "/signup"]
-  const noLayoutRoutes = ["/", "/landing", "/premium-tools", "/account-blocked", "/adminbilla", "/adminbilla/login"]
+  const noLayoutRoutes = ["/", "/premium-tools", "/account-blocked", "/adminbilla", "/adminbilla/login"]
   const isAuthRoute = authRoutes.includes(pathname)
   const isNoLayoutRoute = noLayoutRoutes.includes(pathname) || pathname.startsWith("/adminbilla")
 
   if (!isAuthRoute && loading) {
-    return <LoadingOverlay message="Initializing your workspace..." fullScreen />
+    return <LoadingOverlay message="Initializing UGen Pro" fullScreen />
   }
 
   if (isAuthRoute || isNoLayoutRoute) {

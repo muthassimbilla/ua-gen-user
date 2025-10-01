@@ -17,11 +17,11 @@ export function Footer() {
                 <Sparkles className="h-5 w-5 text-primary-foreground" />
               </div>
               <span className="font-bold text-2xl bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
-                TaskFlow
+                UGen Pro
               </span>
             </Link>
             <p className="text-muted-foreground leading-relaxed mb-6 max-w-sm">
-              The complete platform to manage projects and boost team productivity. Join thousands of teams worldwide.
+              Advanced generator tools for developers and professionals. Create user agents, addresses, and more with our powerful platform.
             </p>
             
             {/* Social links */}

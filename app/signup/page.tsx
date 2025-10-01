@@ -161,7 +161,7 @@ export default function SignupPage() {
       {/* Go Back Button - Fixed Position */}
       <div className="absolute top-6 left-6 z-20">
         <Link
-          href="/landing"
+          href="/"
           className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-white/10 dark:bg-gray-800/20 backdrop-blur-sm border border-white/20 dark:border-gray-700/30 text-green-600 dark:text-green-400 hover:bg-white/20 dark:hover:bg-gray-800/30 hover:border-green-300/50 dark:hover:border-green-500/50 transition-all duration-200 hover:scale-105 shadow-sm hover:shadow-md group"
         >
           <svg
@@ -198,11 +198,14 @@ export default function SignupPage() {
           {/* Left Side - Branding */}
           <div className="hidden lg:block space-y-8">
             <div className="space-y-4">
-              <img
-                src="/images/logo.jpg"
-                alt="UGen Pro Logo"
-                className="w-20 h-20 object-cover rounded-2xl shadow-lg"
-              />
+              <div className="w-24 h-24 rounded-2xl bg-gradient-to-br from-green-500 via-emerald-500 to-teal-600 flex items-center justify-center shadow-xl relative overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent" />
+                <img
+                  src="/logo.jpg"
+                  alt="UGen Pro Logo"
+                  className="w-full h-full object-cover rounded-2xl relative z-10"
+                />
+              </div>
               <h1 className="text-4xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
                 Join Our Community
               </h1>

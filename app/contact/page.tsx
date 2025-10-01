@@ -124,7 +124,7 @@ ${formData.message}
       {/* Back to Home Button */}
       <div className="absolute top-6 left-6 z-20">
         <Link 
-          href="/landing" 
+          href="/" 
           className="inline-flex items-center space-x-2 text-blue-600 hover:text-blue-700 transition-colors bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm px-4 py-2 rounded-xl shadow-lg hover:shadow-xl"
         >
           <ArrowLeft className="w-4 h-4" />

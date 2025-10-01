@@ -14,13 +14,13 @@ const inter = Inter({
 })
 
 export const metadata: Metadata = {
-  title: "TaskFlow - Modern Project Management Platform",
+  title: "UGen Pro - Advanced Generator Tools Platform",
   description:
-    "The complete platform to manage projects and boost team productivity. Streamline workflows, collaborate seamlessly, and deliver projects faster.",
-  keywords: "project management, task management, team collaboration, productivity, workflow automation",
-  authors: [{ name: "TaskFlow" }],
-  creator: "TaskFlow",
-  publisher: "TaskFlow",
+    "The complete platform for advanced generator tools. Create user agents, addresses, and more with our powerful and secure tools.",
+  keywords: "generator tools, user agent generator, address generator, online tools, productivity tools",
+  authors: [{ name: "UGen Pro" }],
+  creator: "UGen Pro",
+  publisher: "UGen Pro",
     generator: 'v0.app'
 }
 
