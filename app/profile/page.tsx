@@ -5,26 +5,7 @@ import { ProtectedRoute } from "@/components/protected-route"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { 
-  User, 
-  Calendar, 
-  Shield,
-  LogOut, 
-  Clock, 
-  AlertTriangle, 
-  Settings, 
-  Eye, 
-  Key, 
-  Database, 
-  Activity,
-  Globe,
-  CheckCircle,
-  XCircle,
-  Crown,
-  Zap,
-  Heart,
-  Lock
-} from "lucide-react"
+import { User, Calendar, Shield, LogOut, Clock, Key, Globe, CheckCircle, Crown, Heart, Lock } from "lucide-react"
 import { UserIPDisplay } from "@/components/user-ip-display"
 import { useState, useEffect } from "react"
 
@@ -65,16 +46,16 @@ export default function ProfilePage() {
 
   const formatDate = (dateString: string | null | undefined) => {
     if (!dateString) return "Unknown"
-    
+
     try {
       const date = new Date(dateString)
       if (isNaN(date.getTime())) return "Unknown"
-      
+
       return date.toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    })
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      })
     } catch (error) {
       console.error("Date formatting error:", error)
       return "Unknown"
@@ -87,7 +68,7 @@ export default function ProfilePage() {
         hasExpiration: false,
         daysRemaining: null,
         isExpired: false,
-        expirationDate: null
+        expirationDate: null,
       }
     }
 
@@ -102,7 +83,7 @@ export default function ProfilePage() {
         hasExpiration: true,
         daysRemaining: daysRemaining,
         isExpired: isExpired,
-        expirationDate: expirationDate
+        expirationDate: expirationDate,
       }
     } catch (error) {
       console.error("Expiration date parsing error:", error)
@@ -110,7 +91,7 @@ export default function ProfilePage() {
         hasExpiration: false,
         daysRemaining: null,
         isExpired: false,
-        expirationDate: null
+        expirationDate: null,
       }
     }
   }
@@ -127,7 +108,7 @@ export default function ProfilePage() {
               <div className="absolute inset-0 bg-gradient-to-r from-blue-600/10 via-purple-600/10 to-indigo-600/10 rounded-3xl" />
               <div className="absolute top-0 right-0 w-72 h-72 bg-gradient-to-br from-blue-400/20 to-purple-600/20 rounded-full blur-3xl" />
               <div className="absolute bottom-0 left-0 w-64 h-64 bg-gradient-to-tr from-indigo-400/20 to-pink-600/20 rounded-full blur-3xl" />
-              
+
               <div className="relative glass-card p-8 rounded-3xl">
                 <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
                   <div className="flex items-center gap-6">
@@ -139,13 +120,15 @@ export default function ProfilePage() {
                         <CheckCircle className="w-4 h-4 text-white" />
                       </div>
                     </div>
-            <div>
+                    <div>
                       <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
                         {user?.full_name || "User"}
                       </h1>
-                      <p className="text-xl text-muted-foreground mt-1">
-                        @{user?.telegram_username || "username"}
-                      </p>
+                      {user?.email ? (
+                        <p className="text-xl text-muted-foreground mt-1">{user.email}</p>
+                      ) : user?.telegram_username ? (
+                        <p className="text-xl text-muted-foreground mt-1">@{user.telegram_username}</p>
+                      ) : null}
                       <div className="flex items-center gap-2 mt-3">
                         <Badge variant="default" className="bg-green-500 hover:bg-green-600">
                           <Shield className="w-3 h-3 mr-1" />
@@ -157,18 +140,18 @@ export default function ProfilePage() {
                         </Badge>
                       </div>
                     </div>
-            </div>
+                  </div>
                   <div className="flex gap-3">
-                    <Button 
-                      variant="outline" 
-                      onClick={() => window.location.href = '/change-password'}
+                    <Button
+                      variant="outline"
+                      onClick={() => (window.location.href = "/change-password")}
                       className="bg-white/50 backdrop-blur-sm border-white/20 hover:bg-white/70 transition-all duration-300"
                     >
                       <Lock className="w-4 h-4 mr-2" />
                       Change Password
                     </Button>
-                    <Button 
-                      variant="outline" 
+                    <Button
+                      variant="outline"
                       onClick={handleLogout}
                       className="bg-white/50 backdrop-blur-sm border-white/20 hover:bg-white/70 transition-all duration-300"
                     >
@@ -202,7 +185,9 @@ export default function ProfilePage() {
                     <div>
                       <p className="text-sm font-medium text-muted-foreground">Member Since</p>
                       <p className="text-2xl font-bold text-purple-600">
-                        {user?.created_at ? new Date(user.created_at).toLocaleDateString("en-US", { month: "long", year: "numeric" }) : "Unknown"}
+                        {user?.created_at
+                          ? new Date(user.created_at).toLocaleDateString("en-US", { month: "long", year: "numeric" })
+                          : "Unknown"}
                       </p>
                     </div>
                     <div className="w-12 h-12 rounded-xl bg-purple-500/20 flex items-center justify-center">
@@ -225,8 +210,7 @@ export default function ProfilePage() {
                   </div>
                 </CardContent>
               </Card>
-
-          </div>
+            </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
               {/* Personal Information */}
@@ -236,20 +220,28 @@ export default function ProfilePage() {
                     <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center">
                       <User className="w-5 h-5 text-white" />
                     </div>
-                  Personal Information
-                </CardTitle>
-                <CardDescription>Your account's main information</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-3">
+                    Personal Information
+                  </CardTitle>
+                  <CardDescription>Your account's main information</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="space-y-3">
                     <div className="flex items-center justify-between p-3 rounded-lg bg-slate-50 dark:bg-slate-800/50">
                       <span className="text-sm font-medium text-muted-foreground">Full Name</span>
                       <span className="font-semibold">{user?.full_name || "Not provided"}</span>
                     </div>
-                    <div className="flex items-center justify-between p-3 rounded-lg bg-slate-50 dark:bg-slate-800/50">
-                      <span className="text-sm font-medium text-muted-foreground">Telegram Username</span>
-                      <span className="font-semibold">@{user?.telegram_username || "Not provided"}</span>
-                    </div>
+                    {user?.email && (
+                      <div className="flex items-center justify-between p-3 rounded-lg bg-slate-50 dark:bg-slate-800/50">
+                        <span className="text-sm font-medium text-muted-foreground">Email</span>
+                        <span className="font-semibold">{user.email}</span>
+                      </div>
+                    )}
+                    {user?.telegram_username && !user?.telegram_username.includes("@") && (
+                      <div className="flex items-center justify-between p-3 rounded-lg bg-slate-50 dark:bg-slate-800/50">
+                        <span className="text-sm font-medium text-muted-foreground">Telegram Username</span>
+                        <span className="font-semibold">@{user.telegram_username}</span>
+                      </div>
+                    )}
                     <div className="flex items-center justify-between p-3 rounded-lg bg-slate-50 dark:bg-slate-800/50">
                       <span className="text-sm font-medium text-muted-foreground">Account Created</span>
                       <span className="font-semibold">{formatDate(user?.created_at)}</span>
@@ -277,11 +269,9 @@ export default function ProfilePage() {
                   {expirationInfo.hasExpiration ? (
                     <div className="space-y-4">
                       <div className="text-center p-6 rounded-xl bg-gradient-to-br from-orange-50 to-red-50 dark:from-orange-900/20 dark:to-red-900/20">
-                        <div className="text-4xl font-bold text-orange-600 mb-2">
-                          {expirationInfo.daysRemaining}
-                        </div>
+                        <div className="text-4xl font-bold text-orange-600 mb-2">{expirationInfo.daysRemaining}</div>
                         <div className="text-sm text-muted-foreground">Days Remaining</div>
-                  </div>
+                      </div>
 
                       <div className="space-y-3">
                         <div className="flex items-center justify-between p-3 rounded-lg bg-slate-50 dark:bg-slate-800/50">
@@ -293,15 +283,25 @@ export default function ProfilePage() {
                               day: "numeric",
                             })}
                           </span>
-                  </div>
+                        </div>
 
                         <div className="flex items-center justify-between p-3 rounded-lg bg-slate-50 dark:bg-slate-800/50">
                           <span className="text-sm font-medium text-muted-foreground">Status</span>
-                          <Badge 
-                            variant={expirationInfo.isExpired ? "destructive" : expirationInfo.daysRemaining! <= 7 ? "secondary" : "default"}
+                          <Badge
+                            variant={
+                              expirationInfo.isExpired
+                                ? "destructive"
+                                : expirationInfo.daysRemaining! <= 7
+                                  ? "secondary"
+                                  : "default"
+                            }
                           >
-                            {expirationInfo.isExpired ? "Expired" : expirationInfo.daysRemaining! <= 7 ? "Expiring Soon" : "Active"}
-                        </Badge>
+                            {expirationInfo.isExpired
+                              ? "Expired"
+                              : expirationInfo.daysRemaining! <= 7
+                                ? "Expiring Soon"
+                                : "Active"}
+                          </Badge>
                         </div>
                       </div>
                     </div>
@@ -337,7 +337,7 @@ export default function ProfilePage() {
                       <div className="text-xs font-medium text-muted-foreground">Account Status</div>
                       <div className="text-sm font-semibold text-green-600">Active</div>
                     </div>
-                    
+
                     <div className="p-3 rounded-lg bg-slate-50 dark:bg-slate-800/50 text-center">
                       <div className="w-8 h-8 rounded-lg bg-blue-500/20 flex items-center justify-center mx-auto mb-2">
                         <Crown className="w-4 h-4 text-blue-600" />
@@ -345,20 +345,18 @@ export default function ProfilePage() {
                       <div className="text-xs font-medium text-muted-foreground">Account Type</div>
                       <div className="text-sm font-semibold text-blue-600">Premium</div>
                     </div>
-                    
+
                     <div className="p-3 rounded-lg bg-slate-50 dark:bg-slate-800/50 text-center">
                       <div className="w-8 h-8 rounded-lg bg-orange-500/20 flex items-center justify-center mx-auto mb-2">
                         <Clock className="w-4 h-4 text-orange-600" />
                       </div>
                       <div className="text-xs font-medium text-muted-foreground">Account Duration</div>
                       <div className="text-sm font-semibold text-orange-600">Lifetime</div>
+                    </div>
                   </div>
-
-                  </div>
-
                 </CardContent>
               </Card>
-                </div>
+            </div>
 
             {/* IP Information */}
             <Card className="glass-card border-0 hover:shadow-xl transition-all duration-300">
@@ -366,7 +364,7 @@ export default function ProfilePage() {
                 <CardTitle className="flex items-center gap-3 text-xl">
                   <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center">
                     <Globe className="w-5 h-5 text-white" />
-                </div>
+                  </div>
                   Network Information
                 </CardTitle>
                 <CardDescription>Your current IP address and device information</CardDescription>

@@ -43,7 +43,6 @@ export default function TopNavigation() {
             <h1 className="text-lg font-bold bg-gradient-to-r from-slate-800 to-slate-600 dark:from-slate-200 dark:to-slate-400 bg-clip-text text-transparent">
               Welcome, {user.full_name}
             </h1>
-            <p className="text-sm text-slate-500 dark:text-slate-400 font-medium">@{user.telegram_username}</p>
           </div>
           <div className="sm:hidden">
             <h1 className="text-base font-bold bg-gradient-to-r from-slate-800 to-slate-600 dark:from-slate-200 dark:to-slate-400 bg-clip-text text-transparent">
@@ -81,7 +80,9 @@ export default function TopNavigation() {
                   </div>
                   <div className="flex-1">
                     <h3 className="font-bold text-slate-800 dark:text-slate-200 text-lg">{user.full_name}</h3>
-                    <p className="text-sm text-slate-600 dark:text-slate-400 font-medium">@{user.telegram_username}</p>
+                    <p className="text-sm text-slate-600 dark:text-slate-400 font-medium">
+                      {user.email || (user.telegram_username ? `@${user.telegram_username}` : "")}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -113,7 +114,7 @@ export default function TopNavigation() {
                     <Settings className="w-5 h-5" />
                     View Profile
                   </Link>
-                  
+
                   <button
                     onClick={handleLogout}
                     className="w-full flex items-center justify-center gap-3 px-4 py-4 bg-gradient-to-r from-red-50 to-red-100 dark:from-red-900/20 dark:to-red-800/20 hover:from-red-100 hover:to-red-200 dark:hover:from-red-900/30 dark:hover:to-red-800/30 text-red-600 dark:text-red-400 rounded-2xl transition-all duration-300 font-semibold hover:scale-105 active:scale-95 shadow-lg hover:shadow-xl"

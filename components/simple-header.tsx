@@ -39,7 +39,7 @@ export default function SimpleHeader() {
               <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center shadow-lg">
                 <User className="w-4 h-4 text-white" />
               </div>
-              <span className="text-sm font-semibold text-slate-700 dark:text-slate-200">{user.telegram_username}</span>
+              <span className="text-sm font-semibold text-slate-700 dark:text-slate-200">{user.full_name}</span>
             </div>
           )}
 
