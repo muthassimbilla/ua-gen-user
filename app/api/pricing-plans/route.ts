@@ -1,23 +1,9 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { createBrowserClient } from "@supabase/ssr"
-
-function getSupabaseClient() {
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-
-  if (supabaseUrl && supabaseAnonKey) {
-    return createBrowserClient(supabaseUrl, supabaseAnonKey)
-  }
-  return null
-}
+import { createClient } from "@/lib/supabase/server"
 
 export async function GET(request: NextRequest) {
   try {
-    const supabase = getSupabaseClient()
-
-    if (!supabase) {
-      return NextResponse.json({ error: "Database not configured" }, { status: 500 })
-    }
+    const supabase = await createClient()
 
     const { searchParams } = new URL(request.url)
     const type = searchParams.get("type") || "landing"
@@ -43,11 +29,7 @@ export async function GET(request: NextRequest) {
 
 export async function PUT(request: NextRequest) {
   try {
-    const supabase = getSupabaseClient()
-
-    if (!supabase) {
-      return NextResponse.json({ error: "Database not configured" }, { status: 500 })
-    }
+    const supabase = await createClient()
 
     const body = await request.json()
     const { id, ...updates } = body
@@ -77,11 +59,7 @@ export async function PUT(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const supabase = getSupabaseClient()
-
-    if (!supabase) {
-      return NextResponse.json({ error: "Database not configured" }, { status: 500 })
-    }
+    const supabase = await createClient()
 
     const body = await request.json()
 
@@ -101,11 +79,7 @@ export async function POST(request: NextRequest) {
 
 export async function DELETE(request: NextRequest) {
   try {
-    const supabase = getSupabaseClient()
-
-    if (!supabase) {
-      return NextResponse.json({ error: "Database not configured" }, { status: 500 })
-    }
+    const supabase = await createClient()
 
     const { searchParams } = new URL(request.url)
     const id = searchParams.get("id")

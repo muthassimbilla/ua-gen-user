@@ -28,6 +28,7 @@ import {
 import AuthThemeToggle from "@/components/auth-theme-toggle"
 import { useNetwork } from "@/contexts/network-context"
 import NoInternet from "@/components/no-internet"
+import { AuthService } from "@/lib/auth-client"
 
 export default function LoginPage() {
   const router = useRouter()
@@ -129,6 +130,25 @@ export default function LoginPage() {
 
         clearTimeout(loginTimeout)
 
+        // Get the current user from auth context to check their status
+        const currentUser = await AuthService.getCurrentUser()
+
+        if (currentUser) {
+          const isPending = !currentUser.is_approved
+          const isSuspended = currentUser.account_status === "suspended"
+          const isExpired = currentUser.expiration_date && new Date(currentUser.expiration_date) < new Date()
+
+          // If user is pending, suspended, or expired, redirect to premium-tools directly
+          if (isPending || isSuspended || isExpired) {
+            console.log("[v0] User has restricted access, redirecting to premium-tools")
+            setTimeout(() => {
+              router.push("/premium-tools")
+            }, 100)
+            return
+          }
+        }
+
+        // For approved users, redirect to tool page or custom redirect
         const redirectTo = searchParams.get("redirect") || "/tool"
         setTimeout(() => {
           router.push(redirectTo)
@@ -242,7 +262,10 @@ export default function LoginPage() {
 
         {/* Simplified Background Elements */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-40">
-          <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-gradient-to-r from-blue-500/30 to-purple-500/30 rounded-full blur-3xl" />
+          <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-600 flex items-center justify-center shadow-xl relative overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent" />
+            <img src="/logo.jpg" alt="UGen Pro Logo" className="w-full h-full object-cover rounded-2xl relative z-10" />
+          </div>
           <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-gradient-to-r from-pink-500/30 to-orange-500/30 rounded-full blur-3xl" />
         </div>
 
