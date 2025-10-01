@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useState, useCallback, useMemo, memo } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
@@ -32,7 +32,7 @@ export default function SignupPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
     setFormData((prev) => ({ ...prev, [name]: value }))
 
@@ -40,9 +40,9 @@ export default function SignupPage() {
     if (errors.length > 0) {
       setErrors([])
     }
-  }
+  }, [errors.length])
 
-  const validateForm = () => {
+  const validateForm = useCallback(() => {
     const newErrors: string[] = []
 
     // Validate full name
@@ -57,6 +57,12 @@ export default function SignupPage() {
       newErrors.push(...emailValidation.errors)
     }
 
+    // Check if email is Gmail only
+    const email = formData.email.trim().toLowerCase()
+    if (emailValidation.isValid && !email.endsWith('@gmail.com')) {
+      newErrors.push("Only Gmail addresses are supported. Please use a @gmail.com email address.")
+    }
+
     // Validate password
     const passwordValidation = PasswordUtils.validatePassword(formData.password)
     if (!passwordValidation.isValid) {
@@ -69,7 +75,7 @@ export default function SignupPage() {
     }
 
     return newErrors
-  }
+  }, [formData.full_name, formData.email, formData.password, formData.confirmPassword])
 
   // Show no internet page if offline
   if (!isOnline) {
@@ -181,36 +187,10 @@ export default function SignupPage() {
         </div>
       </div>
 
-      {/* Animated Background Elements */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        {/* Gradient Orbs */}
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-gradient-to-r from-green-500/20 to-emerald-500/20 rounded-full blur-3xl animate-pulse" />
-        <div
-          className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-gradient-to-r from-blue-500/20 to-cyan-500/20 rounded-full blur-3xl animate-pulse"
-          style={{ animationDelay: "2s" }}
-        />
-        <div
-          className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-gradient-to-r from-purple-500/10 to-pink-500/10 rounded-full blur-2xl animate-pulse"
-          style={{ animationDelay: "1s" }}
-        />
-
-        {/* Floating Particles */}
-        <div
-          className="absolute top-20 left-20 w-2 h-2 bg-green-400/60 rounded-full animate-bounce"
-          style={{ animationDelay: "0.5s" }}
-        />
-        <div
-          className="absolute top-40 right-32 w-1.5 h-1.5 bg-blue-400/60 rounded-full animate-bounce"
-          style={{ animationDelay: "1.5s" }}
-        />
-        <div
-          className="absolute bottom-32 left-16 w-2.5 h-2.5 bg-purple-400/60 rounded-full animate-bounce"
-          style={{ animationDelay: "2.5s" }}
-        />
-        <div
-          className="absolute bottom-20 right-20 w-1 h-1 bg-cyan-400/60 rounded-full animate-bounce"
-          style={{ animationDelay: "3s" }}
-        />
+      {/* Simplified Background Elements */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-40">
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-gradient-to-r from-green-500/30 to-emerald-500/30 rounded-full blur-3xl" />
+        <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-gradient-to-r from-blue-500/30 to-cyan-500/30 rounded-full blur-3xl" />
       </div>
 
       <div className="w-full max-w-6xl relative z-10">
@@ -319,7 +299,7 @@ export default function SignupPage() {
                         id="email"
                         name="email"
                         type="email"
-                        placeholder="your@email.com"
+                        placeholder="yourname@gmail.com"
                         value={formData.email}
                         onChange={handleInputChange}
                         className="h-12 pl-12 pr-4 rounded-xl border-border/50 bg-background/50 backdrop-blur-sm focus:bg-background/80 transition-all duration-200 group-hover:border-green-300/50 focus:border-green-500/50 focus:ring-2 focus:ring-green-500/20"
@@ -328,6 +308,12 @@ export default function SignupPage() {
                       />
                       <Mail className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground group-hover:text-green-500 transition-colors" />
                     </div>
+                    <p className="text-xs text-muted-foreground flex items-center gap-1">
+                      <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                      </svg>
+                      Only Gmail addresses (@gmail.com) are accepted
+                    </p>
                   </div>
 
                   {/* Password Field */}
@@ -389,7 +375,7 @@ export default function SignupPage() {
                     </div>
 
                     {/* Password Match Indicators */}
-                    {formData.confirmPassword && (
+                    {formData.confirmPassword.length > 0 && (
                       <div className="flex items-center space-x-2 text-xs">
                         {formData.password === formData.confirmPassword ? (
                           <>
@@ -420,7 +406,10 @@ export default function SignupPage() {
                     {loading && (
                       <div className="absolute inset-0 bg-gradient-to-r from-green-500 to-emerald-600 flex items-center justify-center">
                         <div className="flex items-center gap-2 bg-black/20 backdrop-blur-sm px-4 py-2 rounded-lg">
-                          <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                          <svg className="animate-spin spinner h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                          </svg>
                           <span className="text-white font-semibold drop-shadow-lg">Creating Account...</span>
                         </div>
                       </div>

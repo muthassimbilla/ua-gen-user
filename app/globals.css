@@ -126,6 +126,20 @@
   .animate-fade-in-up {
     animation: fade-in-up 0.6s ease-out forwards;
   }
+
+  /* Spinner animation - always enabled */
+  @keyframes spin {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  .spinner {
+    animation: spin 1s linear infinite !important;
+  }
 }
 
 /* Added custom scrollbar styling */
@@ -146,11 +160,11 @@
   background: hsl(var(--muted-foreground));
 }
 
-/* Respect user's motion preferences */
+/* Respect user's motion preferences - but keep spinner animations */
 @media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
+  *:not(.animate-spin):not(.spinner),
+  *:not(.animate-spin):not(.spinner)::before,
+  *:not(.animate-spin):not(.spinner)::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
@@ -159,5 +173,12 @@
 
   body {
     animation: none !important;
+  }
+
+  /* Force spinners to always animate */
+  .animate-spin,
+  .spinner {
+    animation-duration: 1s !important;
+    animation-iteration-count: infinite !important;
   }
 }

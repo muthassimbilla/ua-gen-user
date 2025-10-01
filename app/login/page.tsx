@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback, useMemo } from "react"
 import ClientOnly from "@/components/client-only"
 import { useRouter, useSearchParams } from "next/navigation"
 import Link from "next/link"
@@ -122,7 +122,7 @@ export default function LoginPage() {
     return <NoInternet onRetry={retryConnection} isReconnecting={isReconnecting} />
   }
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
     setFormData((prev) => ({ ...prev, [name]: value }))
 
@@ -130,9 +130,9 @@ export default function LoginPage() {
       setErrors([])
       setPendingApproval(false)
     }
-  }
+  }, [errors.length])
 
-  const validateForm = () => {
+  const validateForm = useCallback(() => {
     const newErrors: string[] = []
 
     if (!formData.email.trim()) {
@@ -146,7 +146,7 @@ export default function LoginPage() {
     }
 
     return newErrors
-  }
+  }, [formData.email, formData.password])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -237,33 +237,10 @@ export default function LoginPage() {
           </div>
         </div>
 
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-full blur-3xl animate-pulse" />
-          <div
-            className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-gradient-to-r from-pink-500/20 to-orange-500/20 rounded-full blur-3xl animate-pulse"
-            style={{ animationDelay: "2s" }}
-          />
-          <div
-            className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-gradient-to-r from-green-500/10 to-cyan-500/10 rounded-full blur-2xl animate-pulse"
-            style={{ animationDelay: "1s" }}
-          />
-
-          <div
-            className="absolute top-20 left-20 w-2 h-2 bg-blue-400/60 rounded-full animate-bounce"
-            style={{ animationDelay: "0.5s" }}
-          />
-          <div
-            className="absolute top-40 right-32 w-1.5 h-1.5 bg-purple-400/60 rounded-full animate-bounce"
-            style={{ animationDelay: "1.5s" }}
-          />
-          <div
-            className="absolute bottom-32 left-16 w-2.5 h-2.5 bg-pink-400/60 rounded-full animate-bounce"
-            style={{ animationDelay: "2.5s" }}
-          />
-          <div
-            className="absolute bottom-20 right-20 w-1 h-1 bg-cyan-400/60 rounded-full animate-bounce"
-            style={{ animationDelay: "3s" }}
-          />
+        {/* Simplified Background Elements */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-40">
+          <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-gradient-to-r from-blue-500/30 to-purple-500/30 rounded-full blur-3xl" />
+          <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-gradient-to-r from-pink-500/30 to-orange-500/30 rounded-full blur-3xl" />
         </div>
 
         <div className="w-full max-w-6xl relative z-10">
@@ -471,8 +448,11 @@ export default function LoginPage() {
                       disabled={loading || isSubmitting}
                     >
                       {loading ? (
-                        <div className="flex items-center gap-2">
-                          <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                        <div className="flex items-center justify-center gap-2">
+                          <svg className="animate-spin spinner h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                          </svg>
                           <span>Signing in...</span>
                         </div>
                       ) : (
