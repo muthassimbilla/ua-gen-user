@@ -124,11 +124,6 @@ export default function ProfilePage() {
                       <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
                         {user?.full_name || "User"}
                       </h1>
-                      {user?.email ? (
-                        <p className="text-xl text-muted-foreground mt-1">{user.email}</p>
-                      ) : user?.telegram_username ? (
-                        <p className="text-xl text-muted-foreground mt-1">@{user.telegram_username}</p>
-                      ) : null}
                       <div className="flex items-center gap-2 mt-3">
                         <Badge variant="default" className="bg-green-500 hover:bg-green-600">
                           <Shield className="w-3 h-3 mr-1" />
@@ -230,12 +225,6 @@ export default function ProfilePage() {
                       <span className="text-sm font-medium text-muted-foreground">Full Name</span>
                       <span className="font-semibold">{user?.full_name || "Not provided"}</span>
                     </div>
-                    {user?.email && (
-                      <div className="flex items-center justify-between p-3 rounded-lg bg-slate-50 dark:bg-slate-800/50">
-                        <span className="text-sm font-medium text-muted-foreground">Email</span>
-                        <span className="font-semibold">{user.email}</span>
-                      </div>
-                    )}
                     {user?.telegram_username && !user?.telegram_username.includes("@") && (
                       <div className="flex items-center justify-between p-3 rounded-lg bg-slate-50 dark:bg-slate-800/50">
                         <span className="text-sm font-medium text-muted-foreground">Telegram Username</span>

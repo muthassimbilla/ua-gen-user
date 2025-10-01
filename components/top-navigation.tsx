@@ -78,9 +78,6 @@ export default function TopNavigation() {
                   </div>
                   <div className="flex-1">
                     <h3 className="font-bold text-slate-800 dark:text-slate-200 text-lg">{user.full_name}</h3>
-                    <p className="text-sm text-slate-600 dark:text-slate-400 font-medium">
-                      {user.email || (user.telegram_username ? `@${user.telegram_username}` : "")}
-                    </p>
                   </div>
                 </div>
               </div>
