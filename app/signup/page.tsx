@@ -1,23 +1,17 @@
 "use client"
 
 import type React from "react"
-
-import { useState, useCallback, useMemo, memo } from "react"
+import { useState, useCallback, memo } from "react"
 import { useRouter } from "next/navigation"
-import Link from "next/link"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Alert, AlertDescription } from "@/components/ui/alert"
 import { AuthService, ValidationUtils, PasswordUtils } from "@/lib/auth-client"
 import { setClientFlashMessage } from "@/lib/flash-messages"
-import { Eye, EyeOff, User, Mail, Lock, CheckCircle, XCircle, AlertTriangle, Shield, UserPlus, Zap } from "lucide-react"
-import AuthThemeToggle from "@/components/auth-theme-toggle"
 import { useNetwork } from "@/contexts/network-context"
 import NoInternet from "@/components/no-internet"
+import AuthLayout from "@/components/auth/auth-layout"
+import AuthHero from "@/components/auth/auth-hero"
+import AuthForm from "@/components/auth/auth-form"
 
-export default function SignupPage() {
+const SignupPage = memo(function SignupPage() {
   const router = useRouter()
   const { isOnline, retryConnection, isReconnecting } = useNetwork()
   const [formData, setFormData] = useState({
@@ -41,6 +35,14 @@ export default function SignupPage() {
       setErrors([])
     }
   }, [errors.length])
+
+  const handleTogglePassword = useCallback(() => {
+    setShowPassword(prev => !prev)
+  }, [])
+
+  const handleToggleConfirmPassword = useCallback(() => {
+    setShowConfirmPassword(prev => !prev)
+  }, [])
 
   const validateForm = useCallback(() => {
     const newErrors: string[] = []
@@ -157,299 +159,25 @@ export default function SignupPage() {
   }
 
   return (
-    <div className="h-screen flex items-center justify-center p-4 relative overflow-hidden bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
-      {/* Go Back Button - Fixed Position */}
-      <div className="absolute top-6 left-6 z-20">
-        <Link
-          href="/"
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-white/10 dark:bg-gray-800/20 backdrop-blur-sm border border-white/20 dark:border-gray-700/30 text-green-600 dark:text-green-400 hover:bg-white/20 dark:hover:bg-gray-800/30 hover:border-green-300/50 dark:hover:border-green-500/50 transition-all duration-200 hover:scale-105 shadow-sm hover:shadow-md group"
-        >
-          <svg
-            className="w-4 h-4 transition-transform duration-200 group-hover:-translate-x-1"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-          </svg>
-          <span className="text-sm font-medium">Go back</span>
-        </Link>
+    <AuthLayout variant="signup">
+      <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
+        <AuthHero variant="signup" />
+        <AuthForm
+          variant="signup"
+          formData={formData}
+          errors={errors}
+          loading={loading}
+          isSubmitting={isSubmitting}
+          showPassword={showPassword}
+          showConfirmPassword={showConfirmPassword}
+          onInputChange={handleInputChange}
+          onSubmit={handleSubmit}
+          onTogglePassword={handleTogglePassword}
+          onToggleConfirmPassword={handleToggleConfirmPassword}
+        />
       </div>
-
-      {/* Theme Toggle Button */}
-      <div className="absolute top-6 right-6 z-20">
-        <div className="relative group">
-          <AuthThemeToggle />
-          {/* Tooltip */}
-          <div className="absolute -bottom-12 right-0 bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 text-xs px-2 py-1 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap">
-            Toggle theme
-          </div>
-        </div>
-      </div>
-
-      {/* Simplified Background Elements */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-40">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-gradient-to-r from-green-500/30 to-emerald-500/30 rounded-full blur-3xl" />
-        <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-gradient-to-r from-blue-500/30 to-cyan-500/30 rounded-full blur-3xl" />
-      </div>
-
-      <div className="w-full max-w-6xl relative z-10">
-        <div className="grid lg:grid-cols-2 gap-8 items-center">
-          {/* Left Side - Branding */}
-          <div className="hidden lg:block space-y-8">
-            <div className="space-y-4">
-              <div className="w-24 h-24 rounded-2xl bg-gradient-to-br from-green-500 via-emerald-500 to-teal-600 flex items-center justify-center shadow-xl relative overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent" />
-                <img
-                  src="/logo.jpg"
-                  alt="UGen Pro Logo"
-                  className="w-full h-full object-cover rounded-2xl relative z-10"
-                />
-              </div>
-              <h1 className="text-4xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
-                Join Our Community
-              </h1>
-              <p className="text-xl text-muted-foreground">
-                Create your account and unlock access to powerful tools and exclusive features.
-              </p>
-            </div>
-
-            <div className="space-y-4">
-              <div className="flex items-center space-x-3">
-                <div className="w-8 h-8 rounded-lg bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
-                  <UserPlus className="w-4 h-4 text-green-600 dark:text-green-400" />
-                </div>
-                <span className="text-muted-foreground">Quick and easy registration</span>
-              </div>
-              <div className="flex items-center space-x-3">
-                <div className="w-8 h-8 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
-                  <Shield className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-                </div>
-                <span className="text-muted-foreground">Secure account protection</span>
-              </div>
-              <div className="flex items-center space-x-3">
-                <div className="w-8 h-8 rounded-lg bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center">
-                  <Zap className="w-4 h-4 text-purple-600 dark:text-purple-400" />
-                </div>
-                <span className="text-muted-foreground">Instant access to all features</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Right Side - Signup Form */}
-          <div className="w-full max-w-md mx-auto lg:mx-0">
-            {/* Main Signup Card */}
-            <Card className="glass-card p-6 rounded-3xl shadow-2xl border-0 backdrop-blur-xl bg-white/10 dark:bg-gray-900/10">
-              {/* Header */}
-              <CardHeader className="text-center space-y-2 pb-4">
-                <CardTitle className="text-2xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
-                  Create Account
-                </CardTitle>
-                <CardDescription className="text-muted-foreground">Fill in your details to get started</CardDescription>
-              </CardHeader>
-
-              <CardContent className="space-y-3">
-                {/* Error Messages */}
-                {errors.length > 0 && (
-                  <Alert variant="destructive" className="backdrop-blur-sm rounded-xl">
-                    <AlertTriangle className="h-4 w-4" />
-                    <AlertDescription>
-                      <ul className="list-disc list-inside space-y-1 text-sm">
-                        {errors.map((error, index) => (
-                          <li key={index} className="font-medium">
-                            {error}
-                          </li>
-                        ))}
-                      </ul>
-                    </AlertDescription>
-                  </Alert>
-                )}
-
-                {/* Signup Form */}
-                <form onSubmit={handleSubmit} className="space-y-4">
-                  {/* Full Name Field */}
-                  <div className="space-y-2">
-                    <Label
-                      htmlFor="full_name"
-                      className="text-sm font-semibold text-foreground flex items-center gap-2"
-                    >
-                      <User className="w-4 h-4" />
-                      Full Name
-                    </Label>
-                    <div className="relative group">
-                      <Input
-                        id="full_name"
-                        name="full_name"
-                        type="text"
-                        placeholder="Enter your full name"
-                        value={formData.full_name}
-                        onChange={handleInputChange}
-                        className="h-12 pl-12 pr-4 rounded-xl border-border/50 bg-background/50 backdrop-blur-sm focus:bg-background/80 transition-all duration-200 group-hover:border-green-300/50 focus:border-green-500/50 focus:ring-2 focus:ring-green-500/20"
-                        required
-                      />
-                      <User className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground group-hover:text-green-500 transition-colors" />
-                    </div>
-                  </div>
-
-                  {/* Email Field */}
-                  <div className="space-y-2">
-                    <Label htmlFor="email" className="text-sm font-semibold text-foreground flex items-center gap-2">
-                      <Mail className="w-4 h-4" />
-                      Email
-                    </Label>
-                    <div className="relative group">
-                      <Input
-                        id="email"
-                        name="email"
-                        type="email"
-                        placeholder="yourname@gmail.com"
-                        value={formData.email}
-                        onChange={handleInputChange}
-                        className="h-12 pl-12 pr-4 rounded-xl border-border/50 bg-background/50 backdrop-blur-sm focus:bg-background/80 transition-all duration-200 group-hover:border-green-300/50 focus:border-green-500/50 focus:ring-2 focus:ring-green-500/20"
-                        required
-                        autoComplete="email"
-                      />
-                      <Mail className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground group-hover:text-green-500 transition-colors" />
-                    </div>
-                    <p className="text-xs text-muted-foreground flex items-center gap-1">
-                      <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
-                      </svg>
-                      Only Gmail addresses (@gmail.com) are accepted
-                    </p>
-                  </div>
-
-                  {/* Password Field */}
-                  <div className="space-y-2">
-                    <Label htmlFor="password" className="text-sm font-semibold text-foreground flex items-center gap-2">
-                      <Lock className="w-4 h-4" />
-                      Password
-                    </Label>
-                    <div className="relative group">
-                      <Input
-                        id="password"
-                        name="password"
-                        type={showPassword ? "text" : "password"}
-                        placeholder="Enter your password"
-                        value={formData.password}
-                        onChange={handleInputChange}
-                        className="h-12 pl-12 pr-12 rounded-xl border-border/50 bg-background/50 backdrop-blur-sm focus:bg-background/80 transition-all duration-200 group-hover:border-green-300/50 focus:border-green-500/50 focus:ring-2 focus:ring-green-500/20"
-                        required
-                      />
-                      <Lock className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground group-hover:text-green-500 transition-colors" />
-                      <button
-                        type="button"
-                        onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-4 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-green-500 transition-colors p-1 rounded-md hover:bg-green-50/50 dark:hover:bg-green-900/30"
-                      >
-                        {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* Confirm Password Field */}
-                  <div className="space-y-2">
-                    <Label
-                      htmlFor="confirmPassword"
-                      className="text-sm font-semibold text-foreground flex items-center gap-2"
-                    >
-                      <Shield className="w-4 h-4" />
-                      Confirm Password
-                    </Label>
-                    <div className="relative group">
-                      <Input
-                        id="confirmPassword"
-                        name="confirmPassword"
-                        type={showConfirmPassword ? "text" : "password"}
-                        placeholder="Re-enter your password"
-                        value={formData.confirmPassword}
-                        onChange={handleInputChange}
-                        className="h-12 pl-12 pr-12 rounded-xl border-border/50 bg-background/50 backdrop-blur-sm focus:bg-background/80 transition-all duration-200 group-hover:border-green-300/50 focus:border-green-500/50 focus:ring-2 focus:ring-green-500/20"
-                        required
-                      />
-                      <Shield className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground group-hover:text-green-500 transition-colors" />
-                      <button
-                        type="button"
-                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                        className="absolute right-4 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-green-500 transition-colors p-1 rounded-md hover:bg-green-50/50 dark:hover:bg-green-900/30"
-                      >
-                        {showConfirmPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
-                      </button>
-                    </div>
-
-                    {/* Password Match Indicators */}
-                    {formData.confirmPassword.length > 0 && (
-                      <div className="flex items-center space-x-2 text-xs">
-                        {formData.password === formData.confirmPassword ? (
-                          <>
-                            <CheckCircle className="h-3 w-3 text-green-500" />
-                            <span className="text-green-500 font-medium">Passwords match</span>
-                          </>
-                        ) : (
-                          <>
-                            <XCircle className="h-3 w-3 text-red-500" />
-                            <span className="text-red-500 font-medium">Passwords do not match</span>
-                          </>
-                        )}
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Submit Button */}
-                  <Button
-                    type="submit"
-                    className="w-full h-12 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 relative overflow-hidden active:scale-[0.98] active:shadow-md"
-                    disabled={loading || isSubmitting}
-                    style={{
-                      transform: isSubmitting ? "scale(0.98)" : undefined,
-                      transition: "transform 0.1s ease-in-out",
-                    }}
-                  >
-                    {/* Immediate loading overlay */}
-                    {loading && (
-                      <div className="absolute inset-0 bg-gradient-to-r from-green-500 to-emerald-600 flex items-center justify-center">
-                        <div className="flex items-center gap-2 bg-black/20 backdrop-blur-sm px-4 py-2 rounded-lg">
-                          <svg className="animate-spin spinner h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                          </svg>
-                          <span className="text-white font-semibold drop-shadow-lg">Creating Account...</span>
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Button content */}
-                    <div
-                      className={`flex items-center gap-2 transition-opacity duration-200 ${loading ? "opacity-0" : "opacity-100"}`}
-                    >
-                      <UserPlus className="h-5 w-5" />
-                      Create Account
-                    </div>
-                  </Button>
-                </form>
-
-                {/* Login Link */}
-                <div className="text-center pt-2">
-                  <p className="text-sm text-muted-foreground">
-                    Already have an account?{" "}
-                    <Link
-                      href="/login"
-                      className="font-semibold text-green-600 hover:text-green-700 dark:text-green-400 dark:hover:text-green-300 transition-colors duration-200 hover:underline"
-                    >
-                      Sign In
-                    </Link>
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Footer */}
-            <div className="text-center mt-4">
-              <p className="text-xs text-muted-foreground/70">© 2025 UGen Pro. All rights reserved.</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+    </AuthLayout>
   )
-}
+})
+
+export default SignupPage
