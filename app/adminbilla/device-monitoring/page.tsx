@@ -15,8 +15,6 @@ import {
   CheckCircle,
   LogOut,
   RefreshCw,
-  Play,
-  Pause,
 } from "lucide-react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -131,7 +129,7 @@ export default function DeviceMonitoringPage() {
         const devicesData = await devicesResponse.json()
         setDevices(devicesData.data || [])
         setLastUpdated(new Date())
-        
+
         if (showToast) {
           toast({
             title: "Data Updated",
@@ -268,98 +266,120 @@ export default function DeviceMonitoringPage() {
   return (
     <div className="space-y-4">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">Device Monitoring</h1>
-          <p className="text-muted-foreground">Track user devices and IP addresses</p>
-          <div className="flex items-center gap-2 mt-1">
-            <Clock className="w-3 h-3 text-muted-foreground" />
-            <span className="text-xs text-muted-foreground">
-              Last updated: {lastUpdated.toLocaleTimeString()}
-            </span>
-            {autoRefresh && (
-              <Badge variant="secondary" className="text-xs">
-                <Activity className="w-3 h-3 mr-1" />
-                Live
-              </Badge>
-            )}
+      <div className="glass-card p-4 rounded-2xl border-2 border-indigo-200/50 dark:border-indigo-800/50 bg-gradient-to-br from-indigo-50/50 to-blue-50/50 dark:from-indigo-900/20 dark:to-blue-900/20">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-blue-600 bg-clip-text text-transparent">
+              Device Monitoring
+            </h1>
+            <p className="text-muted-foreground">Track user devices and IP addresses</p>
+            <div className="flex items-center gap-2 mt-1">
+              <Clock className="w-3 h-3 text-muted-foreground" />
+              <span className="text-xs text-muted-foreground">Last updated: {lastUpdated.toLocaleTimeString()}</span>
+              {autoRefresh && (
+                <Badge
+                  variant="secondary"
+                  className="text-xs bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
+                >
+                  <Activity className="w-3 h-3 mr-1" />
+                  Live
+                </Badge>
+              )}
+            </div>
           </div>
-        </div>
-        <div className="flex items-center gap-2">
           <div className="flex items-center gap-2">
-            <Switch
-              checked={autoRefresh}
-              onCheckedChange={setAutoRefresh}
-              id="auto-refresh"
-            />
-            <label htmlFor="auto-refresh" className="text-sm text-muted-foreground">
-              Auto Refresh
-            </label>
+            <div className="flex items-center gap-2">
+              <Switch checked={autoRefresh} onCheckedChange={setAutoRefresh} id="auto-refresh" />
+              <label htmlFor="auto-refresh" className="text-sm text-muted-foreground">
+                Auto Refresh
+              </label>
+            </div>
+            <Button
+              onClick={() => loadData(true)}
+              variant="outline"
+              size="sm"
+              className="bg-gradient-to-r from-indigo-500 to-blue-500 text-white border-0 hover:from-indigo-600 hover:to-blue-600"
+            >
+              <RefreshCw className="w-4 h-4 mr-2" />
+              Refresh
+            </Button>
           </div>
-          <Button onClick={() => loadData(true)} variant="outline" size="sm">
-            <RefreshCw className="w-4 h-4 mr-2" />
-            Refresh
-          </Button>
         </div>
       </div>
 
       {/* Stats Cards */}
       {stats && (
         <div className="grid grid-cols-1 md:grid-cols-5 gap-3">
-          <Card>
+          <Card className="border-2 border-blue-200/50 dark:border-blue-800/50 bg-gradient-to-br from-blue-50 to-blue-100/50 dark:from-blue-900/20 dark:to-blue-800/20">
             <CardContent className="p-4">
               <div className="flex items-center space-x-2">
-                <Users className="w-8 h-8 text-blue-500" />
+                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center shadow-lg">
+                  <Users className="w-6 h-6 text-white" />
+                </div>
                 <div>
-                  <p className="text-2xl font-bold">{stats.overview.total_users}</p>
+                  <p className="text-2xl font-bold text-blue-700 dark:text-blue-300">{stats.overview.total_users}</p>
                   <p className="text-xs text-muted-foreground">Total Users</p>
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="border-2 border-green-200/50 dark:border-green-800/50 bg-gradient-to-br from-green-50 to-green-100/50 dark:from-green-900/20 dark:to-green-800/20">
             <CardContent className="p-4">
               <div className="flex items-center space-x-2">
-                <Activity className="w-8 h-8 text-green-500" />
+                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-green-500 to-green-600 flex items-center justify-center shadow-lg">
+                  <Activity className="w-6 h-6 text-white" />
+                </div>
                 <div>
-                  <p className="text-2xl font-bold">{stats.overview.active_sessions}</p>
+                  <p className="text-2xl font-bold text-green-700 dark:text-green-300">
+                    {stats.overview.active_sessions}
+                  </p>
                   <p className="text-xs text-muted-foreground">Active Sessions</p>
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="border-2 border-purple-200/50 dark:border-purple-800/50 bg-gradient-to-br from-purple-50 to-purple-100/50 dark:from-purple-900/20 dark:to-purple-800/20">
             <CardContent className="p-4">
               <div className="flex items-center space-x-2">
-                <Smartphone className="w-8 h-8 text-purple-500" />
+                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center shadow-lg">
+                  <Smartphone className="w-6 h-6 text-white" />
+                </div>
                 <div>
-                  <p className="text-2xl font-bold">{stats.overview.total_devices}</p>
+                  <p className="text-2xl font-bold text-purple-700 dark:text-purple-300">
+                    {stats.overview.total_devices}
+                  </p>
                   <p className="text-xs text-muted-foreground">Total Devices</p>
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="border-2 border-orange-200/50 dark:border-orange-800/50 bg-gradient-to-br from-orange-50 to-orange-100/50 dark:from-orange-900/20 dark:to-orange-800/20">
             <CardContent className="p-4">
               <div className="flex items-center space-x-2">
-                <Globe className="w-8 h-8 text-orange-500" />
+                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center shadow-lg">
+                  <Globe className="w-6 h-6 text-white" />
+                </div>
                 <div>
-                  <p className="text-2xl font-bold">{stats.overview.unique_ips}</p>
+                  <p className="text-2xl font-bold text-orange-700 dark:text-orange-300">{stats.overview.unique_ips}</p>
                   <p className="text-xs text-muted-foreground">Unique IPs</p>
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="border-2 border-red-200/50 dark:border-red-800/50 bg-gradient-to-br from-red-50 to-red-100/50 dark:from-red-900/20 dark:to-red-800/20">
             <CardContent className="p-4">
               <div className="flex items-center space-x-2">
-                <AlertTriangle className="w-8 h-8 text-red-500" />
+                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-red-500 to-red-600 flex items-center justify-center shadow-lg">
+                  <AlertTriangle className="w-6 h-6 text-white" />
+                </div>
                 <div>
-                  <p className="text-2xl font-bold">{stats.overview.multi_device_users}</p>
+                  <p className="text-2xl font-bold text-red-700 dark:text-red-300">
+                    {stats.overview.multi_device_users}
+                  </p>
                   <p className="text-xs text-muted-foreground">Multi-Device Users</p>
                 </div>
               </div>
@@ -373,7 +393,8 @@ export default function DeviceMonitoringPage() {
         <Alert>
           <AlertTriangle className="h-4 w-4" />
           <AlertDescription>
-            <strong>Recent IP Changes:</strong> {stats.recent_ip_changes.length} auto-logouts due to IP changes in the last 24 hours.
+            <strong>Recent IP Changes:</strong> {stats.recent_ip_changes.length} auto-logouts due to IP changes in the
+            last 24 hours.
           </AlertDescription>
         </Alert>
       )}
@@ -485,9 +506,9 @@ export default function DeviceMonitoringPage() {
                         <div className="flex items-center gap-2">
                           <code className="font-mono">{ip.ip_address}</code>
                           {ip.is_current && (
-                              <Badge variant="default" className="text-xs">
-                                Current
-                              </Badge>
+                            <Badge variant="default" className="text-xs">
+                              Current
+                            </Badge>
                           )}
                         </div>
                         <div className="flex items-center gap-2 text-muted-foreground">

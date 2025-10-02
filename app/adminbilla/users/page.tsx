@@ -288,18 +288,18 @@ export default function UserManagementPage() {
   return (
     <div className="space-y-4 lg:space-y-6">
       {/* Header Section */}
-      <div className="glass-card p-3 lg:p-4 rounded-2xl">
+      <div className="glass-card p-3 lg:p-4 rounded-2xl border-2 border-purple-200/50 dark:border-purple-800/50 bg-gradient-to-br from-purple-50/50 to-pink-50/50 dark:from-purple-900/20 dark:to-pink-900/20">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div>
-            <h1 className="text-2xl lg:text-3xl font-bold text-foreground mb-2">User Management</h1>
+            <h1 className="text-2xl lg:text-3xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-2">
+              User Management
+            </h1>
             <p className="text-muted-foreground text-sm lg:text-base">
               View and manage all user information and security settings
             </p>
             <div className="flex items-center gap-2 mt-1">
               <Clock className="w-3 h-3 text-muted-foreground" />
-              <span className="text-xs text-muted-foreground">
-                Last updated: {lastUpdated.toLocaleTimeString()}
-              </span>
+              <span className="text-xs text-muted-foreground">Last updated: {lastUpdated.toLocaleTimeString()}</span>
               {autoRefresh && (
                 <Badge variant="secondary" className="text-xs">
                   <Activity className="w-3 h-3 mr-1" />
@@ -310,21 +310,12 @@ export default function UserManagementPage() {
           </div>
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 lg:gap-3">
             <div className="flex items-center gap-2">
-              <Switch
-                checked={autoRefresh}
-                onCheckedChange={setAutoRefresh}
-                id="auto-refresh-users"
-              />
+              <Switch checked={autoRefresh} onCheckedChange={setAutoRefresh} id="auto-refresh-users" />
               <label htmlFor="auto-refresh-users" className="text-sm text-muted-foreground">
                 Auto Refresh
               </label>
             </div>
-            <Button 
-              onClick={loadUsers} 
-              variant="outline" 
-              size="sm" 
-              className="text-xs lg:text-sm bg-transparent"
-            >
+            <Button onClick={loadUsers} variant="outline" size="sm" className="text-xs lg:text-sm bg-transparent">
               <RefreshCw className="h-3 w-3 lg:h-4 lg:w-4 mr-2" />
               Refresh
             </Button>
@@ -466,7 +457,7 @@ export default function UserManagementPage() {
                   <div className="min-w-0 flex-1">
                     <h3 className="font-semibold text-foreground text-sm lg:text-base truncate">{user.full_name}</h3>
                     <p className="text-xs lg:text-sm text-muted-foreground truncate">
-                      {user.email || `@${user.telegram_username}` || 'No contact info'}
+                      {user.email || `@${user.telegram_username}` || "No contact info"}
                     </p>
                   </div>
                 </div>
@@ -644,7 +635,7 @@ export default function UserManagementPage() {
                 <div className="flex-1">
                   <h3 className="text-2xl font-bold text-foreground">{selectedUser.full_name}</h3>
                   <p className="text-lg text-muted-foreground">
-                    {selectedUser.email || `@${selectedUser.telegram_username}` || 'No contact info'}
+                    {selectedUser.email || `@${selectedUser.telegram_username}` || "No contact info"}
                   </p>
                   <div className="flex items-center gap-2 mt-2">
                     <Badge variant={getStatusInfo(selectedUser.current_status).variant} className="text-sm">
@@ -679,10 +670,10 @@ export default function UserManagementPage() {
                     </div>
                     <div className="flex justify-between items-center py-2 border-b border-border">
                       <span className="text-sm font-medium text-muted-foreground">
-                        {selectedUser.email ? 'Email Address' : 'Telegram Username'}
+                        {selectedUser.email ? "Email Address" : "Telegram Username"}
                       </span>
                       <span className="text-sm text-foreground font-medium">
-                        {selectedUser.email || `@${selectedUser.telegram_username}` || 'N/A'}
+                        {selectedUser.email || `@${selectedUser.telegram_username}` || "N/A"}
                       </span>
                     </div>
                     <div className="flex justify-between items-center py-2 border-b border-border">
@@ -694,8 +685,12 @@ export default function UserManagementPage() {
                     <div className="flex justify-between items-center py-2">
                       <span className="text-sm font-medium text-muted-foreground">Is Active</span>
                       <div className="flex items-center gap-2">
-                        <div className={`w-2 h-2 rounded-full ${selectedUser.is_active ? "bg-green-500" : "bg-red-500"}`}></div>
-                        <span className={`text-sm font-medium ${selectedUser.is_active ? "text-green-600" : "text-red-600"}`}>
+                        <div
+                          className={`w-2 h-2 rounded-full ${selectedUser.is_active ? "bg-green-500" : "bg-red-500"}`}
+                        ></div>
+                        <span
+                          className={`text-sm font-medium ${selectedUser.is_active ? "text-green-600" : "text-red-600"}`}
+                        >
                           {selectedUser.is_active ? "Active" : "Inactive"}
                         </span>
                       </div>
@@ -719,7 +714,7 @@ export default function UserManagementPage() {
                           month: "long",
                           day: "numeric",
                           hour: "2-digit",
-                          minute: "2-digit"
+                          minute: "2-digit",
                         })}
                       </span>
                     </div>
@@ -731,7 +726,7 @@ export default function UserManagementPage() {
                           month: "long",
                           day: "numeric",
                           hour: "2-digit",
-                          minute: "2-digit"
+                          minute: "2-digit",
                         })}
                       </span>
                     </div>
@@ -744,7 +739,7 @@ export default function UserManagementPage() {
                             month: "long",
                             day: "numeric",
                             hour: "2-digit",
-                            minute: "2-digit"
+                            minute: "2-digit",
                           })}
                         </span>
                       </div>
@@ -756,7 +751,7 @@ export default function UserManagementPage() {
                           {new Date(selectedUser.expiration_date).toLocaleDateString("en-US", {
                             year: "numeric",
                             month: "long",
-                            day: "numeric"
+                            day: "numeric",
                           })}
                         </span>
                       </div>
@@ -770,7 +765,7 @@ export default function UserManagementPage() {
                             month: "long",
                             day: "numeric",
                             hour: "2-digit",
-                            minute: "2-digit"
+                            minute: "2-digit",
                           })}
                         </span>
                       </div>
@@ -802,7 +797,7 @@ export default function UserManagementPage() {
                       </Badge>
                     </div>
                   </div>
-                  
+
                   {selectedUser.user_agent && selectedUser.user_agent !== "Unknown" && (
                     <div className="space-y-2">
                       <span className="text-sm font-medium text-muted-foreground">User Agent</span>

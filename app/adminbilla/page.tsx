@@ -234,20 +234,19 @@ export default function AdminDashboard() {
   return (
     <div className="space-y-6 lg:space-y-8 pb-8">
       {/* Modern Header with Gradient */}
-      <div className="relative glass-card p-6 lg:p-8 rounded-3xl overflow-hidden">
-        {/* Background Gradient */}
-        <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 via-purple-500/5 to-pink-500/10 pointer-events-none" />
-        <div className="absolute -top-24 -right-24 w-64 h-64 bg-blue-500/10 rounded-full blur-3xl" />
-        <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-purple-500/10 rounded-full blur-3xl" />
-        
+      <div className="relative glass-card p-6 lg:p-8 rounded-3xl overflow-hidden border-2 border-blue-200/50 dark:border-blue-800/50">
+        <div className="absolute inset-0 bg-gradient-to-br from-blue-500/20 via-purple-500/15 to-pink-500/20 pointer-events-none" />
+        <div className="absolute -top-24 -right-24 w-64 h-64 bg-blue-500/20 rounded-full blur-3xl" />
+        <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-purple-500/20 rounded-full blur-3xl" />
+
         <div className="relative z-10 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div>
             <div className="flex items-center gap-3 mb-3">
-              <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center shadow-lg">
+              <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 flex items-center justify-center shadow-lg">
                 <Shield className="w-6 h-6 text-white" />
               </div>
               <div>
-                <h1 className="text-3xl lg:text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                <h1 className="text-3xl lg:text-4xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
                   Admin Dashboard
                 </h1>
                 <p className="text-muted-foreground text-sm lg:text-base">Welcome back, {admin?.full_name}</p>
@@ -259,7 +258,10 @@ export default function AdminDashboard() {
                 <span className="text-xs text-muted-foreground">Updated: {lastUpdated.toLocaleTimeString()}</span>
               </div>
               {autoRefresh && (
-                <Badge variant="secondary" className="text-xs px-3 py-1.5 bg-green-500/10 text-green-600 dark:text-green-400 border-green-500/20">
+                <Badge
+                  variant="secondary"
+                  className="text-xs px-3 py-1.5 bg-green-500/10 text-green-600 dark:text-green-400 border-green-500/20"
+                >
                   <Activity className="w-3.5 h-3.5 mr-1.5 animate-pulse" />
                   Live
                 </Badge>
@@ -293,7 +295,7 @@ export default function AdminDashboard() {
               size="sm"
               className="px-4 py-2 h-auto bg-background/50 hover:bg-background transition-all duration-200 hover:scale-105"
             >
-              <RefreshCw className={`w-4 h-4 mr-2 ${isLoadingData ? 'animate-spin' : ''}`} />
+              <RefreshCw className={`w-4 h-4 mr-2 ${isLoadingData ? "animate-spin" : ""}`} />
               Refresh
             </Button>
           </div>
@@ -319,8 +321,10 @@ export default function AdminDashboard() {
                 className="relative group glass-card p-6 lg:p-8 rounded-3xl hover:shadow-2xl hover:shadow-primary/10 transition-all duration-300 overflow-hidden"
               >
                 {/* Gradient Background */}
-                <div className={`absolute inset-0 bg-gradient-to-br ${stat.gradient} opacity-0 group-hover:opacity-5 transition-opacity duration-300`} />
-                
+                <div
+                  className={`absolute inset-0 bg-gradient-to-br ${stat.gradient} opacity-0 group-hover:opacity-5 transition-opacity duration-300`}
+                />
+
                 <div className="relative z-10">
                   <div className="flex items-center justify-between mb-4 lg:mb-6">
                     <div
@@ -328,7 +332,9 @@ export default function AdminDashboard() {
                     >
                       <Icon className="w-7 h-7 lg:w-8 lg:h-8 text-white" />
                     </div>
-                    <div className={`px-3 py-1.5 rounded-full text-xs font-semibold ${stat.bgColor} ${stat.textColor} border border-current/20`}>
+                    <div
+                      className={`px-3 py-1.5 rounded-full text-xs font-semibold ${stat.bgColor} ${stat.textColor} border border-current/20`}
+                    >
                       {stat.change}
                     </div>
                   </div>
@@ -353,8 +359,10 @@ export default function AdminDashboard() {
               <Link key={item.href} href={item.href}>
                 <div className="relative group glass-card p-6 lg:p-8 rounded-3xl hover:shadow-2xl hover:shadow-primary/10 transition-all duration-300 cursor-pointer overflow-hidden">
                   {/* Hover Background */}
-                  <div className={`absolute inset-0 bg-gradient-to-br ${item.gradient} opacity-0 group-hover:opacity-5 transition-opacity duration-300`} />
-                  
+                  <div
+                    className={`absolute inset-0 bg-gradient-to-br ${item.gradient} opacity-0 group-hover:opacity-5 transition-opacity duration-300`}
+                  />
+
                   <div className="relative z-10 flex items-start space-x-4 lg:space-x-5">
                     <div
                       className={`w-16 h-16 lg:w-20 lg:h-20 rounded-2xl bg-gradient-to-br ${item.gradient} flex items-center justify-center shadow-xl group-hover:scale-110 group-hover:rotate-3 transition-all duration-300`}
@@ -368,7 +376,12 @@ export default function AdminDashboard() {
                       <p className="text-sm lg:text-base text-muted-foreground leading-relaxed">{item.description}</p>
                       <div className="mt-3 text-sm font-semibold text-primary opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center gap-1">
                         View Details
-                        <svg className="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg
+                          className="w-4 h-4 group-hover:translate-x-1 transition-transform"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                         </svg>
                       </div>
@@ -438,9 +451,11 @@ export default function AdminDashboard() {
                       </Badge>
                     </div>
                     <div className="text-sm text-muted-foreground truncate mb-1 font-medium">
-                      {activity.user} 
+                      {activity.user}
                       {activity.email && <span className="text-primary">({activity.email})</span>}
-                      {!activity.email && activity.username && <span className="text-primary">(@{activity.username})</span>}
+                      {!activity.email && activity.username && (
+                        <span className="text-primary">(@{activity.username})</span>
+                      )}
                     </div>
                     {activity.details && (
                       <div className="text-xs text-muted-foreground/80 truncate mb-2">{activity.details}</div>
