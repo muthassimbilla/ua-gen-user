@@ -4,6 +4,7 @@ import { Bell, Cloud, MessageSquare, Menu } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { useAuth } from "@/lib/auth-context"
 
 interface TopNavProps {
   title: string
@@ -11,6 +12,8 @@ interface TopNavProps {
 }
 
 export function TopNav({ title, onMenuClick }: TopNavProps) {
+  const { user } = useAuth()
+
   return (
     <div className="flex h-16 items-center justify-between border-b bg-background px-6">
       <div className="flex items-center gap-4">
@@ -35,7 +38,7 @@ export function TopNav({ title, onMenuClick }: TopNavProps) {
         </Button>
         <Avatar className="h-8 w-8 ml-2">
           <AvatarFallback className="bg-gradient-to-br from-purple-600 to-blue-600 text-white text-xs">
-            JD
+            {user?.email?.substring(0, 2).toUpperCase() || "U"}
           </AvatarFallback>
         </Avatar>
       </div>

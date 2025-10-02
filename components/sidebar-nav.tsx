@@ -9,34 +9,45 @@ import {
   Layers,
   FileText,
   FolderKanban,
-  BookOpen,
-  Users,
-  Bookmark,
   Settings,
   ChevronDown,
   Search,
   Sparkles,
+  Smartphone,
+  MapPin,
 } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { useAuth } from "@/lib/auth-context"
 
 const navigation = [
   { name: "Home", href: "/tool", icon: Home, count: null },
-  { name: "Apps", href: "/tool", icon: Layers, count: 2 },
-  { name: "Files", href: "/tool", icon: FileText, count: null },
-  { name: "Projects", href: "/tool", icon: FolderKanban, count: 4 },
-  { name: "Learn", href: "/tool", icon: BookOpen, count: null },
-  { name: "Community", href: "/tool", icon: Users, count: null },
-  { name: "Resources", href: "/tool", icon: Bookmark, count: null },
+  { name: "Tools", href: "/tool", icon: Layers, count: 2, hasDropdown: true },
+  { name: "Profile", href: "/profile", icon: FileText, count: null },
+  { name: "Premium", href: "/premium-tools", icon: FolderKanban, count: null },
+]
+
+const toolsSubmenu = [
+  { name: "User Agent Generator", href: "/tool/user-agent-generator", icon: Smartphone },
+  { name: "Address Generator", href: "/tool/address-generator", icon: MapPin },
 ]
 
 export function SidebarNav() {
   const pathname = usePathname()
-  const [expandedItems, setExpandedItems] = useState<string[]>([])
+  const { user, logout } = useAuth()
+  const [expandedItems, setExpandedItems] = useState<string[]>(["Tools"])
 
   const toggleExpand = (name: string) => {
     setExpandedItems((prev) => (prev.includes(name) ? prev.filter((item) => item !== name) : [...prev, name]))
+  }
+
+  const handleLogout = async () => {
+    try {
+      await logout()
+    } catch (error) {
+      console.error("Logout failed:", error)
+    }
   }
 
   return (
@@ -63,8 +74,7 @@ export function SidebarNav() {
       {/* Navigation */}
       <nav className="flex-1 space-y-1 px-3 overflow-y-auto">
         {navigation.map((item) => {
-          const isActive = pathname === item.href
-          const hasDropdown = ["Apps", "Files", "Projects", "Learn", "Community", "Resources"].includes(item.name)
+          const isActive = pathname === item.href || (item.name === "Tools" && pathname.startsWith("/tool"))
           const isExpanded = expandedItems.includes(item.name)
 
           return (
@@ -78,7 +88,7 @@ export function SidebarNav() {
                     : "text-muted-foreground hover:bg-muted/50 hover:text-foreground",
                 )}
                 onClick={(e) => {
-                  if (hasDropdown) {
+                  if (item.hasDropdown) {
                     e.preventDefault()
                     toggleExpand(item.name)
                   }
@@ -91,10 +101,33 @@ export function SidebarNav() {
                     {item.count}
                   </Badge>
                 )}
-                {hasDropdown && (
+                {item.hasDropdown && (
                   <ChevronDown className={cn("h-4 w-4 transition-transform", isExpanded && "rotate-180")} />
                 )}
               </Link>
+
+              {item.name === "Tools" && isExpanded && (
+                <div className="ml-8 mt-1 space-y-1">
+                  {toolsSubmenu.map((subItem) => {
+                    const isSubActive = pathname === subItem.href
+                    return (
+                      <Link
+                        key={subItem.name}
+                        href={subItem.href}
+                        className={cn(
+                          "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors",
+                          isSubActive
+                            ? "bg-muted text-foreground font-medium"
+                            : "text-muted-foreground hover:bg-muted/50 hover:text-foreground",
+                        )}
+                      >
+                        <subItem.icon className="h-4 w-4" />
+                        <span>{subItem.name}</span>
+                      </Link>
+                    )
+                  })}
+                </div>
+              )}
             </div>
           )
         })}
@@ -112,15 +145,21 @@ export function SidebarNav() {
         <div className="flex items-center gap-3 rounded-lg bg-muted/50 px-3 py-2.5">
           <Avatar className="h-8 w-8">
             <AvatarFallback className="bg-gradient-to-br from-purple-600 to-blue-600 text-white text-xs">
-              JD
+              {user?.email?.substring(0, 2).toUpperCase() || "U"}
             </AvatarFallback>
           </Avatar>
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium truncate">John Doe</p>
+            <p className="text-sm font-medium truncate">{user?.email || "User"}</p>
           </div>
-          <Badge variant="secondary" className="text-xs">
-            Pro
-          </Badge>
+          <button
+            onClick={handleLogout}
+            className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+            title="Logout"
+          >
+            <Badge variant="secondary" className="text-xs cursor-pointer">
+              Pro
+            </Badge>
+          </button>
         </div>
       </div>
     </div>
