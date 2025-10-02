@@ -282,17 +282,39 @@ export class AuthService {
 
   static async resetPassword(email: string): Promise<void> {
     try {
+      console.log("[v0] Attempting password reset for:", email)
+      
       const supabase = createClient()
 
-      const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: process.env.NEXT_PUBLIC_DEV_SUPABASE_REDIRECT_URL || `${window.location.origin}/auth/callback`,
-      })
-
-      if (error) {
-        throw new Error(error.message)
+      if (!supabase) {
+        throw new Error("Supabase client not available")
       }
 
-      console.log("[v0] Password reset email sent")
+      const redirectUrl = process.env.NEXT_PUBLIC_DEV_SUPABASE_REDIRECT_URL || `${window.location.origin}/auth/callback`
+      console.log("[v0] Using redirect URL:", redirectUrl)
+
+      const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: redirectUrl,
+      })
+
+      console.log("[v0] Reset password response:", { data, error })
+
+      if (error) {
+        console.error("[v0] Supabase reset password error:", error)
+        
+        // Handle specific error cases
+        if (error.message.includes("rate limit")) {
+          throw new Error("Too many requests. Please wait a few minutes before trying again.")
+        } else if (error.message.includes("not found") || error.message.includes("user not found")) {
+          throw new Error("No account found with this email address.")
+        } else if (error.message.includes("invalid email")) {
+          throw new Error("Please enter a valid email address.")
+        } else {
+          throw new Error(error.message || "Failed to send reset email")
+        }
+      }
+
+      console.log("[v0] Password reset email sent successfully")
     } catch (error: any) {
       console.error("[v0] Password reset error:", error)
       throw error
