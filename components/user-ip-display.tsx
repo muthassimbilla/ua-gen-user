@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, memo } from "react"
 import { Globe, Shield, RefreshCw, Copy } from "lucide-react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -13,7 +13,7 @@ interface UserIPInfo {
   user_id: string
 }
 
-export function UserIPDisplay() {
+export const UserIPDisplay = memo(function UserIPDisplay() {
   const { user } = useAuth()
   const { toast } = useToast()
 
@@ -30,15 +30,27 @@ export function UserIPDisplay() {
   const loadIPInfo = async () => {
     try {
       setLoading(true)
+
+      const cachedData = localStorage.getItem("ip_cache")
+      if (cachedData) {
+        const { ip, timestamp } = JSON.parse(cachedData)
+        const fiveMinutes = 5 * 60 * 1000
+        if (Date.now() - timestamp < fiveMinutes) {
+          setCurrentIP(ip)
+          setLoading(false)
+          return
+        }
+      }
+
       let detectedIP = null
 
       // Try multiple IP detection methods
       const ipDetectionMethods = [
         // Method 1: Our API
         async () => {
-      const response = await fetch("/api/user/current-ip")
-      if (response.ok) {
-        const data = await response.json()
+          const response = await fetch("/api/user/current-ip")
+          if (response.ok) {
+            const data = await response.json()
             if (data.success && data.data?.ip) {
               return data.data.ip
             }
@@ -63,15 +75,6 @@ export function UserIPDisplay() {
           }
           return null
         },
-        // Method 4: httpbin.org
-        async () => {
-          const response = await fetch("https://httpbin.org/ip")
-          if (response.ok) {
-            const data = await response.json()
-            return data.origin
-          }
-          return null
-        }
       ]
 
       // Try each method until one succeeds
@@ -90,10 +93,16 @@ export function UserIPDisplay() {
 
       if (detectedIP) {
         setCurrentIP(detectedIP)
+        localStorage.setItem(
+          "ip_cache",
+          JSON.stringify({
+            ip: detectedIP,
+            timestamp: Date.now(),
+          }),
+        )
       } else {
         setCurrentIP("IP Detection Failed")
       }
-
     } catch (error) {
       console.error("Error loading IP info:", error)
       setCurrentIP("IP Detection Failed")
@@ -104,18 +113,18 @@ export function UserIPDisplay() {
 
   const handleRefresh = async () => {
     setRefreshing(true)
+    localStorage.removeItem("ip_cache")
     await loadIPInfo()
     setRefreshing(false)
 
     // Only show success toast if IP was successfully loaded
     if (currentIP && currentIP !== "IP Detection Failed") {
-    toast({
-      title: "Success",
-      description: "IP information updated",
-    })
+      toast({
+        title: "Success",
+        description: "IP information updated",
+      })
+    }
   }
-  }
-
 
   if (!user) return null
 
@@ -139,18 +148,22 @@ export function UserIPDisplay() {
 
       <CardContent className="space-y-4">
         {/* Current IP */}
-        <div className={`p-6 rounded-xl border ${
-          currentIP === "IP Detection Failed" 
-            ? "bg-gradient-to-r from-orange-500/10 to-red-500/10 border-orange-500/20" 
-            : "bg-gradient-to-r from-green-500/10 to-emerald-500/10 border-green-500/20"
-        }`}>
+        <div
+          className={`p-6 rounded-xl border ${
+            currentIP === "IP Detection Failed"
+              ? "bg-gradient-to-r from-orange-500/10 to-red-500/10 border-orange-500/20"
+              : "bg-gradient-to-r from-green-500/10 to-emerald-500/10 border-green-500/20"
+          }`}
+        >
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <div className={`w-12 h-12 rounded-xl flex items-center justify-center shadow-lg ${
-                currentIP === "IP Detection Failed"
-                  ? "bg-gradient-to-br from-orange-500 to-red-600"
-                  : "bg-gradient-to-br from-green-500 to-emerald-600"
-              }`}>
+              <div
+                className={`w-12 h-12 rounded-xl flex items-center justify-center shadow-lg ${
+                  currentIP === "IP Detection Failed"
+                    ? "bg-gradient-to-br from-orange-500 to-red-600"
+                    : "bg-gradient-to-br from-green-500 to-emerald-600"
+                }`}
+              >
                 <Globe className="w-6 h-6 text-white" />
               </div>
               <div>
@@ -164,24 +177,28 @@ export function UserIPDisplay() {
                     <span className="text-orange-500">IP Detection Failed</span>
                   )}
                 </p>
-                <p className={`text-xs mt-1 ${
-                  currentIP === "IP Detection Failed"
-                    ? "text-orange-600 dark:text-orange-400"
-                    : "text-green-600 dark:text-green-400"
-                }`}>
-                  {currentIP === "IP Detection Failed" 
+                <p
+                  className={`text-xs mt-1 ${
+                    currentIP === "IP Detection Failed"
+                      ? "text-orange-600 dark:text-orange-400"
+                      : "text-green-600 dark:text-green-400"
+                  }`}
+                >
+                  {currentIP === "IP Detection Failed"
                     ? "Unable to detect your IP address. Please check your internet connection."
-                    : "This IP is being monitored for security"
-                  }
+                    : "This IP is being monitored for security"}
                 </p>
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <Badge variant={currentIP === "IP Detection Failed" ? "secondary" : "default"} 
-                className={currentIP === "IP Detection Failed" 
-                  ? "bg-orange-500/10 text-orange-600 border-orange-500/20" 
-                  : "bg-green-500/10 text-green-600 border-green-500/20"
-                }>
+              <Badge
+                variant={currentIP === "IP Detection Failed" ? "secondary" : "default"}
+                className={
+                  currentIP === "IP Detection Failed"
+                    ? "bg-orange-500/10 text-orange-600 border-orange-500/20"
+                    : "bg-green-500/10 text-green-600 border-green-500/20"
+                }
+              >
                 {currentIP === "IP Detection Failed" ? "Failed" : "Active"}
               </Badge>
               {currentIP && currentIP !== "IP Detection Failed" && (
@@ -204,9 +221,7 @@ export function UserIPDisplay() {
             </div>
           </div>
         </div>
-
-
       </CardContent>
     </Card>
   )
-}
+})

@@ -12,6 +12,7 @@ const inter = Inter({
   preload: true,
   fallback: ["system-ui", "arial"],
   adjustFontFallback: true,
+  variable: "--font-inter",
 })
 
 export const metadata: Metadata = {
@@ -23,6 +24,11 @@ export const metadata: Metadata = {
   creator: "UGen Pro",
   publisher: "UGen Pro",
   generator: "v0.app",
+  openGraph: {
+    title: "UGen Pro - Advanced Generator Tools Platform",
+    description: "The complete platform for advanced generator tools",
+    type: "website",
+  },
 }
 
 export const viewport: Viewport = {
