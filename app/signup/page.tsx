@@ -87,6 +87,7 @@ const SignupPage = memo(function SignupPage() {
     async function checkAuthAndRedirect() {
       if (user) {
         console.log("[v0] User already logged in, redirecting...")
+        setLoading(true)
         const currentUser = await AuthService.getCurrentUser()
 
         if (currentUser) {
@@ -107,10 +108,6 @@ const SignupPage = memo(function SignupPage() {
 
     checkAuthAndRedirect()
   }, [user, router])
-
-  if (user) {
-    return null
-  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()

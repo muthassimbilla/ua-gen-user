@@ -218,6 +218,7 @@ const LoginPage = memo(function LoginPage() {
     async function checkAuthAndRedirect() {
       if (user) {
         console.log("[v0] User already logged in, redirecting...")
+        setLoading(true)
         const currentUser = await AuthService.getCurrentUser()
 
         if (currentUser) {
@@ -238,10 +239,6 @@ const LoginPage = memo(function LoginPage() {
 
     checkAuthAndRedirect()
   }, [user, router])
-
-  if (user) {
-    return null
-  }
 
   if (!isOnline) {
     return <NoInternet onRetry={retryConnection} isReconnecting={isReconnecting} />
