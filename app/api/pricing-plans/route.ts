@@ -3,13 +3,13 @@ import { createClient } from "@/lib/supabase/server"
 
 export async function GET(request: NextRequest) {
   try {
-    console.log("[v0] Pricing plans GET request")
+    console.log("[v0] Pricing plans GET request started")
     const supabase = await createClient()
 
     const { searchParams } = new URL(request.url)
     const type = searchParams.get("type")
 
-    console.log("[v0] Fetching plans for type:", type)
+    console.log("[v0] Fetching plans for type:", type || "all")
 
     let query = supabase
       .from("pricing_plans")
@@ -17,7 +17,6 @@ export async function GET(request: NextRequest) {
       .eq("is_active", true)
       .order("display_order", { ascending: true })
 
-    // If type is specified, filter by it, otherwise get all plans
     if (type) {
       query = query.eq("plan_type", type)
     }
@@ -25,12 +24,12 @@ export async function GET(request: NextRequest) {
     const { data: plans, error } = await query
 
     if (error) {
-      console.error("[v0] Error fetching pricing plans:", error)
+      console.error("[v0] Database error fetching pricing plans:", error)
       return NextResponse.json(
         {
+          plans: [],
           error: "Failed to fetch pricing plans",
           details: error.message,
-          plans: [],
         },
         {
           status: 200,
@@ -45,18 +44,19 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(
       { plans: plans || [] },
       {
+        status: 200,
         headers: {
           "Content-Type": "application/json",
         },
       },
     )
   } catch (error) {
-    console.error("[v0] Unexpected error:", error)
+    console.error("[v0] Unexpected error in pricing-plans API:", error)
     return NextResponse.json(
       {
+        plans: [],
         error: "Internal server error",
         details: error instanceof Error ? error.message : "Unknown error",
-        plans: [],
       },
       {
         status: 200,
