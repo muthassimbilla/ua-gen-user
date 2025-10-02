@@ -1,10 +1,12 @@
 "use client"
 
-import { Bell, Cloud, MessageSquare, Menu } from "lucide-react"
+import { Bell, MessageSquare, Menu, Moon, Sun } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { useAuth } from "@/lib/auth-context"
+import { useTheme } from "next-themes"
+import { useEffect, useState } from "react"
 import Link from "next/link"
 
 interface TopNavProps {
@@ -14,6 +16,20 @@ interface TopNavProps {
 
 export function TopNav({ title, onMenuClick }: TopNavProps) {
   const { user } = useAuth()
+  const [mounted, setMounted] = useState(false)
+  const { resolvedTheme, setTheme } = useTheme()
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  const toggleTheme = () => {
+    if (resolvedTheme === "dark") {
+      setTheme("light")
+    } else {
+      setTheme("dark")
+    }
+  }
 
   return (
     <div className="flex h-16 items-center justify-between border-b bg-background px-6">
@@ -25,8 +41,22 @@ export function TopNav({ title, onMenuClick }: TopNavProps) {
       </div>
 
       <div className="flex items-center gap-2">
-        <Button variant="ghost" size="icon" className="relative">
-          <Cloud className="h-5 w-5" />
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={toggleTheme}
+          disabled={!mounted}
+          aria-label={resolvedTheme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+        >
+          {mounted ? (
+            resolvedTheme === "dark" ? (
+              <Sun className="h-5 w-5 text-yellow-500" />
+            ) : (
+              <Moon className="h-5 w-5" />
+            )
+          ) : (
+            <div className="h-5 w-5 animate-pulse bg-muted rounded" />
+          )}
         </Button>
         <Button variant="ghost" size="icon" className="relative">
           <MessageSquare className="h-5 w-5" />

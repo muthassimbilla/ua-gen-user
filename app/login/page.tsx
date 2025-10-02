@@ -256,7 +256,7 @@ const LoginPage = memo(function LoginPage() {
   return (
     <ClientOnly>
       <AuthLayout variant="login">
-        <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
+        <div className="space-y-8">
           <AuthHero variant="login" />
           <AuthForm
             variant="login"

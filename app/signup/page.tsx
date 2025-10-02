@@ -194,7 +194,7 @@ const SignupPage = memo(function SignupPage() {
 
   return (
     <AuthLayout variant="signup">
-      <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
+      <div className="space-y-8">
         <AuthHero variant="signup" />
         <AuthForm
           variant="signup"
