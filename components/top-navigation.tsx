@@ -4,7 +4,6 @@ import { useState, useRef, useEffect } from "react"
 import { User, LogOut, ChevronDown, Settings } from "lucide-react"
 import { useAuth } from "@/lib/auth-context"
 import Link from "next/link"
-import Image from "next/image"
 
 export default function TopNavigation() {
   const { user, logout } = useAuth()
@@ -37,25 +36,7 @@ export default function TopNavigation() {
 
   return (
     <div className="fixed top-0 left-0 right-0 z-40 h-16 bg-gradient-to-r from-white/95 via-white/90 to-white/95 dark:from-slate-900/95 dark:via-slate-900/90 dark:to-slate-900/95 backdrop-blur-2xl border-b border-white/40 dark:border-slate-700/50 lg:left-64 shadow-xl">
-      <div className="flex items-center justify-between h-full px-6">
-        <div className="flex items-center gap-4">
-          <Link href="/" className="flex items-center gap-3 group">
-            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-500 via-indigo-500 to-purple-600 flex items-center justify-center shadow-xl relative overflow-hidden group-hover:scale-105 transition-transform duration-300">
-              <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent" />
-              <Image 
-                src="/logo.jpg" 
-                alt="UGen Pro Logo" 
-                width={32} 
-                height={32} 
-                className="rounded-lg relative z-10 object-cover w-full h-full" 
-              />
-            </div>
-            <span className="text-lg font-bold bg-gradient-to-r from-slate-800 to-slate-600 dark:from-slate-200 dark:to-slate-400 bg-clip-text text-transparent group-hover:from-blue-600 group-hover:to-purple-600 transition-all duration-300">
-              UGen Pro
-            </span>
-          </Link>
-        </div>
-
+      <div className="flex items-center justify-end h-full px-6">
         {/* Right side - Profile dropdown */}
         <div className="relative" ref={profileRef}>
           <button
@@ -82,8 +63,7 @@ export default function TopNavigation() {
                     <div className="absolute inset-0 bg-gradient-to-br from-white/30 to-transparent" />
                     <User className="w-7 h-7 text-white relative z-10 group-hover:scale-110 transition-transform duration-300" />
                   </div>
-                  <div className="flex-1">
-                  </div>
+                  <div className="flex-1"></div>
                 </div>
               </div>
 
