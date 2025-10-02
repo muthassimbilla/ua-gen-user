@@ -236,8 +236,8 @@ export default function AdminDashboard() {
       {/* Modern Header with Gradient */}
       <div className="relative glass-card p-6 lg:p-8 rounded-3xl overflow-hidden border-2 border-blue-200/50 dark:border-blue-800/50">
         <div className="absolute inset-0 bg-gradient-to-br from-blue-500/20 via-purple-500/15 to-pink-500/20 pointer-events-none" />
-        <div className="absolute -top-24 -right-24 w-64 h-64 bg-blue-500/20 rounded-full blur-3xl" />
-        <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-purple-500/20 rounded-full blur-3xl" />
+        <div className="absolute -top-24 -right-24 w-64 h-64 bg-blue-500/20 rounded-full" />
+        <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-purple-500/20 rounded-full" />
 
         <div className="relative z-10 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div>
