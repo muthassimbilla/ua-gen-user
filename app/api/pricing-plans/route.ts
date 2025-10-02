@@ -7,16 +7,22 @@ export async function GET(request: NextRequest) {
     const supabase = await createClient()
 
     const { searchParams } = new URL(request.url)
-    const type = searchParams.get("type") || "landing"
+    const type = searchParams.get("type")
 
     console.log("[v0] Fetching plans for type:", type)
 
-    const { data: plans, error } = await supabase
+    let query = supabase
       .from("pricing_plans")
       .select("*")
-      .eq("plan_type", type)
       .eq("is_active", true)
       .order("display_order", { ascending: true })
+
+    // If type is specified, filter by it, otherwise get all plans
+    if (type) {
+      query = query.eq("plan_type", type)
+    }
+
+    const { data: plans, error } = await query
 
     if (error) {
       console.error("[v0] Error fetching pricing plans:", error)
@@ -24,23 +30,40 @@ export async function GET(request: NextRequest) {
         {
           error: "Failed to fetch pricing plans",
           details: error.message,
-          plans: [], // Return empty array instead of failing
+          plans: [],
         },
-        { status: 200 },
-      ) // Return 200 with empty array for graceful degradation
+        {
+          status: 200,
+          headers: {
+            "Content-Type": "application/json",
+          },
+        },
+      )
     }
 
     console.log("[v0] Plans fetched successfully:", plans?.length || 0)
-    return NextResponse.json({ plans: plans || [] })
+    return NextResponse.json(
+      { plans: plans || [] },
+      {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      },
+    )
   } catch (error) {
     console.error("[v0] Unexpected error:", error)
     return NextResponse.json(
       {
         error: "Internal server error",
         details: error instanceof Error ? error.message : "Unknown error",
-        plans: [], // Return empty array for graceful degradation
+        plans: [],
       },
-      { status: 200 },
+      {
+        status: 200,
+        headers: {
+          "Content-Type": "application/json",
+        },
+      },
     )
   }
 }

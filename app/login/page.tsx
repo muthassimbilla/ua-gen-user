@@ -16,7 +16,7 @@ import AuthForm from "@/components/auth/auth-form"
 const LoginPage = memo(function LoginPage() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const { login } = useAuth()
+  const { login, user } = useAuth()
   const { isOnline, retryConnection, isReconnecting } = useNetwork()
 
   const [formData, setFormData] = useState({
@@ -68,7 +68,7 @@ const LoginPage = memo(function LoginPage() {
   )
 
   const handleTogglePassword = useCallback(() => {
-    setShowPassword(prev => !prev)
+    setShowPassword((prev) => !prev)
   }, [])
 
   const validateForm = useCallback(() => {
@@ -213,6 +213,41 @@ const LoginPage = memo(function LoginPage() {
       }
     }
   }, [searchParams])
+
+  useEffect(() => {
+    async function checkAuthAndRedirect() {
+      if (user) {
+        console.log("[v0] User already logged in, redirecting...")
+        const currentUser = await AuthService.getCurrentUser()
+
+        if (currentUser) {
+          const isPending = !currentUser.is_approved
+          const isSuspended = currentUser.account_status === "suspended"
+          const isExpired = currentUser.expiration_date && new Date(currentUser.expiration_date) < new Date()
+
+          if (isPending || isSuspended || isExpired) {
+            router.push("/premium-tools")
+          } else {
+            router.push("/tool")
+          }
+        } else {
+          router.push("/tool")
+        }
+      }
+    }
+
+    checkAuthAndRedirect()
+  }, [user, router])
+
+  if (user) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <p>Redirecting...</p>
+        </div>
+      </div>
+    )
+  }
 
   if (!isOnline) {
     return <NoInternet onRetry={retryConnection} isReconnecting={isReconnecting} />

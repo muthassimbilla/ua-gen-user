@@ -1,19 +1,20 @@
 "use client"
 
 import type React from "react"
-import { useState, useCallback, memo } from "react"
+import { useState, useCallback, memo, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { AuthService, ValidationUtils, PasswordUtils } from "@/lib/auth-client"
 import { setClientFlashMessage } from "@/lib/flash-messages"
 import { useNetwork } from "@/contexts/network-context"
-import NoInternet from "@/components/no-internet"
 import AuthLayout from "@/components/auth/auth-layout"
 import AuthHero from "@/components/auth/auth-hero"
 import AuthForm from "@/components/auth/auth-form"
+import { useAuth } from "@/lib/auth-context"
 
 const SignupPage = memo(function SignupPage() {
   const router = useRouter()
   const { isOnline, retryConnection, isReconnecting } = useNetwork()
+  const { user } = useAuth()
   const [formData, setFormData] = useState({
     full_name: "",
     email: "",
@@ -26,22 +27,25 @@ const SignupPage = memo(function SignupPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
 
-  const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target
-    setFormData((prev) => ({ ...prev, [name]: value }))
+  const handleInputChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const { name, value } = e.target
+      setFormData((prev) => ({ ...prev, [name]: value }))
 
-    // Clear errors when user starts typing
-    if (errors.length > 0) {
-      setErrors([])
-    }
-  }, [errors.length])
+      // Clear errors when user starts typing
+      if (errors.length > 0) {
+        setErrors([])
+      }
+    },
+    [errors.length],
+  )
 
   const handleTogglePassword = useCallback(() => {
-    setShowPassword(prev => !prev)
+    setShowPassword((prev) => !prev)
   }, [])
 
   const handleToggleConfirmPassword = useCallback(() => {
-    setShowConfirmPassword(prev => !prev)
+    setShowConfirmPassword((prev) => !prev)
   }, [])
 
   const validateForm = useCallback(() => {
@@ -61,7 +65,7 @@ const SignupPage = memo(function SignupPage() {
 
     // Check if email is Gmail only
     const email = formData.email.trim().toLowerCase()
-    if (emailValidation.isValid && !email.endsWith('@gmail.com')) {
+    if (emailValidation.isValid && !email.endsWith("@gmail.com")) {
       newErrors.push("Only Gmail addresses are supported. Please use a @gmail.com email address.")
     }
 
@@ -79,9 +83,39 @@ const SignupPage = memo(function SignupPage() {
     return newErrors
   }, [formData.full_name, formData.email, formData.password, formData.confirmPassword])
 
-  // Show no internet page if offline
-  if (!isOnline) {
-    return <NoInternet onRetry={retryConnection} isReconnecting={isReconnecting} />
+  useEffect(() => {
+    async function checkAuthAndRedirect() {
+      if (user) {
+        console.log("[v0] User already logged in, redirecting...")
+        const currentUser = await AuthService.getCurrentUser()
+
+        if (currentUser) {
+          const isPending = !currentUser.is_approved
+          const isSuspended = currentUser.account_status === "suspended"
+          const isExpired = currentUser.expiration_date && new Date(currentUser.expiration_date) < new Date()
+
+          if (isPending || isSuspended || isExpired) {
+            router.push("/premium-tools")
+          } else {
+            router.push("/tool")
+          }
+        } else {
+          router.push("/tool")
+        }
+      }
+    }
+
+    checkAuthAndRedirect()
+  }, [user, router])
+
+  if (user) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <p>Redirecting...</p>
+        </div>
+      </div>
+    )
   }
 
   const handleSubmit = async (e: React.FormEvent) => {

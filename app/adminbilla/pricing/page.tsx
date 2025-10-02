@@ -13,6 +13,7 @@ import { Badge } from "@/components/ui/badge"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Edit, Trash2, Plus, Save, X, DollarSign, RefreshCw } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
 interface PricingPlan {
   id: string
@@ -35,12 +36,12 @@ export default function AdminPricingPage() {
   const router = useRouter()
   const { toast } = useToast()
   const { admin, isLoading: authLoading } = useAdminAuth()
-  const [landingPlans, setLandingPlans] = useState<PricingPlan[]>([])
-  const [premiumPlans, setPremiumPlans] = useState<PricingPlan[]>([])
+  const [allPlans, setAllPlans] = useState<PricingPlan[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [editingPlan, setEditingPlan] = useState<PricingPlan | null>(null)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
+  const [isCreating, setIsCreating] = useState(false)
 
   useEffect(() => {
     if (!authLoading && !admin) {
@@ -55,36 +56,35 @@ export default function AdminPricingPage() {
 
   async function fetchPlans() {
     try {
-      console.log("[v0] Fetching pricing plans...")
+      console.log("[v0] Fetching all pricing plans...")
       setError(null)
       setLoading(true)
 
       const controller = new AbortController()
-      const timeoutId = setTimeout(() => controller.abort(), 10000) // 10 second timeout
+      const timeoutId = setTimeout(() => controller.abort(), 10000)
 
-      const [landingRes, premiumRes] = await Promise.all([
-        fetch("/api/pricing-plans?type=landing", { signal: controller.signal }),
-        fetch("/api/pricing-plans?type=premium", { signal: controller.signal }),
-      ])
+      const response = await fetch("/api/pricing-plans", { signal: controller.signal })
 
       clearTimeout(timeoutId)
 
-      console.log("[v0] Landing response status:", landingRes.status)
-      console.log("[v0] Premium response status:", premiumRes.status)
+      console.log("[v0] Response status:", response.status)
+      console.log("[v0] Response content-type:", response.headers.get("content-type"))
 
-      const landingData = await landingRes.json()
-      const premiumData = await premiumRes.json()
+      const contentType = response.headers.get("content-type")
+      if (!contentType || !contentType.includes("application/json")) {
+        throw new Error("Server returned non-JSON response. Please check your database connection.")
+      }
 
-      console.log("[v0] Landing plans data:", landingData)
-      console.log("[v0] Premium plans data:", premiumData)
+      const data = await response.json()
 
-      setLandingPlans(landingData.plans || [])
-      setPremiumPlans(premiumData.plans || [])
+      console.log("[v0] Plans data:", data)
 
-      if (landingData.error || premiumData.error) {
+      setAllPlans(data.plans || [])
+
+      if (data.error) {
         toast({
           title: "Warning",
-          description: "Some pricing plans may not have loaded correctly. Please refresh.",
+          description: data.details || "Some pricing plans may not have loaded correctly.",
           variant: "default",
         })
       }
@@ -95,8 +95,7 @@ export default function AdminPricingPage() {
       const errorMessage = error instanceof Error ? error.message : "Unknown error"
       setError(errorMessage)
 
-      setLandingPlans([])
-      setPremiumPlans([])
+      setAllPlans([])
 
       toast({
         title: "Error",
@@ -110,27 +109,29 @@ export default function AdminPricingPage() {
 
   async function handleSave(plan: PricingPlan) {
     try {
+      const method = isCreating ? "POST" : "PUT"
       const response = await fetch("/api/pricing-plans", {
-        method: "PUT",
+        method,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(plan),
       })
 
-      if (!response.ok) throw new Error("Failed to update plan")
+      if (!response.ok) throw new Error("Failed to save plan")
 
       toast({
         title: "Success",
-        description: "Pricing plan updated successfully",
+        description: `Pricing plan ${isCreating ? "created" : "updated"} successfully`,
       })
 
       setIsDialogOpen(false)
       setEditingPlan(null)
+      setIsCreating(false)
       fetchPlans()
     } catch (error) {
-      console.error("[v0] Error updating plan:", error)
+      console.error("[v0] Error saving plan:", error)
       toast({
         title: "Error",
-        description: "Failed to update pricing plan",
+        description: `Failed to ${isCreating ? "create" : "update"} pricing plan`,
         variant: "destructive",
       })
     }
@@ -164,6 +165,28 @@ export default function AdminPricingPage() {
 
   function openEditDialog(plan: PricingPlan) {
     setEditingPlan({ ...plan })
+    setIsCreating(false)
+    setIsDialogOpen(true)
+  }
+
+  function openCreateDialog() {
+    setEditingPlan({
+      id: "",
+      name: "",
+      price: "",
+      duration: "month",
+      original_price: "",
+      discount: "",
+      description: "",
+      features: [""],
+      is_popular: false,
+      icon: "Zap",
+      gradient: "from-blue-500 to-cyan-500",
+      display_order: allPlans.length + 1,
+      is_active: true,
+      plan_type: "landing",
+    })
+    setIsCreating(true)
     setIsDialogOpen(true)
   }
 
@@ -192,6 +215,9 @@ export default function AdminPricingPage() {
     const newFeatures = editingPlan.features.filter((_, i) => i !== index)
     setEditingPlan({ ...editingPlan, features: newFeatures })
   }
+
+  const landingPlans = allPlans.filter((p) => p.plan_type === "landing")
+  const premiumPlans = allPlans.filter((p) => p.plan_type === "premium")
 
   const PlanCard = ({ plan }: { plan: PricingPlan }) => (
     <Card className="relative">
@@ -293,12 +319,18 @@ export default function AdminPricingPage() {
             <DollarSign className="w-8 h-8" />
             Pricing Plans Management
           </h1>
-          <p className="text-muted-foreground mt-2">Manage pricing plans for landing page and premium tools</p>
+          <p className="text-muted-foreground mt-2">Manage all pricing plans from one place</p>
         </div>
-        <Button onClick={fetchPlans} variant="outline" disabled={loading}>
-          <RefreshCw className={`w-4 h-4 mr-2 ${loading ? "animate-spin" : ""}`} />
-          Refresh
-        </Button>
+        <div className="flex gap-2">
+          <Button onClick={openCreateDialog} variant="default">
+            <Plus className="w-4 h-4 mr-2" />
+            Create Plan
+          </Button>
+          <Button onClick={fetchPlans} variant="outline" disabled={loading}>
+            <RefreshCw className={`w-4 h-4 mr-2 ${loading ? "animate-spin" : ""}`} />
+            Refresh
+          </Button>
+        </div>
       </div>
 
       {error && (
@@ -349,7 +381,7 @@ export default function AdminPricingPage() {
             </div>
             <div>
               <p className="text-sm text-muted-foreground">Total Plans</p>
-              <p className="text-2xl font-bold">{landingPlans.length + premiumPlans.length} Plans</p>
+              <p className="text-2xl font-bold">{allPlans.length} Plans</p>
             </div>
           </div>
         </Card>
@@ -372,7 +404,10 @@ export default function AdminPricingPage() {
           {landingPlans.length === 0 ? (
             <Card className="p-8 text-center">
               <p className="text-muted-foreground mb-4">No landing page plans found</p>
-              <p className="text-sm text-muted-foreground">Run the database migration script to create default plans</p>
+              <Button onClick={openCreateDialog} variant="outline">
+                <Plus className="w-4 h-4 mr-2" />
+                Create First Plan
+              </Button>
             </Card>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -399,7 +434,10 @@ export default function AdminPricingPage() {
           {premiumPlans.length === 0 ? (
             <Card className="p-8 text-center">
               <p className="text-muted-foreground mb-4">No premium tools plans found</p>
-              <p className="text-sm text-muted-foreground">Run the database migration script to create default plans</p>
+              <Button onClick={openCreateDialog} variant="outline">
+                <Plus className="w-4 h-4 mr-2" />
+                Create First Plan
+              </Button>
             </Card>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -414,12 +452,27 @@ export default function AdminPricingPage() {
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Edit Pricing Plan</DialogTitle>
-            <DialogDescription>Update the pricing plan details below</DialogDescription>
+            <DialogTitle>{isCreating ? "Create New" : "Edit"} Pricing Plan</DialogTitle>
+            <DialogDescription>
+              {isCreating ? "Create a new pricing plan" : "Update the pricing plan details below"}
+            </DialogDescription>
           </DialogHeader>
 
           {editingPlan && (
             <div className="space-y-4">
+              <div>
+                <Label>Plan Type</Label>
+                <Select value={editingPlan.plan_type} onValueChange={(value) => updateEditingPlan("plan_type", value)}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="landing">Landing Page</SelectItem>
+                    <SelectItem value="premium">Premium Tools</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <Label>Plan Name</Label>
@@ -538,13 +591,14 @@ export default function AdminPricingPage() {
               <div className="flex gap-2 pt-4">
                 <Button onClick={() => handleSave(editingPlan)} className="flex-1">
                   <Save className="w-4 h-4 mr-2" />
-                  Save Changes
+                  {isCreating ? "Create Plan" : "Save Changes"}
                 </Button>
                 <Button
                   variant="outline"
                   onClick={() => {
                     setIsDialogOpen(false)
                     setEditingPlan(null)
+                    setIsCreating(false)
                   }}
                 >
                   Cancel
