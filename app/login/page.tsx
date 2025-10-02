@@ -240,13 +240,7 @@ const LoginPage = memo(function LoginPage() {
   }, [user, router])
 
   if (user) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <p>Redirecting...</p>
-        </div>
-      </div>
-    )
+    return null
   }
 
   if (!isOnline) {

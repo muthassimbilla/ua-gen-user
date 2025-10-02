@@ -109,13 +109,7 @@ const SignupPage = memo(function SignupPage() {
   }, [user, router])
 
   if (user) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <p>Redirecting...</p>
-        </div>
-      </div>
-    )
+    return null
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
