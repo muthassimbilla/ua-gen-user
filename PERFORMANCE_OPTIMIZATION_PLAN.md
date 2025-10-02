@@ -20,7 +20,7 @@
 - Missing lazy loading
 
 ### Solutions:
-```typescript
+\`\`\`typescript
 // Implement next/image with optimization
 import Image from 'next/image'
 
@@ -37,7 +37,7 @@ const optimizedImage = (
     blurDataURL="data:image/jpeg;base64,..."
   />
 )
-```
+\`\`\`
 
 ## 2. 📦 Bundle Size Optimization
 
@@ -47,7 +47,7 @@ const optimizedImage = (
 - Heavy libraries
 
 ### Solutions:
-```typescript
+\`\`\`typescript
 // Dynamic imports for heavy components
 const HeavyComponent = dynamic(() => import('./HeavyComponent'), {
   loading: () => <LoadingSpinner />,
@@ -57,7 +57,7 @@ const HeavyComponent = dynamic(() => import('./HeavyComponent'), {
 // Tree shaking optimization
 import { specificFunction } from 'large-library'
 // Instead of: import * from 'large-library'
-```
+\`\`\`
 
 ## 3. 🔄 Code Splitting
 
@@ -66,7 +66,7 @@ import { specificFunction } from 'large-library'
 - Large initial bundle
 
 ### Solutions:
-```typescript
+\`\`\`typescript
 // Route-based code splitting
 const ToolsPage = dynamic(() => import('./tools/page'), {
   loading: () => <PageLoader />
@@ -76,7 +76,7 @@ const ToolsPage = dynamic(() => import('./tools/page'), {
 const AdminPanel = dynamic(() => import('./admin-panel'), {
   loading: () => <AdminLoader />
 })
-```
+\`\`\`
 
 ## 4. ⚡ Caching Strategy
 
@@ -85,7 +85,7 @@ const AdminPanel = dynamic(() => import('./admin-panel'), {
 - Static data refetched
 
 ### Solutions:
-```typescript
+\`\`\`typescript
 // React Query for API caching
 import { useQuery } from '@tanstack/react-query'
 
@@ -104,7 +104,7 @@ const urlsToCache = [
   '/static/js/bundle.js',
   '/static/css/main.css'
 ]
-```
+\`\`\`
 
 ## 5. 🎯 Lazy Loading
 
@@ -113,7 +113,7 @@ const urlsToCache = [
 - Heavy animations on load
 
 ### Solutions:
-```typescript
+\`\`\`typescript
 // Intersection Observer for lazy loading
 const useIntersectionObserver = (ref, options) => {
   const [isIntersecting, setIsIntersecting] = useState(false)
@@ -141,7 +141,7 @@ const LazyComponent = ({ children }) => {
     </div>
   )
 }
-```
+\`\`\`
 
 ## 6. 🗄️ Database Optimization
 
@@ -151,7 +151,7 @@ const LazyComponent = ({ children }) => {
 - Missing indexes
 
 ### Solutions:
-```sql
+\`\`\`sql
 -- Add database indexes
 CREATE INDEX idx_users_email ON users(email);
 CREATE INDEX idx_users_status ON users(account_status);
@@ -164,7 +164,7 @@ FROM users u
 LEFT JOIN profiles p ON u.id = p.user_id 
 WHERE u.account_status = 'active'
 LIMIT 10;
-```
+\`\`\`
 
 ## 7. 🌐 CDN & Static Assets
 
@@ -173,7 +173,7 @@ LIMIT 10;
 - No CDN implementation
 
 ### Solutions:
-```typescript
+\`\`\`typescript
 // CDN configuration
 const CDN_URL = process.env.NEXT_PUBLIC_CDN_URL || ''
 
@@ -187,7 +187,7 @@ const staticAssets = {
 // Preload critical resources
 <link rel="preload" href="/fonts/inter.woff2" as="font" type="font/woff2" crossorigin />
 <link rel="preload" href="/images/hero-bg.webp" as="image" />
-```
+\`\`\`
 
 ## 8. 📱 Mobile Performance
 
@@ -196,7 +196,7 @@ const staticAssets = {
 - Touch interactions not optimized
 
 ### Solutions:
-```typescript
+\`\`\`typescript
 // Mobile-specific optimizations
 const isMobile = useMediaQuery('(max-width: 768px)')
 
@@ -214,7 +214,7 @@ const useTouchOptimization = () => {
     }
   }, [])
 }
-```
+\`\`\`
 
 ## 9. 🔧 Build Optimization
 
@@ -223,7 +223,7 @@ const useTouchOptimization = () => {
 - Unoptimized chunks
 
 ### Solutions:
-```javascript
+\`\`\`javascript
 // webpack.config.js optimizations
 module.exports = {
   optimization: {
@@ -245,7 +245,7 @@ module.exports = {
     }
   }
 }
-```
+\`\`\`
 
 ## 10. 📊 Performance Monitoring
 
@@ -254,7 +254,7 @@ module.exports = {
 - Missing metrics
 
 ### Solutions:
-```typescript
+\`\`\`typescript
 // Performance monitoring
 import { getCLS, getFID, getFCP, getLCP, getTTFB } from 'web-vitals'
 
@@ -274,7 +274,7 @@ getTTFB(sendToAnalytics)
 performance.mark('app-start')
 performance.mark('app-end')
 performance.measure('app-load-time', 'app-start', 'app-end')
-```
+\`\`\`
 
 ## 🎯 Implementation Priority
 

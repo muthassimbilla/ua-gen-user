@@ -5,7 +5,6 @@ import "./globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
 import { Toaster } from "@/components/ui/toaster"
 import ClientProviders from "@/components/client-providers"
-import { PerformanceMonitor, PerformanceOverlay } from "@/components/performance-monitor"
 
 const inter = Inter({
   subsets: ["latin"],
@@ -22,7 +21,7 @@ export const metadata: Metadata = {
   authors: [{ name: "UGen Pro" }],
   creator: "UGen Pro",
   publisher: "UGen Pro",
-    generator: 'v0.app'
+  generator: "v0.app",
 }
 
 export const viewport: Viewport = {
@@ -53,8 +52,6 @@ export default function RootLayout({
         >
           <ClientProviders>{children}</ClientProviders>
           <Toaster />
-          <PerformanceMonitor />
-          <PerformanceOverlay />
         </ThemeProvider>
       </body>
     </html>
