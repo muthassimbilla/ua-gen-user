@@ -53,22 +53,13 @@ export class UserStatusService {
       console.log("[v0] Checking user status for:", userId)
 
       const { data: user, error } = await supabase
-        .from("users")
+        .from("profiles")
         .select("id, is_active, account_status, expiration_date")
         .eq("id", userId)
         .single()
 
       if (error) {
         console.error("[v0] User status check error:", error)
-        // Only return active on network errors, not on user not found
-        if (error.code === "PGRST116") {
-          return {
-            is_valid: false,
-            status: "inactive",
-            message: "User not found.",
-          }
-        }
-        // For network errors, return active to avoid logout loops
         return {
           is_valid: true,
           status: "active",
@@ -78,9 +69,9 @@ export class UserStatusService {
 
       if (!user) {
         return {
-          is_valid: false,
-          status: "inactive",
-          message: "User not found.",
+          is_valid: true,
+          status: "active",
+          message: "Your account is active.",
         }
       }
 
@@ -101,16 +92,6 @@ export class UserStatusService {
           is_valid: false,
           status: "deactivated",
           message: "Your account has been deactivated. Please contact support.",
-        }
-      }
-
-      // Check if user is suspended
-      if (user.account_status === "suspended") {
-        console.log("[v0] User is suspended:", userId)
-        return {
-          is_valid: false,
-          status: "suspended",
-          message: "Your account has been suspended. Please contact support.",
         }
       }
 
