@@ -56,45 +56,31 @@ export default function AdminPricingPage() {
 
   async function fetchPlans() {
     try {
-      console.log("[v0] Fetching all pricing plans...")
       setError(null)
       setLoading(true)
 
-      const controller = new AbortController()
-      const timeoutId = setTimeout(() => controller.abort(), 10000)
+      const response = await fetch("/api/pricing-plans/admin")
 
-      const response = await fetch("/api/pricing-plans", { signal: controller.signal })
-
-      clearTimeout(timeoutId)
-
-      console.log("[v0] Response status:", response.status)
-      console.log("[v0] Response content-type:", response.headers.get("content-type"))
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
+      }
 
       const contentType = response.headers.get("content-type")
       if (!contentType || !contentType.includes("application/json")) {
-        throw new Error("Server returned non-JSON response. Please check your database connection.")
+        throw new Error("Server returned non-JSON response")
       }
 
       const data = await response.json()
 
-      console.log("[v0] Plans data:", data)
-
-      setAllPlans(data.plans || [])
-
       if (data.error) {
-        toast({
-          title: "Warning",
-          description: data.details || "Some pricing plans may not have loaded correctly.",
-          variant: "default",
-        })
+        throw new Error(data.error)
       }
 
-      console.log("[v0] Plans loaded successfully")
+      setAllPlans(data.plans || [])
     } catch (error) {
       console.error("[v0] Error fetching plans:", error)
       const errorMessage = error instanceof Error ? error.message : "Unknown error"
       setError(errorMessage)
-
       setAllPlans([])
 
       toast({
@@ -110,13 +96,16 @@ export default function AdminPricingPage() {
   async function handleSave(plan: PricingPlan) {
     try {
       const method = isCreating ? "POST" : "PUT"
-      const response = await fetch("/api/pricing-plans", {
+      const response = await fetch("/api/pricing-plans/admin", {
         method,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(plan),
       })
 
-      if (!response.ok) throw new Error("Failed to save plan")
+      if (!response.ok) {
+        const data = await response.json()
+        throw new Error(data.error || "Failed to save plan")
+      }
 
       toast({
         title: "Success",
@@ -131,7 +120,8 @@ export default function AdminPricingPage() {
       console.error("[v0] Error saving plan:", error)
       toast({
         title: "Error",
-        description: `Failed to ${isCreating ? "create" : "update"} pricing plan`,
+        description:
+          error instanceof Error ? error.message : `Failed to ${isCreating ? "create" : "update"} pricing plan`,
         variant: "destructive",
       })
     }
@@ -141,11 +131,14 @@ export default function AdminPricingPage() {
     if (!confirm("Are you sure you want to delete this plan?")) return
 
     try {
-      const response = await fetch(`/api/pricing-plans?id=${planId}`, {
+      const response = await fetch(`/api/pricing-plans/admin?id=${planId}`, {
         method: "DELETE",
       })
 
-      if (!response.ok) throw new Error("Failed to delete plan")
+      if (!response.ok) {
+        const data = await response.json()
+        throw new Error(data.error || "Failed to delete plan")
+      }
 
       toast({
         title: "Success",
@@ -157,7 +150,7 @@ export default function AdminPricingPage() {
       console.error("[v0] Error deleting plan:", error)
       toast({
         title: "Error",
-        description: "Failed to delete pricing plan",
+        description: error instanceof Error ? error.message : "Failed to delete pricing plan",
         variant: "destructive",
       })
     }
@@ -184,7 +177,7 @@ export default function AdminPricingPage() {
       gradient: "from-blue-500 to-cyan-500",
       display_order: allPlans.length + 1,
       is_active: true,
-      plan_type: "landing",
+      plan_type: "premium",
     })
     setIsCreating(true)
     setIsDialogOpen(true)
@@ -215,9 +208,6 @@ export default function AdminPricingPage() {
     const newFeatures = editingPlan.features.filter((_, i) => i !== index)
     setEditingPlan({ ...editingPlan, features: newFeatures })
   }
-
-  const landingPlans = allPlans.filter((p) => p.plan_type === "landing")
-  const premiumPlans = allPlans.filter((p) => p.plan_type === "premium")
 
   const PlanCard = ({ plan }: { plan: PricingPlan }) => (
     <Card className="relative">
@@ -349,27 +339,15 @@ export default function AdminPricingPage() {
         </Card>
       )}
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <Card className="p-6">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-gradient-to-r from-blue-500 to-cyan-500 flex items-center justify-center">
-              <span className="text-white font-bold">L</span>
-            </div>
-            <div>
-              <p className="text-sm text-muted-foreground">Landing Page</p>
-              <p className="text-2xl font-bold">{landingPlans.length} Plans</p>
-            </div>
-          </div>
-        </Card>
-
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
         <Card className="p-6">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-lg bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center">
-              <span className="text-white font-bold">P</span>
+              <DollarSign className="w-5 h-5 text-white" />
             </div>
             <div>
-              <p className="text-sm text-muted-foreground">Premium Tools</p>
-              <p className="text-2xl font-bold">{premiumPlans.length} Plans</p>
+              <p className="text-sm text-muted-foreground">Total Plans</p>
+              <p className="text-2xl font-bold">{allPlans.length}</p>
             </div>
           </div>
         </Card>
@@ -377,76 +355,44 @@ export default function AdminPricingPage() {
         <Card className="p-6">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-lg bg-gradient-to-r from-green-500 to-emerald-500 flex items-center justify-center">
-              <span className="text-white font-bold">T</span>
+              <span className="text-white font-bold">✓</span>
             </div>
             <div>
-              <p className="text-sm text-muted-foreground">Total Plans</p>
-              <p className="text-2xl font-bold">{allPlans.length} Plans</p>
+              <p className="text-sm text-muted-foreground">Active Plans</p>
+              <p className="text-2xl font-bold">{allPlans.filter((p) => p.is_active).length}</p>
             </div>
           </div>
         </Card>
       </div>
 
-      <div className="space-y-8">
-        <div>
-          <div className="flex items-center gap-3 mb-6">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-r from-blue-500 to-cyan-500 flex items-center justify-center">
-              <span className="text-white font-bold text-sm">L</span>
-            </div>
-            <div>
-              <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Landing Page Plans</h2>
-              <p className="text-sm text-muted-foreground">Pricing plans for the main landing page</p>
-            </div>
-            <Badge variant="outline" className="ml-auto">
-              {landingPlans.length} plans
-            </Badge>
+      <div>
+        <div className="flex items-center gap-3 mb-6">
+          <div className="w-8 h-8 rounded-lg bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center">
+            <DollarSign className="w-5 h-5 text-white" />
           </div>
-          {landingPlans.length === 0 ? (
-            <Card className="p-8 text-center">
-              <p className="text-muted-foreground mb-4">No landing page plans found</p>
-              <Button onClick={openCreateDialog} variant="outline">
-                <Plus className="w-4 h-4 mr-2" />
-                Create First Plan
-              </Button>
-            </Card>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {landingPlans.map((plan) => (
-                <PlanCard key={plan.id} plan={plan} />
-              ))}
-            </div>
-          )}
-        </div>
-
-        <div>
-          <div className="flex items-center gap-3 mb-6">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center">
-              <span className="text-white font-bold text-sm">P</span>
-            </div>
-            <div>
-              <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Premium Tools Plans</h2>
-              <p className="text-sm text-muted-foreground">Pricing plans for premium tools access</p>
-            </div>
-            <Badge variant="outline" className="ml-auto">
-              {premiumPlans.length} plans
-            </Badge>
+          <div>
+            <h2 className="text-2xl font-bold text-slate-900 dark:text-white">All Pricing Plans</h2>
+            <p className="text-sm text-muted-foreground">Manage pricing for landing page and premium tools</p>
           </div>
-          {premiumPlans.length === 0 ? (
-            <Card className="p-8 text-center">
-              <p className="text-muted-foreground mb-4">No premium tools plans found</p>
-              <Button onClick={openCreateDialog} variant="outline">
-                <Plus className="w-4 h-4 mr-2" />
-                Create First Plan
-              </Button>
-            </Card>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {premiumPlans.map((plan) => (
-                <PlanCard key={plan.id} plan={plan} />
-              ))}
-            </div>
-          )}
+          <Badge variant="outline" className="ml-auto">
+            {allPlans.length} plans
+          </Badge>
         </div>
+        {allPlans.length === 0 ? (
+          <Card className="p-8 text-center">
+            <p className="text-muted-foreground mb-4">No pricing plans found</p>
+            <Button onClick={openCreateDialog} variant="outline">
+              <Plus className="w-4 h-4 mr-2" />
+              Create First Plan
+            </Button>
+          </Card>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {allPlans.map((plan) => (
+              <PlanCard key={plan.id} plan={plan} />
+            ))}
+          </div>
+        )}
       </div>
 
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
