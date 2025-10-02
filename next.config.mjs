@@ -22,8 +22,6 @@ const nextConfig = {
     optimizePackageImports: ['lucide-react', '@radix-ui/react-icons'],
     esmExternals: true,
     serverComponentsExternalPackages: ['@supabase/supabase-js'],
-    // Performance optimizations
-    optimizeCss: true,
     webVitalsAttribution: ['CLS', 'LCP', 'FCP', 'FID', 'TTFB'],
   },
   // Enable React strict mode for better performance
