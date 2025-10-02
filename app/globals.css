@@ -4,7 +4,7 @@
 
 @layer base {
   :root {
-    /* Simplified color palette - cleaner, lighter colors */
+    /* Light mode - cleaner, more neutral palette */
     --background: 0 0% 100%;
     --foreground: 0 0% 10%;
     --card: 0 0% 100%;
@@ -24,7 +24,7 @@
     --border: 214 32% 91%;
     --input: 214 32% 91%;
     --ring: 217 91% 60%;
-    --radius: 0.5rem;
+    --radius: 0.75rem;
   }
 
   .dark {
@@ -75,7 +75,6 @@
     min-height: 100vh;
   }
 
-  /* Removed all complex animations, kept only essential spinner */
   @keyframes spin {
     from {
       transform: rotate(0deg);
@@ -90,9 +89,10 @@
   }
 }
 
-/* Simplified scrollbar styling */
+/* Custom scrollbar styling to match design */
 ::-webkit-scrollbar {
   width: 8px;
+  height: 8px;
 }
 
 ::-webkit-scrollbar-track {
