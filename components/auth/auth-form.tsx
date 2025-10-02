@@ -57,21 +57,21 @@ const AuthForm = memo(function AuthForm({
   const hasConfirmPassword = variant === "signup"
 
   return (
-    <div className="w-full max-w-md mx-auto lg:mx-0 px-4 sm:px-0">
-      <Card className="glass-card p-6 sm:p-8 rounded-3xl shadow-2xl border-0 backdrop-blur-xl bg-white/15 dark:bg-gray-900/15 relative overflow-hidden">
+    <div className="w-full max-w-sm mx-auto lg:mx-0 px-4 sm:px-0">
+      <Card className="glass-card p-4 sm:p-6 rounded-2xl shadow-xl border-0 backdrop-blur-xl bg-white/15 dark:bg-gray-900/15 relative overflow-hidden">
         {/* Card background gradient */}
         <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent dark:from-gray-800/5"></div>
         
-        <CardHeader className="text-center space-y-3 pb-6 relative z-10">
-          <CardTitle className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 bg-clip-text text-transparent">
+        <CardHeader className="text-center space-y-2 pb-4 relative z-10">
+          <CardTitle className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 bg-clip-text text-transparent">
             {isLogin ? "Sign In" : "Create Account"}
           </CardTitle>
-          <CardDescription className="text-muted-foreground text-sm sm:text-base">
+          <CardDescription className="text-muted-foreground text-sm">
             {isLogin ? "Enter your credentials to access your account" : "Fill in your details to get started"}
           </CardDescription>
         </CardHeader>
 
-        <CardContent className="space-y-6 relative z-10">
+        <CardContent className="space-y-4 relative z-10">
           {/* Success Messages */}
           {flashMessage && (
             <Alert
@@ -163,10 +163,10 @@ const AuthForm = memo(function AuthForm({
           )}
 
           {/* Form */}
-          <form onSubmit={onSubmit} className="space-y-6">
+          <form onSubmit={onSubmit} className="space-y-4">
             {/* Full Name Field - Only for Signup */}
             {!isLogin && (
-              <div className="space-y-3">
+              <div className="space-y-2">
                 <Label htmlFor="full_name" className="text-sm font-semibold text-foreground flex items-center gap-2">
                   <User className="w-4 h-4" />
                   Full Name
@@ -179,16 +179,16 @@ const AuthForm = memo(function AuthForm({
                     placeholder="Enter your full name"
                     value={formData.full_name || ""}
                     onChange={onInputChange}
-                    className="h-12 sm:h-14 pl-12 sm:pl-14 pr-4 rounded-2xl border-border/50 bg-background/60 backdrop-blur-sm focus:bg-background/90 transition-all duration-300 group-hover:border-blue-300/60 focus:border-blue-500/60 focus:ring-2 focus:ring-blue-500/30 text-sm sm:text-base"
+                        className="h-10 sm:h-12 pl-10 sm:pl-12 pr-4 rounded-xl border-border/50 bg-background/60 backdrop-blur-sm focus:bg-background/90 transition-all duration-300 group-hover:border-blue-300/60 focus:border-blue-500/60 focus:ring-2 focus:ring-blue-500/30 text-sm"
                     required
                   />
-                  <User className="absolute left-4 sm:left-5 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground group-hover:text-blue-500 transition-colors duration-200" />
+                  <User className="absolute left-3 sm:left-4 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground group-hover:text-blue-500 transition-colors duration-200" />
                 </div>
               </div>
             )}
 
             {/* Email Field */}
-            <div className="space-y-3">
+            <div className="space-y-2">
               <Label htmlFor="email" className="text-sm font-semibold text-foreground flex items-center gap-2">
                 <Mail className="w-4 h-4" />
                 Email
@@ -201,11 +201,11 @@ const AuthForm = memo(function AuthForm({
                   placeholder={isLogin ? "your@email.com" : "yourname@gmail.com"}
                   value={formData.email}
                   onChange={onInputChange}
-                  className="h-12 sm:h-14 pl-12 sm:pl-14 pr-4 rounded-2xl border-border/50 bg-background/60 backdrop-blur-sm focus:bg-background/90 transition-all duration-300 group-hover:border-blue-300/60 focus:border-blue-500/60 focus:ring-2 focus:ring-blue-500/30 text-sm sm:text-base"
+                        className="h-10 sm:h-12 pl-10 sm:pl-12 pr-4 rounded-xl border-border/50 bg-background/60 backdrop-blur-sm focus:bg-background/90 transition-all duration-300 group-hover:border-blue-300/60 focus:border-blue-500/60 focus:ring-2 focus:ring-blue-500/30 text-sm"
                   required
                   autoComplete="email"
                 />
-                <Mail className="absolute left-4 sm:left-5 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground group-hover:text-blue-500 transition-colors duration-200" />
+                <Mail className="absolute left-3 sm:left-4 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground group-hover:text-blue-500 transition-colors duration-200" />
               </div>
               {!isLogin && (
                 <p className="text-xs text-muted-foreground flex items-center gap-1">
@@ -218,7 +218,7 @@ const AuthForm = memo(function AuthForm({
             </div>
 
             {/* Password Field */}
-            <div className="space-y-4">
+            <div className="space-y-2">
               <Label htmlFor="password" className="text-sm font-semibold text-foreground flex items-center gap-2">
                 <Lock className="w-4 h-4" />
                 Password
@@ -231,15 +231,15 @@ const AuthForm = memo(function AuthForm({
                   placeholder="Enter your password"
                   value={formData.password}
                   onChange={onInputChange}
-                  className="h-12 sm:h-14 pl-12 sm:pl-14 pr-12 sm:pr-14 rounded-2xl border-border/50 bg-background/60 backdrop-blur-sm focus:bg-background/90 transition-all duration-300 group-hover:border-blue-300/60 focus:border-blue-500/60 focus:ring-2 focus:ring-blue-500/30 text-sm sm:text-base"
+                        className="h-10 sm:h-12 pl-10 sm:pl-12 pr-10 sm:pr-12 rounded-xl border-border/50 bg-background/60 backdrop-blur-sm focus:bg-background/90 transition-all duration-300 group-hover:border-blue-300/60 focus:border-blue-500/60 focus:ring-2 focus:ring-blue-500/30 text-sm"
                   required
                   autoComplete={isLogin ? "current-password" : "new-password"}
                 />
-                <Lock className="absolute left-4 sm:left-5 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground group-hover:text-blue-500 transition-colors duration-200" />
+                <Lock className="absolute left-3 sm:left-4 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground group-hover:text-blue-500 transition-colors duration-200" />
                 <button
                   type="button"
                   onClick={onTogglePassword}
-                  className="absolute right-4 sm:right-5 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-blue-500 transition-colors duration-200 p-2 rounded-lg hover:bg-blue-50/50 dark:hover:bg-blue-900/30"
+                  className="absolute right-3 sm:right-4 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-blue-500 transition-colors duration-200 p-1 rounded-lg hover:bg-blue-50/50 dark:hover:bg-blue-900/30"
                 >
                   {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                 </button>
@@ -258,7 +258,7 @@ const AuthForm = memo(function AuthForm({
 
             {/* Confirm Password Field - Only for Signup */}
             {hasConfirmPassword && (
-              <div className="space-y-3">
+              <div className="space-y-2">
                 <Label htmlFor="confirmPassword" className="text-sm font-semibold text-foreground flex items-center gap-2">
                   <Shield className="w-4 h-4" />
                   Confirm Password
@@ -271,14 +271,14 @@ const AuthForm = memo(function AuthForm({
                     placeholder="Re-enter your password"
                     value={formData.confirmPassword || ""}
                     onChange={onInputChange}
-                    className="h-12 sm:h-14 pl-12 sm:pl-14 pr-12 sm:pr-14 rounded-2xl border-border/50 bg-background/60 backdrop-blur-sm focus:bg-background/90 transition-all duration-300 group-hover:border-blue-300/60 focus:border-blue-500/60 focus:ring-2 focus:ring-blue-500/30 text-sm sm:text-base"
+                        className="h-10 sm:h-12 pl-10 sm:pl-12 pr-10 sm:pr-12 rounded-xl border-border/50 bg-background/60 backdrop-blur-sm focus:bg-background/90 transition-all duration-300 group-hover:border-blue-300/60 focus:border-blue-500/60 focus:ring-2 focus:ring-blue-500/30 text-sm"
                     required
                   />
-                  <Shield className="absolute left-4 sm:left-5 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground group-hover:text-blue-500 transition-colors duration-200" />
+                  <Shield className="absolute left-3 sm:left-4 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground group-hover:text-blue-500 transition-colors duration-200" />
                   <button
                     type="button"
                     onClick={onToggleConfirmPassword}
-                    className="absolute right-4 sm:right-5 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-blue-500 transition-colors duration-200 p-2 rounded-lg hover:bg-blue-50/50 dark:hover:bg-blue-900/30"
+                    className="absolute right-3 sm:right-4 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-blue-500 transition-colors duration-200 p-1 rounded-lg hover:bg-blue-50/50 dark:hover:bg-blue-900/30"
                   >
                     {showConfirmPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                   </button>
@@ -306,13 +306,13 @@ const AuthForm = memo(function AuthForm({
             {/* Submit Button */}
             <Button
               type="submit"
-              className="w-full h-12 sm:h-14 bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-600 hover:from-blue-600 hover:via-indigo-600 hover:to-purple-700 text-white font-semibold rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 relative overflow-hidden active:scale-[0.98] active:shadow-lg text-sm sm:text-base"
+              className="w-full h-10 sm:h-12 bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-600 hover:from-blue-600 hover:via-indigo-600 hover:to-purple-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 relative overflow-hidden active:scale-[0.98] active:shadow-lg text-sm"
               disabled={loading || isSubmitting}
             >
               {loading ? (
                 <div className="flex items-center justify-center gap-2">
                   <svg
-                    className="animate-spin spinner h-5 w-5 text-white"
+                    className="animate-spin spinner h-4 w-4 text-white"
                     xmlns="http://www.w3.org/2000/svg"
                     fill="none"
                     viewBox="0 0 24 24"
@@ -335,7 +335,7 @@ const AuthForm = memo(function AuthForm({
                 </div>
               ) : (
                 <div className="flex items-center gap-2">
-                  {isLogin ? <LogIn className="h-5 w-5" /> : <UserPlus className="h-5 w-5" />}
+                  {isLogin ? <LogIn className="h-4 w-4" /> : <UserPlus className="h-4 w-4" />}
                   {isLogin ? "Sign In" : "Create Account"}
                 </div>
               )}
@@ -343,8 +343,8 @@ const AuthForm = memo(function AuthForm({
           </form>
 
           {/* Auth Link */}
-          <div className="text-center pt-2">
-            <p className="text-base text-muted-foreground">
+          <div className="text-center pt-1">
+            <p className="text-sm text-muted-foreground">
               {isLogin ? "New user? " : "Already have an account? "}
               <Link
                 href={isLogin ? "/signup" : "/login"}
@@ -358,8 +358,8 @@ const AuthForm = memo(function AuthForm({
       </Card>
 
       {/* Footer */}
-      <div className="text-center mt-6">
-        <p className="text-sm text-muted-foreground/80">© 2025 UGen Pro. All rights reserved.</p>
+      <div className="text-center mt-4">
+        <p className="text-xs text-muted-foreground/80">© 2025 UGen Pro. All rights reserved.</p>
       </div>
     </div>
   )
