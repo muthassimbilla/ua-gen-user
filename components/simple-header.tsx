@@ -22,15 +22,15 @@ export default function SimpleHeader() {
     <div className="fixed top-0 left-0 right-0 z-40 h-16 bg-gradient-to-r from-white/95 via-white/90 to-white/95 dark:from-slate-900/95 dark:via-slate-900/90 dark:to-slate-900/95 backdrop-blur-2xl border-b border-white/40 dark:border-slate-700/50 shadow-xl">
       <div className="flex items-center justify-between h-full px-6 max-w-7xl mx-auto">
         {/* Logo */}
-        <Link href="/" className="flex items-center gap-3 group">
-          <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-blue-500 via-indigo-500 to-purple-600 flex items-center justify-center shadow-xl relative overflow-hidden group-hover:scale-105 transition-transform duration-300">
+        <div className="flex items-center gap-3 group cursor-default">
+          <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-blue-500 via-indigo-500 to-purple-600 flex items-center justify-center shadow-xl relative overflow-hidden">
             <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent" />
             <Image src="/logo.jpg" alt="Logo" width={24} height={24} className="rounded-lg relative z-10 object-cover w-full h-full" />
           </div>
-          <span className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent group-hover:from-blue-700 group-hover:to-purple-700 transition-all duration-300">
+          <span className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
             UGen Pro
           </span>
-        </Link>
+        </div>
 
         <div className="flex items-center gap-4">
           {/* User Info */}

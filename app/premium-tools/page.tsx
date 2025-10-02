@@ -7,11 +7,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import {
-  Smartphone,
-  MapPin,
-  Shield,
-  Star,
-  Users,
   Clock,
   AlertTriangle,
   CheckCircle2,
@@ -22,48 +17,6 @@ import {
 import LoadingSpinner from "@/components/loading-spinner"
 import SimpleHeader from "@/components/simple-header"
 
-const premiumTools = [
-  {
-    name: "User Agent Generator",
-    description: "Generate realistic iOS & Android user agents for Instagram & Facebook",
-    features: [
-      "Generate realistic iOS & Android user agents",
-      "Support for Instagram & Facebook apps",
-      "Advanced customization options",
-      "Custom headers and parameters",
-    ],
-    icon: Smartphone,
-    color: "from-blue-500 to-indigo-600",
-    users: "12.5K+",
-    rating: 4.9,
-    tags: ["iOS & Android", "Social Media", "Custom Headers"],
-  },
-  {
-    name: "Address Generator",
-    description: "Generate real addresses from IP addresses and ZIP codes",
-    features: [
-      "Generate real addresses from IP addresses",
-      "Create addresses from ZIP codes",
-      "Multiple address options with navigation",
-      "Copy addresses to clipboard",
-    ],
-    icon: MapPin,
-    color: "from-green-500 to-emerald-600",
-    users: "8.2K+",
-    rating: 4.7,
-    tags: ["IP Geolocation", "ZIP Codes", "Mapbox API"],
-  },
-  {
-    name: "Campaign Security",
-    description: "Advanced security features for your marketing campaigns",
-    features: ["Real-time threat detection", "IP blocking and filtering", "Bot protection", "Analytics and reporting"],
-    icon: Shield,
-    color: "from-purple-500 to-pink-600",
-    users: "Coming Soon",
-    rating: 5.0,
-    tags: ["Security", "Protection", "Analytics"],
-  },
-]
 
 interface PricingPlan {
   id: string
@@ -162,12 +115,12 @@ export default function PremiumToolsPage() {
   const getStatusConfig = () => {
     if (userStatus === "pending") {
       return {
-        icon: Clock,
-        bgColor: "from-orange-500 to-amber-600",
-        textColor: "text-orange-700 dark:text-orange-300",
+        icon: Crown,
+        bgColor: "from-purple-500 to-pink-600",
+        textColor: "text-purple-700 dark:text-purple-300",
         badgeVariant: "secondary" as const,
-        title: "একাউন্ট Pending",
-        message: "আপনার একাউন্ট এখনও অনুমোদিত হয়নি। অনুগ্রহ করে অ্যাডমিনের অনুমোদনের জন্য অপেক্ষা করুন।",
+        title: "Premium Subscription প্রয়োজন",
+        message: "সকল Premium Tools এক্সেস করতে আপনার একটি subscription প্রয়োজন। নিচের প্ল্যান থেকে আপনার পছন্দের একটি বেছে নিন এবং এখনই শুরু করুন!",
       }
     } else if (userStatus === "expired") {
       return {
@@ -175,8 +128,8 @@ export default function PremiumToolsPage() {
         bgColor: "from-red-500 to-rose-600",
         textColor: "text-red-700 dark:text-red-300",
         badgeVariant: "destructive" as const,
-        title: "একাউন্টের মেয়াদ শেষ",
-        message: "আপনার একাউন্টের মেয়াদ শেষ হয়ে গেছে। নিচের প্ল্যান থেকে একটি কিনে আবার এক্সেস পান।",
+        title: "Subscription মেয়াদ শেষ",
+        message: "আপনার subscription এর মেয়াদ শেষ হয়ে গেছে। নিচের প্ল্যান থেকে একটি কিনে আবার এক্সেস পান।",
       }
     }
     return {
@@ -184,8 +137,8 @@ export default function PremiumToolsPage() {
       bgColor: "from-green-500 to-emerald-600",
       textColor: "text-green-700 dark:text-green-300",
       badgeVariant: "default" as const,
-      title: "একাউন্ট Active",
-      message: "আপনার একাউন্ট সক্রিয় আছে।",
+      title: "Subscription Active",
+      message: "আপনার subscription সক্রিয় আছে।",
     }
   }
 
@@ -229,110 +182,38 @@ export default function PremiumToolsPage() {
                 <div className="flex items-center gap-3 mb-2">
                   <h2 className="text-xl font-bold text-white">{statusConfig.title}</h2>
                   <Badge variant={statusConfig.badgeVariant} className="bg-white/20 text-white border-white/30">
-                    {userStatus === "pending" ? "Pending" : userStatus === "expired" ? "Expired" : "Active"}
+                    {userStatus === "pending" ? "Subscription Needed" : userStatus === "expired" ? "Expired" : "Active"}
                   </Badge>
                 </div>
-                <p className="text-white/90 text-sm leading-relaxed">{statusConfig.message}</p>
-              </div>
-            </div>
-          </div>
-
-          {/* Premium Tools Section */}
-          <div
-            className={`mb-12 transition-all duration-1000 delay-200 ${isLoaded ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}`}
-          >
-            <div className="text-center mb-8">
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-purple-500/10 to-pink-500/10 border border-purple-500/20 mb-4">
-                <Crown className="w-4 h-4 text-purple-600 dark:text-purple-400" />
-                <span className="text-sm font-semibold text-purple-700 dark:text-purple-300">Premium Features</span>
-              </div>
-              <h2 className="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white mb-3">Our Premium Tools</h2>
-              <p className="text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
-                এই টুলস গুলো ব্যবহার করতে আপনার একাউন্ট Approved এবং Active থাকতে হবে
-              </p>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {premiumTools.map((tool, index) => {
-                const IconComponent = tool.icon
-                return (
-                  <div
-                    key={tool.name}
-                    className="group animate-fade-in-up"
-                    style={{
-                      animationDelay: `${index * 100 + 400}ms`,
-                      animationFillMode: "both",
-                    }}
-                  >
-                    <Card className="h-full bg-white/80 dark:bg-slate-800/60 backdrop-blur-xl border-white/50 dark:border-slate-700/40 hover:border-purple-300 dark:hover:border-purple-500/50 transition-all duration-500 hover:shadow-xl hover:shadow-purple-500/20 dark:hover:shadow-purple-500/40 overflow-hidden relative hover:-translate-y-2 rounded-2xl">
-                      <div
-                        className={`absolute inset-0 bg-gradient-to-br ${tool.color} opacity-0 group-hover:opacity-10 transition-opacity duration-500`}
-                      />
-
-                      <CardHeader className="pb-4 relative p-6">
-                        <div className="flex items-start justify-between mb-4">
-                          <div
-                            className={`p-3 rounded-2xl bg-gradient-to-br ${tool.color} shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:scale-105 relative overflow-hidden`}
-                          >
-                            <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent" />
-                            <IconComponent className="w-6 h-6 text-white relative z-10" />
-                          </div>
-
-                          <div className="flex flex-col items-end gap-2">
-                            {tool.rating && (
-                              <div className="flex items-center gap-1 text-xs bg-white/50 dark:bg-slate-800/50 px-2 py-1 rounded-full">
-                                <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
-                                <span className="font-semibold text-slate-900 dark:text-white">{tool.rating}</span>
-                              </div>
-                            )}
-                          </div>
-                        </div>
-
-                        <CardTitle className="text-xl font-bold text-slate-900 dark:text-white mb-2">
-                          {tool.name}
-                        </CardTitle>
-
-                        <p className="text-sm text-slate-600 dark:text-slate-400 mb-3">{tool.description}</p>
-
-                        <div className="flex items-center gap-2">
-                          <div className="flex items-center gap-1 text-xs text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-700 px-2 py-1 rounded-full">
-                            <Users className="w-3 h-3" />
-                            {tool.users}
-                          </div>
-                        </div>
-                      </CardHeader>
-
-                      <CardContent className="pt-0 relative p-6">
-                        <ul className="space-y-2 mb-4">
-                          {tool.features.map((feature, idx) => (
-                            <li key={idx} className="flex items-start gap-2 text-slate-600 dark:text-slate-300">
-                              <CheckCircle2 className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
-                              <span className="text-xs leading-relaxed">{feature}</span>
-                            </li>
-                          ))}
-                        </ul>
-
-                        <div className="flex flex-wrap gap-1.5">
-                          {tool.tags.map((tag) => (
-                            <span
-                              key={tag}
-                              className="text-xs px-3 py-1 rounded-full bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/40 dark:to-pink-900/40 text-purple-700 dark:text-purple-400 border border-purple-200 dark:border-purple-700 font-medium"
-                            >
-                              {tag}
-                            </span>
-                          ))}
-                        </div>
-                      </CardContent>
-                    </Card>
+                <p className="text-white/90 text-sm leading-relaxed mb-4">{statusConfig.message}</p>
+                {userStatus === "pending" && (
+                  <div className="flex items-center gap-3">
+                    <Button
+                      onClick={() => {
+                        const pricingSection = document.getElementById('pricing-section');
+                        if (pricingSection) {
+                          pricingSection.scrollIntoView({ behavior: 'smooth' });
+                        }
+                      }}
+                      className="bg-white/20 hover:bg-white/30 text-white border-white/30 hover:border-white/50 transition-all duration-300 shadow-lg hover:shadow-xl"
+                    >
+                      <Crown className="w-4 h-4 mr-2" />
+                      Subscription কিনুন
+                    </Button>
+                    <div className="text-white/70 text-xs">
+                      💎 Premium Tools এক্সেস করুন
+                    </div>
                   </div>
-                )
-              })}
+                )}
+              </div>
             </div>
           </div>
+
 
           {/* Pricing Section */}
           <div
-            className={`transition-all duration-1000 delay-400 ${isLoaded ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}`}
+            id="pricing-section"
+            className={`transition-all duration-1000 delay-200 ${isLoaded ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}`}
           >
             <div className="text-center mb-8">
               <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-blue-500/10 to-indigo-500/10 border border-blue-500/20 mb-4">
@@ -428,7 +309,7 @@ export default function PremiumToolsPage() {
 
           {/* Contact Admin Section */}
           <div
-            className={`mt-12 text-center transition-all duration-1000 delay-600 ${isLoaded ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}`}
+            className={`mt-12 text-center transition-all duration-1000 delay-400 ${isLoaded ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}`}
           >
             <Card className="bg-white/80 dark:bg-slate-800/60 backdrop-blur-xl border-white/50 dark:border-slate-700/40 p-8 rounded-2xl">
               <div className="max-w-2xl mx-auto">

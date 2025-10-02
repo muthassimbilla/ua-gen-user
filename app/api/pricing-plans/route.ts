@@ -3,27 +3,46 @@ import { createClient } from "@/lib/supabase/server"
 
 export async function GET(request: NextRequest) {
   try {
+    console.log("[v0] Pricing plans GET request")
     const supabase = await createClient()
 
     const { searchParams } = new URL(request.url)
     const type = searchParams.get("type") || "landing"
+    
+    console.log("[v0] Fetching plans for type:", type)
 
-    const { data: plans, error } = await supabase
+    // For admin panel, we need to fetch all plans (including inactive)
+    // For public pages, we only fetch active plans
+    const isAdminRequest = request.headers.get("referer")?.includes("/adminbilla")
+    
+    let query = supabase
       .from("pricing_plans")
       .select("*")
       .eq("plan_type", type)
-      .eq("is_active", true)
       .order("display_order", { ascending: true })
+
+    if (!isAdminRequest) {
+      query = query.eq("is_active", true)
+    }
+
+    const { data: plans, error } = await query
 
     if (error) {
       console.error("[v0] Error fetching pricing plans:", error)
-      return NextResponse.json({ error: "Failed to fetch pricing plans" }, { status: 500 })
+      return NextResponse.json({ 
+        error: "Failed to fetch pricing plans", 
+        details: error.message 
+      }, { status: 500 })
     }
 
+    console.log("[v0] Plans fetched successfully:", plans?.length || 0)
     return NextResponse.json({ plans: plans || [] })
   } catch (error) {
     console.error("[v0] Unexpected error:", error)
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 })
+    return NextResponse.json({ 
+      error: "Internal server error", 
+      details: error instanceof Error ? error.message : "Unknown error"
+    }, { status: 500 })
   }
 }
 
