@@ -2,7 +2,6 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
 import { Smartphone, Star, MapPin, Download, Plus } from "lucide-react"
 import Link from "next/link"
 import { ProtectedRoute } from "@/components/protected-route"
@@ -75,35 +74,8 @@ export default function ToolsPage() {
 
         {/* Main Content */}
         <div className="flex-1 overflow-y-auto">
-          {/* Hero Section */}
+          {/* Recent Apps Section */}
           <div className="p-6">
-            <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-purple-600 via-purple-500 to-blue-600 p-8 text-white mb-8">
-              {/* Decorative circles */}
-              <div className="absolute right-8 top-1/2 -translate-y-1/2 w-48 h-48 rounded-full border-8 border-white/10" />
-              <div className="absolute right-16 top-1/2 -translate-y-1/2 w-32 h-32 rounded-full border-8 border-white/10" />
-              <div className="absolute right-24 top-1/2 -translate-y-1/2 w-16 h-16 rounded-full bg-white/10" />
-
-              <div className="relative z-10 max-w-2xl">
-                <Badge className="mb-4 bg-white/20 text-white border-white/30 hover:bg-white/30">Premium</Badge>
-                <h2 className="text-4xl font-bold mb-4">Welcome to UGen Pro Creative Suite</h2>
-                <p className="text-lg text-white/90 mb-6">
-                  Unleash your creativity with our comprehensive suite of professional design tools and resources.
-                </p>
-                <div className="flex gap-3">
-                  <Button variant="secondary" className="bg-white text-purple-600 hover:bg-white/90">
-                    Explore Plans
-                  </Button>
-                  <Button
-                    variant="outline"
-                    className="border-white/30 text-white hover:bg-white/10 bg-transparent hover:text-white"
-                  >
-                    Take a Tour
-                  </Button>
-                </div>
-              </div>
-            </div>
-
-            {/* Recent Apps Section */}
             <div className="mb-8">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-2xl font-semibold">Recent Apps</h3>

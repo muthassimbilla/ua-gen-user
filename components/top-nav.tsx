@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { useAuth } from "@/lib/auth-context"
+import Link from "next/link"
 
 interface TopNavProps {
   title: string
@@ -20,7 +21,7 @@ export function TopNav({ title, onMenuClick }: TopNavProps) {
         <Button variant="ghost" size="icon" className="lg:hidden" onClick={onMenuClick}>
           <Menu className="h-5 w-5" />
         </Button>
-        <h1 className="text-lg font-semibold">{title}</h1>
+        <h1 className="text-lg font-semibold">{user?.full_name || title}</h1>
       </div>
 
       <div className="flex items-center gap-2">
@@ -36,11 +37,13 @@ export function TopNav({ title, onMenuClick }: TopNavProps) {
             3
           </Badge>
         </Button>
-        <Avatar className="h-8 w-8 ml-2">
-          <AvatarFallback className="bg-gradient-to-br from-purple-600 to-blue-600 text-white text-xs">
-            {user?.email?.substring(0, 2).toUpperCase() || "U"}
-          </AvatarFallback>
-        </Avatar>
+        <Link href="/profile" className="ml-2">
+          <Avatar className="h-8 w-8 cursor-pointer hover:ring-2 hover:ring-primary transition-all">
+            <AvatarFallback className="bg-gradient-to-br from-purple-600 to-blue-600 text-white text-xs">
+              {user?.full_name?.substring(0, 2).toUpperCase() || user?.email?.substring(0, 2).toUpperCase() || "U"}
+            </AvatarFallback>
+          </Avatar>
+        </Link>
       </div>
     </div>
   )
