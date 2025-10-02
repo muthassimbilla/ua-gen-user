@@ -64,11 +64,16 @@ export class AuthService {
 
       const supabase = createClient()
 
+      const isLocalhost = typeof window !== "undefined" && window.location.hostname === "localhost"
+      const redirectUrl = isLocalhost
+        ? process.env.NEXT_PUBLIC_DEV_SUPABASE_REDIRECT_URL || "http://localhost:3000/login"
+        : `${window.location.origin}/login`
+
       const { data, error } = await supabase.auth.signUp({
         email: signupData.email,
         password: signupData.password,
         options: {
-          emailRedirectTo: process.env.NEXT_PUBLIC_DEV_SUPABASE_REDIRECT_URL || `${window.location.origin}/login`,
+          emailRedirectTo: redirectUrl,
           data: {
             full_name: signupData.full_name,
           },
@@ -284,8 +289,13 @@ export class AuthService {
     try {
       const supabase = createClient()
 
+      const isLocalhost = typeof window !== "undefined" && window.location.hostname === "localhost"
+      const redirectUrl = isLocalhost
+        ? process.env.NEXT_PUBLIC_DEV_SUPABASE_REDIRECT_URL || "http://localhost:3000/reset-password"
+        : `${window.location.origin}/reset-password`
+
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: process.env.NEXT_PUBLIC_DEV_SUPABASE_REDIRECT_URL || `${window.location.origin}/reset-password`,
+        redirectTo: redirectUrl,
       })
 
       if (error) {

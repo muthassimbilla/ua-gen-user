@@ -19,11 +19,10 @@ const nextConfig = {
   swcMinify: true,
   experimental: {
     scrollRestoration: true,
-    optimizePackageImports: ['lucide-react', '@radix-ui/react-icons', '@supabase/supabase-js'],
+    optimizePackageImports: ['lucide-react', '@radix-ui/react-icons'],
     esmExternals: true,
     serverComponentsExternalPackages: ['@supabase/supabase-js'],
     webVitalsAttribution: ['CLS', 'LCP', 'FCP', 'FID', 'TTFB'],
-    optimizeCss: true,
   },
   // Enable React strict mode for better performance
   reactStrictMode: true,
