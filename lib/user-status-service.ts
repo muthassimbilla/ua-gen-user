@@ -3,7 +3,7 @@ import { createBrowserClient } from "@supabase/ssr"
 // User status interface
 export interface UserStatus {
   is_valid: boolean
-  status: "active" | "suspended" | "expired" | "inactive" | "pending"
+  status: "active" | "suspended" | "expired" | "inactive" | "pending" | "deactivated"
   message: string
   expiration_date?: string
 }
@@ -95,12 +95,22 @@ export class UserStatusService {
       }
 
       // Check if user is inactive (check account_status instead of is_active)
-      if (user.account_status === "inactive" || user.account_status === "suspended") {
-        console.log("[v0] User is inactive:", userId)
+      if (user.account_status === "inactive") {
+        console.log("[v0] User is deactivated:", userId)
         return {
           is_valid: false,
-          status: "inactive",
-          message: "Your account has been deactivated.",
+          status: "deactivated",
+          message: "Your account has been deactivated. Please contact support.",
+        }
+      }
+
+      // Check if user is suspended
+      if (user.account_status === "suspended") {
+        console.log("[v0] User is suspended:", userId)
+        return {
+          is_valid: false,
+          status: "suspended",
+          message: "Your account has been suspended. Please contact support.",
         }
       }
 
@@ -179,7 +189,7 @@ export class UserStatusService {
 
         if (
           !status.is_valid &&
-          (status.status === "suspended" || status.status === "expired") &&
+          (status.status === "suspended" || status.status === "expired" || status.status === "deactivated") &&
           !status.message.includes("network") &&
           !status.message.includes("active")
         ) {

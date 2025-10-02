@@ -7,6 +7,7 @@ import { AuthService } from "./auth-client"
 import { useStatusMiddleware } from "./status-middleware"
 import { useStatusNotification } from "@/components/status-notification-provider"
 import type { UserStatus } from "./user-status-service"
+import { StatusChecker } from "./status-checker"
 
 interface AuthContextType {
   user: User | null
@@ -138,9 +139,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (
       status.status === "suspended" ||
       status.status === "expired" ||
-      (status.status === "inactive" && !status.message.includes("network") && !status.message.includes("status check"))
+      status.status === "inactive" ||
+      status.status === "deactivated"
     ) {
-      console.log("[v0] Account suspended/expired, logging out")
+      console.log("[v0] Account deactivated/suspended/expired, logging out")
       setTimeout(async () => {
         await logout()
       }, 2000)
@@ -172,6 +174,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
     }
   }, [])
+
+  // Start status checking when user is logged in
+  useEffect(() => {
+    if (user && !loading) {
+      console.log("[v0] Starting status checking for user:", user.id)
+      const statusChecker = StatusChecker.getInstance()
+      statusChecker.startChecking(30000) // Check every 30 seconds
+
+      return () => {
+        console.log("[v0] Stopping status checking")
+        statusChecker.stopChecking()
+      }
+    }
+  }, [user, loading])
 
   const value: AuthContextType = {
     user,

@@ -68,7 +68,7 @@ export class AuthService {
         email: signupData.email,
         password: signupData.password,
         options: {
-          emailRedirectTo: process.env.NEXT_PUBLIC_DEV_SUPABASE_REDIRECT_URL || `${window.location.origin}/login`,
+          emailRedirectTo: process.env.NEXT_PUBLIC_DEV_SUPABASE_REDIRECT_URL || `${window.location.origin}/auth/callback`,
           data: {
             full_name: signupData.full_name,
           },
@@ -285,7 +285,7 @@ export class AuthService {
       const supabase = createClient()
 
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: process.env.NEXT_PUBLIC_DEV_SUPABASE_REDIRECT_URL || `${window.location.origin}/reset-password`,
+        redirectTo: process.env.NEXT_PUBLIC_DEV_SUPABASE_REDIRECT_URL || `${window.location.origin}/auth/callback`,
       })
 
       if (error) {
