@@ -5,6 +5,7 @@ import "./globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
 import { Toaster } from "@/components/ui/toaster"
 import ClientProviders from "@/components/client-providers"
+import { PerformanceMonitor, PerformanceOverlay } from "@/components/performance-monitor"
 
 const inter = Inter({
   subsets: ["latin"],
@@ -52,6 +53,8 @@ export default function RootLayout({
         >
           <ClientProviders>{children}</ClientProviders>
           <Toaster />
+          <PerformanceMonitor />
+          <PerformanceOverlay />
         </ThemeProvider>
       </body>
     </html>

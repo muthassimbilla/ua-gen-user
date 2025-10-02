@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
@@ -19,29 +19,6 @@ export default function ForgotPasswordPage() {
   const [errors, setErrors] = useState<string[]>([])
   const [success, setSuccess] = useState(false)
   const [loading, setLoading] = useState(false)
-  const [debugInfo, setDebugInfo] = useState<string[]>([])
-
-  // Check environment variables on component mount
-  useEffect(() => {
-    const envCheck = []
-    
-    if (!process.env.NEXT_PUBLIC_SUPABASE_URL) {
-      envCheck.push("❌ NEXT_PUBLIC_SUPABASE_URL is missing")
-    } else {
-      envCheck.push("✅ NEXT_PUBLIC_SUPABASE_URL is set")
-    }
-    
-    if (!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
-      envCheck.push("❌ NEXT_PUBLIC_SUPABASE_ANON_KEY is missing")
-    } else {
-      envCheck.push("✅ NEXT_PUBLIC_SUPABASE_ANON_KEY is set")
-    }
-    
-    const redirectUrl = process.env.NEXT_PUBLIC_DEV_SUPABASE_REDIRECT_URL || `${window.location.origin}/auth/callback`
-    envCheck.push(`📍 Redirect URL: ${redirectUrl}`)
-    
-    setDebugInfo(envCheck)
-  }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -51,41 +28,20 @@ export default function ForgotPasswordPage() {
     setSuccess(false)
 
     try {
-      console.log("[v0] Starting password reset for:", email)
-      
       // Validate email
       const emailValidation = ValidationUtils.validateEmail(email)
       if (!emailValidation.isValid) {
-        console.log("[v0] Email validation failed:", emailValidation.errors)
         setErrors(emailValidation.errors)
         setLoading(false)
         return
       }
 
-      console.log("[v0] Email validation passed, calling resetPassword")
       await AuthService.resetPassword(email.trim())
-      
-      console.log("[v0] Password reset email sent successfully")
+
       setSuccess(true)
     } catch (error: any) {
       console.error("[v0] Password reset error:", error)
-      
-      // Better error handling
-      let errorMessage = "Failed to send reset email"
-      
-      if (error.message) {
-        if (error.message.includes("rate limit")) {
-          errorMessage = "Too many requests. Please wait a few minutes before trying again."
-        } else if (error.message.includes("not found")) {
-          errorMessage = "No account found with this email address."
-        } else if (error.message.includes("invalid email")) {
-          errorMessage = "Please enter a valid email address."
-        } else {
-          errorMessage = error.message
-        }
-      }
-      
-      setErrors([errorMessage])
+      setErrors([error.message || "Failed to send reset email"])
     } finally {
       setLoading(false)
     }
@@ -121,23 +77,6 @@ export default function ForgotPasswordPage() {
           </CardHeader>
 
           <CardContent className="space-y-4">
-            {/* Debug Information */}
-            {debugInfo.length > 0 && (
-              <Alert className="border-blue-500/30 bg-blue-500/10 backdrop-blur-sm rounded-xl">
-                <div className="text-blue-400 font-medium mb-2">🔧 Debug Information:</div>
-                <div className="text-xs space-y-1">
-                  {debugInfo.map((info, index) => (
-                    <div key={index}>{info}</div>
-                  ))}
-                </div>
-                {debugInfo.some(info => info.includes("❌")) && (
-                  <div className="mt-2 text-xs text-red-400">
-                    ⚠️ Missing environment variables! Please create .env.local file with Supabase credentials.
-                  </div>
-                )}
-              </Alert>
-            )}
-
             {/* Success Message */}
             {success && (
               <Alert className="border-green-500/30 bg-green-500/10 backdrop-blur-sm rounded-xl">
@@ -160,9 +99,6 @@ export default function ForgotPasswordPage() {
                       </li>
                     ))}
                   </ul>
-                  <div className="mt-2 text-xs text-muted-foreground">
-                    If the problem persists, please check the browser console for more details.
-                  </div>
                 </AlertDescription>
               </Alert>
             )}

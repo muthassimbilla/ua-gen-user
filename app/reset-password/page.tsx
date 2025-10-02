@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -22,32 +22,6 @@ export default function ResetPasswordPage() {
   const [loading, setLoading] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
-  const [isValidToken, setIsValidToken] = useState(false)
-
-  // Check for valid reset token on component mount
-  useEffect(() => {
-    const checkResetToken = () => {
-      if (typeof window !== "undefined") {
-        const tokenData = localStorage.getItem("supabase.auth.token")
-        if (tokenData) {
-          try {
-            const token = JSON.parse(tokenData)
-            if (token.access_token && token.refresh_token) {
-              setIsValidToken(true)
-              return
-            }
-          } catch (error) {
-            console.error("[v0] Error parsing token data:", error)
-          }
-        }
-      }
-      
-      // No valid token, redirect to login
-      router.push("/login?message=Invalid or expired reset link. Please request a new one.")
-    }
-
-    checkResetToken()
-  }, [router])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -76,11 +50,6 @@ export default function ResetPasswordPage() {
 
       setSuccess(true)
 
-      // Clear reset token
-      if (typeof window !== "undefined") {
-        localStorage.removeItem("supabase.auth.token")
-      }
-
       // Redirect to login after 2 seconds
       setTimeout(() => {
         router.push("/login?message=Password reset successful! Please login with your new password.")
@@ -91,27 +60,6 @@ export default function ResetPasswordPage() {
     } finally {
       setLoading(false)
     }
-  }
-
-  // Show loading while checking token
-  if (!isValidToken) {
-    return (
-      <div className="h-screen flex items-center justify-center p-4 relative overflow-hidden bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
-        <div className="text-center space-y-4">
-          <div className="w-16 h-16 mx-auto rounded-full bg-blue-100 dark:bg-blue-900/20 flex items-center justify-center">
-            <Shield className="w-8 h-8 text-blue-600 dark:text-blue-400 animate-spin" />
-          </div>
-          <div className="space-y-2">
-            <h2 className="text-xl font-semibold text-slate-900 dark:text-white">
-              Verifying reset link...
-            </h2>
-            <p className="text-slate-600 dark:text-slate-400">
-              Please wait while we validate your password reset link.
-            </p>
-          </div>
-        </div>
-      </div>
-    )
   }
 
   return (
