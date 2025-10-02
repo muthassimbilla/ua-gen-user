@@ -11,7 +11,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Switch } from "@/components/ui/switch"
 import { Badge } from "@/components/ui/badge"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { Edit, Trash2, Plus, Save, X, DollarSign } from "lucide-react"
+import { Edit, Trash2, Plus, Save, X, DollarSign, RefreshCw } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 
 interface PricingPlan {
@@ -58,26 +58,19 @@ export default function AdminPricingPage() {
       console.log("[v0] Fetching pricing plans...")
       setError(null)
       setLoading(true)
-      
+
+      const controller = new AbortController()
+      const timeoutId = setTimeout(() => controller.abort(), 10000) // 10 second timeout
+
       const [landingRes, premiumRes] = await Promise.all([
-        fetch("/api/pricing-plans?type=landing"),
-        fetch("/api/pricing-plans?type=premium"),
+        fetch("/api/pricing-plans?type=landing", { signal: controller.signal }),
+        fetch("/api/pricing-plans?type=premium", { signal: controller.signal }),
       ])
+
+      clearTimeout(timeoutId)
 
       console.log("[v0] Landing response status:", landingRes.status)
       console.log("[v0] Premium response status:", premiumRes.status)
-
-      if (!landingRes.ok) {
-        const landingError = await landingRes.text()
-        console.error("[v0] Landing plans error:", landingError)
-        throw new Error(`Landing plans failed: ${landingRes.status} - ${landingError}`)
-      }
-
-      if (!premiumRes.ok) {
-        const premiumError = await premiumRes.text()
-        console.error("[v0] Premium plans error:", premiumError)
-        throw new Error(`Premium plans failed: ${premiumRes.status} - ${premiumError}`)
-      }
 
       const landingData = await landingRes.json()
       const premiumData = await premiumRes.json()
@@ -87,12 +80,24 @@ export default function AdminPricingPage() {
 
       setLandingPlans(landingData.plans || [])
       setPremiumPlans(premiumData.plans || [])
-      
+
+      if (landingData.error || premiumData.error) {
+        toast({
+          title: "Warning",
+          description: "Some pricing plans may not have loaded correctly. Please refresh.",
+          variant: "default",
+        })
+      }
+
       console.log("[v0] Plans loaded successfully")
     } catch (error) {
       console.error("[v0] Error fetching plans:", error)
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+      const errorMessage = error instanceof Error ? error.message : "Unknown error"
       setError(errorMessage)
+
+      setLandingPlans([])
+      setPremiumPlans([])
+
       toast({
         title: "Error",
         description: `Failed to load pricing plans: ${errorMessage}`,
@@ -195,15 +200,15 @@ export default function AdminPricingPage() {
         <CardTitle className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <span>{plan.name}</span>
-            <Badge 
-              variant="outline" 
+            <Badge
+              variant="outline"
               className={`text-xs ${
-                plan.plan_type === 'landing' 
-                  ? 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-800' 
-                  : 'bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-900/20 dark:text-purple-400 dark:border-purple-800'
+                plan.plan_type === "landing"
+                  ? "bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-800"
+                  : "bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-900/20 dark:text-purple-400 dark:border-purple-800"
               }`}
             >
-              {plan.plan_type === 'landing' ? 'Landing' : 'Premium'}
+              {plan.plan_type === "landing" ? "Landing" : "Premium"}
             </Badge>
           </div>
           <div className="flex gap-2">
@@ -256,7 +261,10 @@ export default function AdminPricingPage() {
   if (authLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <p>Loading...</p>
+        <div className="text-center">
+          <RefreshCw className="w-8 h-8 animate-spin mx-auto mb-4" />
+          <p>Loading...</p>
+        </div>
       </div>
     )
   }
@@ -268,30 +276,10 @@ export default function AdminPricingPage() {
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen gap-4">
+        <RefreshCw className="w-8 h-8 animate-spin" />
         <p>Loading pricing plans...</p>
-        <Button 
-          onClick={fetchPlans} 
-          variant="outline"
-          disabled={loading}
-        >
+        <Button onClick={fetchPlans} variant="outline" disabled={loading}>
           Retry
-        </Button>
-      </div>
-    )
-  }
-
-  if (error) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-screen gap-4">
-        <div className="text-center">
-          <h2 className="text-2xl font-bold text-red-600 mb-2">Error Loading Plans</h2>
-          <p className="text-muted-foreground mb-4">{error}</p>
-        </div>
-        <Button 
-          onClick={fetchPlans} 
-          variant="outline"
-        >
-          Try Again
         </Button>
       </div>
     )
@@ -307,9 +295,28 @@ export default function AdminPricingPage() {
           </h1>
           <p className="text-muted-foreground mt-2">Manage pricing plans for landing page and premium tools</p>
         </div>
+        <Button onClick={fetchPlans} variant="outline" disabled={loading}>
+          <RefreshCw className={`w-4 h-4 mr-2 ${loading ? "animate-spin" : ""}`} />
+          Refresh
+        </Button>
       </div>
 
-      {/* Summary Cards */}
+      {error && (
+        <Card className="mb-6 border-red-500 bg-red-50 dark:bg-red-900/20">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="font-semibold text-red-700 dark:text-red-400">Error Loading Plans</p>
+                <p className="text-sm text-red-600 dark:text-red-300">{error}</p>
+              </div>
+              <Button onClick={fetchPlans} variant="outline" size="sm">
+                Try Again
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         <Card className="p-6">
           <div className="flex items-center gap-3">
@@ -322,7 +329,7 @@ export default function AdminPricingPage() {
             </div>
           </div>
         </Card>
-        
+
         <Card className="p-6">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-lg bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center">
@@ -334,7 +341,7 @@ export default function AdminPricingPage() {
             </div>
           </div>
         </Card>
-        
+
         <Card className="p-6">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-lg bg-gradient-to-r from-green-500 to-emerald-500 flex items-center justify-center">
@@ -349,7 +356,6 @@ export default function AdminPricingPage() {
       </div>
 
       <div className="space-y-8">
-        {/* Landing Page Plans Section */}
         <div>
           <div className="flex items-center gap-3 mb-6">
             <div className="w-8 h-8 rounded-lg bg-gradient-to-r from-blue-500 to-cyan-500 flex items-center justify-center">
@@ -363,14 +369,20 @@ export default function AdminPricingPage() {
               {landingPlans.length} plans
             </Badge>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {landingPlans.map((plan) => (
-              <PlanCard key={plan.id} plan={plan} />
-            ))}
-          </div>
+          {landingPlans.length === 0 ? (
+            <Card className="p-8 text-center">
+              <p className="text-muted-foreground mb-4">No landing page plans found</p>
+              <p className="text-sm text-muted-foreground">Run the database migration script to create default plans</p>
+            </Card>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {landingPlans.map((plan) => (
+                <PlanCard key={plan.id} plan={plan} />
+              ))}
+            </div>
+          )}
         </div>
 
-        {/* Premium Tools Plans Section */}
         <div>
           <div className="flex items-center gap-3 mb-6">
             <div className="w-8 h-8 rounded-lg bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center">
@@ -384,15 +396,21 @@ export default function AdminPricingPage() {
               {premiumPlans.length} plans
             </Badge>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {premiumPlans.map((plan) => (
-              <PlanCard key={plan.id} plan={plan} />
-            ))}
-          </div>
+          {premiumPlans.length === 0 ? (
+            <Card className="p-8 text-center">
+              <p className="text-muted-foreground mb-4">No premium tools plans found</p>
+              <p className="text-sm text-muted-foreground">Run the database migration script to create default plans</p>
+            </Card>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {premiumPlans.map((plan) => (
+                <PlanCard key={plan.id} plan={plan} />
+              ))}
+            </div>
+          )}
         </div>
       </div>
 
-      {/* Edit Dialog */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
