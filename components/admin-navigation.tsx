@@ -5,7 +5,7 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { useAdminAuth } from "@/lib/admin-auth-context"
 import { Button } from "@/components/ui/button"
-import { Home, Users, LogOut, User, Menu, X, Shield, DollarSign } from "lucide-react"
+import { Home, Users, LogOut, User, Menu, X, Shield } from "lucide-react"
 import ThemeToggle from "@/components/theme-toggle"
 
 export function AdminNavigation() {
@@ -16,7 +16,6 @@ export function AdminNavigation() {
   const navigationItems = [
     { name: "Dashboard", href: "/adminbilla", icon: Home },
     { name: "User Management", href: "/adminbilla/users", icon: Users },
-    { name: "Pricing Management", href: "/adminbilla/pricing", icon: DollarSign },
   ]
 
   const toggleSidebar = () => {
