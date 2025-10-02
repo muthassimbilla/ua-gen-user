@@ -60,14 +60,14 @@ const AuthForm = memo(function AuthForm({
     <div className="w-full">
       {/* Success Messages */}
       {flashMessage && (
-        <Alert className="mb-4 border-green-500/50 bg-green-500/10">
+        <Alert className="mb-4 border-green-500/50 bg-gradient-to-r from-green-500/10 to-emerald-500/10">
           <CheckCircle className="h-4 w-4 text-green-500" />
           <AlertDescription className="text-sm">{flashMessage.message}</AlertDescription>
         </Alert>
       )}
 
       {successMessage && !flashMessage && (
-        <Alert className="mb-4 border-green-500/50 bg-green-500/10">
+        <Alert className="mb-4 border-green-500/50 bg-gradient-to-r from-green-500/10 to-emerald-500/10">
           <CheckCircle className="h-4 w-4 text-green-500" />
           <AlertDescription className="text-sm">{successMessage}</AlertDescription>
         </Alert>
@@ -75,14 +75,14 @@ const AuthForm = memo(function AuthForm({
 
       {/* Session Messages */}
       {sessionInvalidReason && (
-        <Alert className="mb-4 border-orange-500/50 bg-orange-500/10">
+        <Alert className="mb-4 border-orange-500/50 bg-gradient-to-r from-orange-500/10 to-amber-500/10">
           <AlertTriangle className="h-4 w-4 text-orange-500" />
           <AlertDescription className="text-sm">Your session has expired. Please log in again.</AlertDescription>
         </Alert>
       )}
 
       {ipChangeLogout && (
-        <Alert className="mb-4 border-orange-500/50 bg-orange-500/10">
+        <Alert className="mb-4 border-orange-500/50 bg-gradient-to-r from-orange-500/10 to-amber-500/10">
           <AlertTriangle className="h-4 w-4 text-orange-500" />
           <AlertDescription className="text-sm">
             Your session expired due to IP address change. Please log in again.
@@ -91,7 +91,7 @@ const AuthForm = memo(function AuthForm({
       )}
 
       {pendingApproval && (
-        <Alert className="mb-4 border-yellow-500/50 bg-yellow-500/10">
+        <Alert className="mb-4 border-yellow-500/50 bg-gradient-to-r from-yellow-500/10 to-amber-500/10">
           <AlertTriangle className="h-4 w-4 text-yellow-500" />
           <AlertDescription className="text-sm">
             Your account is pending approval. This usually takes 24 hours.
@@ -101,7 +101,7 @@ const AuthForm = memo(function AuthForm({
 
       {/* Error Messages */}
       {errors.length > 0 && !pendingApproval && (
-        <Alert variant="destructive" className="mb-4">
+        <Alert variant="destructive" className="mb-4 bg-gradient-to-r from-red-500/10 to-rose-500/10">
           <XCircle className="h-4 w-4" />
           <AlertDescription className="text-sm">
             <ul className="list-disc list-inside space-y-1">
@@ -128,7 +128,7 @@ const AuthForm = memo(function AuthForm({
               placeholder="Enter your full name"
               value={formData.full_name || ""}
               onChange={onInputChange}
-              className="h-11"
+              className="h-11 focus-visible:ring-purple-500"
               required
             />
           </div>
@@ -146,7 +146,7 @@ const AuthForm = memo(function AuthForm({
             placeholder={isLogin ? "your@email.com" : "yourname@gmail.com"}
             value={formData.email}
             onChange={onInputChange}
-            className="h-11"
+            className="h-11 focus-visible:ring-blue-500"
             required
             autoComplete="email"
           />
@@ -166,21 +166,24 @@ const AuthForm = memo(function AuthForm({
               placeholder="Enter your password"
               value={formData.password}
               onChange={onInputChange}
-              className="h-11 pr-10"
+              className="h-11 pr-10 focus-visible:ring-purple-500"
               required
               autoComplete={isLogin ? "current-password" : "new-password"}
             />
             <button
               type="button"
               onClick={onTogglePassword}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-purple-600 dark:hover:text-purple-400 transition-colors"
             >
               {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
             </button>
           </div>
           {isLogin && (
             <div className="text-right">
-              <Link href="/forgot-password" className="text-sm text-primary hover:underline">
+              <Link
+                href="/forgot-password"
+                className="text-sm text-blue-600 dark:text-blue-400 hover:text-purple-600 dark:hover:text-purple-400 transition-colors font-medium"
+              >
                 Forgot password?
               </Link>
             </div>
@@ -201,13 +204,13 @@ const AuthForm = memo(function AuthForm({
                 placeholder="Re-enter your password"
                 value={formData.confirmPassword || ""}
                 onChange={onInputChange}
-                className="h-11 pr-10"
+                className="h-11 pr-10 focus-visible:ring-pink-500"
                 required
               />
               <button
                 type="button"
                 onClick={onToggleConfirmPassword}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-pink-600 dark:hover:text-pink-400 transition-colors"
               >
                 {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
               </button>
@@ -233,7 +236,11 @@ const AuthForm = memo(function AuthForm({
         )}
 
         {/* Submit Button */}
-        <Button type="submit" className="w-full h-11" disabled={loading || isSubmitting}>
+        <Button
+          type="submit"
+          className="w-full h-11 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 hover:from-blue-700 hover:via-purple-700 hover:to-pink-700 text-white shadow-lg hover:shadow-xl transition-all"
+          disabled={loading || isSubmitting}
+        >
           {loading ? (
             <div className="flex items-center gap-2">
               <svg className="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -258,7 +265,10 @@ const AuthForm = memo(function AuthForm({
       <div className="text-center mt-6">
         <p className="text-sm text-muted-foreground">
           {isLogin ? "Don't have an account? " : "Already have an account? "}
-          <Link href={isLogin ? "/signup" : "/login"} className="text-primary hover:underline font-medium">
+          <Link
+            href={isLogin ? "/signup" : "/login"}
+            className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 hover:from-purple-600 hover:to-pink-600 font-semibold transition-all"
+          >
             {isLogin ? "Sign up" : "Sign in"}
           </Link>
         </p>

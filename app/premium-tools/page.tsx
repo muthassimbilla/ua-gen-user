@@ -111,20 +111,24 @@ export default function PremiumToolsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 dark:from-slate-900 dark:via-purple-900/20 dark:to-slate-900">
       <SimpleHeader />
 
       {/* Background Effects */}
       <div className="fixed inset-0 -z-10">
-        <div className="absolute inset-0 bg-gradient-to-br from-blue-50/50 via-transparent to-indigo-50/50 dark:hidden" />
+        <div className="absolute inset-0 bg-gradient-to-br from-blue-100/50 via-purple-100/30 to-pink-100/50 dark:hidden" />
         <div className="hidden dark:block absolute inset-0">
-          <div className="absolute inset-0 bg-gradient-to-br from-blue-900/25 via-purple-900/15 to-indigo-900/25" />
-          <div className="absolute inset-0 bg-gradient-to-tr from-cyan-900/10 via-transparent to-pink-900/10" />
+          <div className="absolute inset-0 bg-gradient-to-br from-blue-900/25 via-purple-900/15 to-pink-900/25" />
+          <div className="absolute inset-0 bg-gradient-to-tr from-cyan-900/10 via-transparent to-rose-900/10" />
         </div>
-        <div className="absolute top-1/4 -left-64 w-96 h-96 bg-blue-200/30 dark:bg-blue-500/10 rounded-full blur-3xl animate-pulse" />
+        <div className="absolute top-1/4 -left-64 w-96 h-96 bg-blue-400/40 dark:bg-blue-500/20 rounded-full blur-3xl animate-pulse" />
         <div
-          className="absolute bottom-1/4 -right-64 w-96 h-96 bg-indigo-200/30 dark:bg-indigo-500/10 rounded-full blur-3xl animate-pulse"
+          className="absolute bottom-1/4 -right-64 w-96 h-96 bg-purple-400/40 dark:bg-purple-500/20 rounded-full blur-3xl animate-pulse"
           style={{ animationDelay: "1s" }}
+        />
+        <div
+          className="absolute top-1/2 left-1/3 w-80 h-80 bg-pink-400/30 dark:bg-pink-500/15 rounded-full blur-3xl animate-pulse"
+          style={{ animationDelay: "2s" }}
         />
       </div>
 
@@ -174,11 +178,15 @@ export default function PremiumToolsPage() {
             className={`transition-all duration-1000 delay-200 ${isLoaded ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}`}
           >
             <div className="text-center mb-8">
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-blue-500/10 to-indigo-500/10 border border-blue-500/20 mb-4">
-                <Sparkles className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-                <span className="text-sm font-semibold text-blue-700 dark:text-blue-300">Pricing Plans</span>
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-blue-500/20 via-purple-500/20 to-pink-500/20 border border-purple-500/30 mb-4">
+                <Sparkles className="w-4 h-4 text-purple-600 dark:text-purple-400" />
+                <span className="text-sm font-semibold bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
+                  Pricing Plans
+                </span>
               </div>
-              <h2 className="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white mb-3">Choose Your Plan</h2>
+              <h2 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-3">
+                Choose Your Plan
+              </h2>
               <p className="text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
                 আপনার প্রয়োজন অনুযায়ী একটি প্ল্যান বেছে নিন এবং সকল Premium Tools এক্সেস করুন
               </p>
@@ -191,15 +199,17 @@ export default function PremiumToolsPage() {
           <div
             className={`mt-12 text-center transition-all duration-1000 delay-400 ${isLoaded ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}`}
           >
-            <Card className="bg-white/80 dark:bg-slate-800/60 backdrop-blur-xl border-white/50 dark:border-slate-700/40 p-8 rounded-2xl">
+            <Card className="bg-white/80 dark:bg-slate-800/60 backdrop-blur-xl border-2 border-purple-200/50 dark:border-purple-500/30 p-8 rounded-2xl shadow-xl">
               <div className="max-w-2xl mx-auto">
-                <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-3">Need Help?</h3>
+                <h3 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-3">
+                  Need Help?
+                </h3>
                 <p className="text-slate-600 dark:text-slate-400 mb-6">কোনো সমস্যা বা প্রশ্ন থাকলে আমাদের সাথে যোগাযোগ করুন</p>
                 <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
                   <Button
                     onClick={handleContactAdmin}
                     variant="outline"
-                    className="bg-white/50 dark:bg-slate-700/50 hover:bg-white dark:hover:bg-slate-700"
+                    className="bg-gradient-to-r from-blue-500/10 to-purple-500/10 hover:from-blue-500/20 hover:to-purple-500/20 border-purple-300 dark:border-purple-600"
                   >
                     Contact Admin
                   </Button>
