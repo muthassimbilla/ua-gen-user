@@ -176,51 +176,54 @@ export default function Email2NamePage() {
                     </div>
                   </div>
 
-                  {/* First Name */}
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between">
-                      <Label className="text-sm font-medium text-muted-foreground">First Name</Label>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => copyToClipboard(nameData.firstName, "First Name")}
-                        className={`h-8 w-8 p-0 transition-all ${
-                          copiedField === "First Name" ? "bg-green-100 dark:bg-green-800/30" : ""
-                        }`}
-                      >
-                        {copiedField === "First Name" ? (
-                          <CheckCircle className="h-4 w-4 text-green-600" />
-                        ) : (
-                          <Copy className="h-4 w-4" />
-                        )}
-                      </Button>
+                  {/* First Name and Last Name in same row */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {/* First Name */}
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <Label className="text-sm font-medium text-muted-foreground">First Name</Label>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => copyToClipboard(nameData.firstName, "First Name")}
+                          className={`h-8 w-8 p-0 transition-all ${
+                            copiedField === "First Name" ? "bg-green-100 dark:bg-green-800/30" : ""
+                          }`}
+                        >
+                          {copiedField === "First Name" ? (
+                            <CheckCircle className="h-4 w-4 text-green-600" />
+                          ) : (
+                            <Copy className="h-4 w-4" />
+                          )}
+                        </Button>
+                      </div>
+                      <div className="p-4 rounded-lg border bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800">
+                        <p className="font-medium">{nameData.firstName}</p>
+                      </div>
                     </div>
-                    <div className="p-4 rounded-lg border bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800">
-                      <p className="font-medium">{nameData.firstName}</p>
-                    </div>
-                  </div>
 
-                  {/* Last Name */}
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between">
-                      <Label className="text-sm font-medium text-muted-foreground">Last Name</Label>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => copyToClipboard(nameData.lastName, "Last Name")}
-                        className={`h-8 w-8 p-0 transition-all ${
-                          copiedField === "Last Name" ? "bg-green-100 dark:bg-green-800/30" : ""
-                        }`}
-                      >
-                        {copiedField === "Last Name" ? (
-                          <CheckCircle className="h-4 w-4 text-green-600" />
-                        ) : (
-                          <Copy className="h-4 w-4" />
-                        )}
-                      </Button>
-                    </div>
-                    <div className="p-4 rounded-lg border bg-purple-50 dark:bg-purple-900/20 border-purple-200 dark:border-purple-800">
-                      <p className="font-medium">{nameData.lastName}</p>
+                    {/* Last Name */}
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <Label className="text-sm font-medium text-muted-foreground">Last Name</Label>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => copyToClipboard(nameData.lastName, "Last Name")}
+                          className={`h-8 w-8 p-0 transition-all ${
+                            copiedField === "Last Name" ? "bg-green-100 dark:bg-green-800/30" : ""
+                          }`}
+                        >
+                          {copiedField === "Last Name" ? (
+                            <CheckCircle className="h-4 w-4 text-green-600" />
+                          ) : (
+                            <Copy className="h-4 w-4" />
+                          )}
+                        </Button>
+                      </div>
+                      <div className="p-4 rounded-lg border bg-purple-50 dark:bg-purple-900/20 border-purple-200 dark:border-purple-800">
+                        <p className="font-medium">{nameData.lastName}</p>
+                      </div>
                     </div>
                   </div>
 
@@ -248,65 +251,68 @@ export default function Email2NamePage() {
                     </div>
                   </div>
 
-                  {/* Country */}
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between">
-                      <Label className="text-sm font-medium text-muted-foreground">Country</Label>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => copyToClipboard(nameData.country, "Country")}
-                        className={`h-8 w-8 p-0 transition-all ${
-                          copiedField === "Country" ? "bg-green-100 dark:bg-green-800/30" : ""
-                        }`}
-                      >
-                        {copiedField === "Country" ? (
-                          <CheckCircle className="h-4 w-4 text-green-600" />
-                        ) : (
-                          <Copy className="h-4 w-4" />
-                        )}
-                      </Button>
+                  {/* Country and Type in same row */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {/* Country */}
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <Label className="text-sm font-medium text-muted-foreground">Country</Label>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => copyToClipboard(nameData.country, "Country")}
+                          className={`h-8 w-8 p-0 transition-all ${
+                            copiedField === "Country" ? "bg-green-100 dark:bg-green-800/30" : ""
+                          }`}
+                        >
+                          {copiedField === "Country" ? (
+                            <CheckCircle className="h-4 w-4 text-green-600" />
+                          ) : (
+                            <Copy className="h-4 w-4" />
+                          )}
+                        </Button>
+                      </div>
+                      <div className="p-4 rounded-lg border bg-cyan-50 dark:bg-cyan-900/20 border-cyan-200 dark:border-cyan-800">
+                        <p className="font-medium">{nameData.country}</p>
+                      </div>
                     </div>
-                    <div className="p-4 rounded-lg border bg-cyan-50 dark:bg-cyan-900/20 border-cyan-200 dark:border-cyan-800">
-                      <p className="font-medium">{nameData.country}</p>
-                    </div>
-                  </div>
 
-                  {/* Type */}
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between">
-                      <Label className="text-sm font-medium text-muted-foreground">Type</Label>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => copyToClipboard(nameData.type, "Type")}
-                        className={`h-8 w-8 p-0 transition-all ${
-                          copiedField === "Type" ? "bg-green-100 dark:bg-green-800/30" : ""
-                        }`}
-                      >
-                        {copiedField === "Type" ? (
-                          <CheckCircle className="h-4 w-4 text-green-600" />
-                        ) : (
-                          <Copy className="h-4 w-4" />
-                        )}
-                      </Button>
-                    </div>
-                    <div
-                      className={`p-4 rounded-lg border ${
-                        nameData.type.toLowerCase() === "business"
-                          ? "bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800"
-                          : "bg-slate-50 dark:bg-slate-900/20 border-slate-200 dark:border-slate-800"
-                      }`}
-                    >
-                      <p
-                        className={`font-medium ${
+                    {/* Type */}
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <Label className="text-sm font-medium text-muted-foreground">Type</Label>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => copyToClipboard(nameData.type, "Type")}
+                          className={`h-8 w-8 p-0 transition-all ${
+                            copiedField === "Type" ? "bg-green-100 dark:bg-green-800/30" : ""
+                          }`}
+                        >
+                          {copiedField === "Type" ? (
+                            <CheckCircle className="h-4 w-4 text-green-600" />
+                          ) : (
+                            <Copy className="h-4 w-4" />
+                          )}
+                        </Button>
+                      </div>
+                      <div
+                        className={`p-4 rounded-lg border ${
                           nameData.type.toLowerCase() === "business"
-                            ? "text-red-700 dark:text-red-400"
-                            : "text-slate-700 dark:text-slate-300"
+                            ? "bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800"
+                            : "bg-slate-50 dark:bg-slate-900/20 border-slate-200 dark:border-slate-800"
                         }`}
                       >
-                        {nameData.type}
-                      </p>
+                        <p
+                          className={`font-medium ${
+                            nameData.type.toLowerCase() === "business"
+                              ? "text-red-700 dark:text-red-400"
+                              : "text-slate-700 dark:text-slate-300"
+                          }`}
+                        >
+                          {nameData.type}
+                        </p>
+                      </div>
                     </div>
                   </div>
                 </>
