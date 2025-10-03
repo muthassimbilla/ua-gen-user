@@ -316,7 +316,7 @@ export default function AddressGeneratorPage() {
               </TabsList>
 
               <TabsContent value="ip" className="space-y-0">
-                <Card className="h-[550px] flex flex-col">
+                <Card className="h-[650px] flex flex-col">
                   <CardHeader className="pb-4 flex-shrink-0">
                     <CardTitle className="flex items-center gap-2">
                       <MapPin className="h-5 w-5 text-blue-500" />
@@ -367,7 +367,7 @@ export default function AddressGeneratorPage() {
               </TabsContent>
 
               <TabsContent value="zip" className="space-y-0">
-                <Card className="h-[550px] flex flex-col">
+                <Card className="h-[650px] flex flex-col">
                   <CardHeader className="pb-4 flex-shrink-0">
                     <CardTitle className="flex items-center gap-2">
                       <MapPin className="h-5 w-5 text-green-500" />
@@ -422,7 +422,7 @@ export default function AddressGeneratorPage() {
           {/* Right Side - Output Section */}
           <div className="space-y-6">
             {addressData.addresses.length > 0 && currentAddress ? (
-              <Card className="h-[550px] flex flex-col">
+              <Card className="h-[650px] flex flex-col">
                 <CardHeader className="pb-4 flex-shrink-0">
                   <div className="flex items-center justify-between">
                     <div>
@@ -678,7 +678,7 @@ export default function AddressGeneratorPage() {
                 </CardContent>
               </Card>
             ) : (
-              <Card className="h-[550px] flex flex-col">
+              <Card className="h-[650px] flex flex-col">
                 <CardContent className="flex flex-col items-center justify-center flex-1 text-center py-12">
                   <div className="w-24 h-24 bg-gradient-to-br from-blue-100 to-purple-100 dark:from-blue-900/30 dark:to-purple-900/30 rounded-full flex items-center justify-center mb-6">
                     <MapPin className="h-12 w-12 text-blue-500" />
