@@ -88,7 +88,7 @@ export default function Email2NamePage() {
       <div className="container mx-auto px-4 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 max-w-6xl mx-auto">
           {/* Left Card - Input */}
-          <Card className="min-h-[600px] flex flex-col">
+          <Card className="min-h-[450px] flex flex-col">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Mail className="h-5 w-5 text-blue-500" />
@@ -141,7 +141,7 @@ export default function Email2NamePage() {
           </Card>
 
           {/* Right Card - Output */}
-          <Card className="min-h-[600px] flex flex-col">
+          <Card className="min-h-[450px] flex flex-col">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <CheckCircle className="h-5 w-5 text-green-500" />
