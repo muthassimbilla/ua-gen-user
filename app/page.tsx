@@ -1,9 +1,11 @@
+"use client"
+
 import dynamic from "next/dynamic"
 import { HeroSection } from "@/components/hero-section"
-import { FeaturesSection } from "@/components/features-section"
+import { ToolsSection } from "@/components/tools-section"
 import { Navigation } from "@/components/navigation"
+import { useState } from "react"
 
-// Lazy load sections that are below the fold
 const PricingSection = dynamic(
   () => import("@/components/pricing-section").then((mod) => ({ default: mod.PricingSection })),
   {
@@ -23,11 +25,13 @@ const Footer = dynamic(() => import("@/components/footer").then((mod) => ({ defa
 })
 
 export default function HomePage() {
+  const [locale, setLocale] = useState<"en" | "bn">("en")
+
   return (
     <div className="min-h-screen bg-background">
-      <Navigation />
-      <HeroSection />
-      <FeaturesSection />
+      <Navigation locale={locale} onLocaleChange={setLocale} />
+      <HeroSection locale={locale} />
+      <ToolsSection locale={locale} />
       <PricingSection />
       <TestimonialsSection />
       <Footer />
