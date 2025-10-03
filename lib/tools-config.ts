@@ -1,5 +1,5 @@
 import { z } from "zod"
-import { MapPin, Mail } from "lucide-react"
+import { MapPin, Mail, Monitor } from "lucide-react"
 
 export const ToolSchema = z.object({
   id: z.string(),
@@ -19,6 +19,7 @@ export const ToolSchema = z.object({
     }),
   ),
   demoImage: z.string().optional(),
+  demoVideo: z.string().optional(),
   ctaText: z.object({
     en: z.string(),
     bn: z.string(),
@@ -30,6 +31,47 @@ export const ToolSchema = z.object({
 export type Tool = z.infer<typeof ToolSchema>
 
 export const toolsData: Tool[] = [
+  {
+    id: "user-agent-generator",
+    name: {
+      en: "User Agent Generator",
+      bn: "ইউজার এজেন্ট জেনারেটর",
+    },
+    description: {
+      en: "Generate realistic user agent strings for different browsers and devices instantly.",
+      bn: "বিভিন্ন ব্রাউজার এবং ডিভাইসের জন্য বাস্তবসম্মত ইউজার এজেন্ট স্ট্রিং তৈরি করুন।",
+    },
+    icon: Monitor,
+    features: [
+      {
+        en: "Generate user agents for Chrome, Firefox, Safari, Edge",
+        bn: "ক্রোম, ফায়ারফক্স, সাফারি, এজের জন্য ইউজার এজেন্ট তৈরি করুন",
+      },
+      {
+        en: "Support for mobile and desktop devices",
+        bn: "মোবাইল এবং ডেস্কটপ ডিভাইসের জন্য সাপোর্ট",
+      },
+      {
+        en: "Real-time generation with latest versions",
+        bn: "সর্বশেষ সংস্করণ সহ রিয়েল-টাইম জেনারেশন",
+      },
+      {
+        en: "Copy with one click",
+        bn: "এক ক্লিকে কপি করুন",
+      },
+      {
+        en: "Bulk generation support",
+        bn: "বাল্ক জেনারেশন সাপোর্ট",
+      },
+    ],
+    demoVideo: "https://www.youtube.com/embed/dQw4w9WgXcQ",
+    ctaText: {
+      en: "Try User Agent Generator",
+      bn: "ইউজার এজেন্ট জেনারেটর ব্যবহার করুন",
+    },
+    ctaLink: "/tool/user-agent-generator",
+    color: "from-green-500/20 to-emerald-500/20 border-green-500/30",
+  },
   {
     id: "address-generator",
     name: {
@@ -63,7 +105,7 @@ export const toolsData: Tool[] = [
         bn: "সাধারণ জিপ কোডের জন্য ফলব্যাক ডেটা",
       },
     ],
-    demoImage: "/address-generator-tool-interface.jpg",
+    demoVideo: "https://www.youtube.com/embed/dQw4w9WgXcQ",
     ctaText: {
       en: "Try Address Generator",
       bn: "ঠিকানা জেনারেটর ব্যবহার করুন",
@@ -104,7 +146,7 @@ export const toolsData: Tool[] = [
         bn: "এক ক্লিকে পৃথক ফিল্ড কপি করুন",
       },
     ],
-    demoImage: "/email-to-name-converter-ai-tool.jpg",
+    demoVideo: "https://www.youtube.com/embed/dQw4w9WgXcQ",
     ctaText: {
       en: "Try Email2Name",
       bn: "Email2Name ব্যবহার করুন",

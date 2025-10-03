@@ -2,40 +2,24 @@
 
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
-import { Sparkles, Menu, Globe, X } from "lucide-react"
+import { Sparkles, Menu, X } from "lucide-react"
 import { useState, useEffect } from "react"
 import { ThemeToggle } from "@/components/theme-toggle"
 
 interface NavigationProps {
-  locale: "en" | "bn"
-  onLocaleChange: (locale: "en" | "bn") => void
   activeSection?: string
 }
 
-export function Navigation({ locale, onLocaleChange, activeSection = "hero" }: NavigationProps) {
+export function Navigation({ activeSection = "hero" }: NavigationProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
 
-  const content = {
-    en: {
-      home: "Home",
-      tools: "Tools",
-      pricing: "Pricing",
-      testimonials: "Reviews",
-      signIn: "Sign In",
-      getStarted: "Get Started",
-    },
-    bn: {
-      home: "হোম",
-      tools: "টুল",
-      pricing: "প্রাইসিং",
-      testimonials: "রিভিউ",
-      signIn: "সাইন ইন",
-      getStarted: "শুরু করুন",
-    },
-  }
-
-  const t = content[locale]
+  const navItems = [
+    { id: "hero", label: "Home", href: "#hero" },
+    { id: "tools", label: "Tools", href: "#tools" },
+    { id: "pricing", label: "Pricing", href: "#pricing" },
+    { id: "testimonials", label: "Reviews", href: "#testimonials" },
+  ]
 
   // Detect scroll for navbar styling
   useEffect(() => {
@@ -46,13 +30,6 @@ export function Navigation({ locale, onLocaleChange, activeSection = "hero" }: N
     window.addEventListener("scroll", handleScroll)
     return () => window.removeEventListener("scroll", handleScroll)
   }, [])
-
-  const navItems = [
-    { id: "hero", label: t.home, href: "#hero" },
-    { id: "tools", label: t.tools, href: "#tools" },
-    { id: "pricing", label: t.pricing, href: "#pricing" },
-    { id: "testimonials", label: t.testimonials, href: "#testimonials" },
-  ]
 
   return (
     <nav
@@ -94,21 +71,11 @@ export function Navigation({ locale, onLocaleChange, activeSection = "hero" }: N
 
         {/* Right side controls */}
         <div className="flex items-center gap-2">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => onLocaleChange(locale === "en" ? "bn" : "en")}
-            className="h-9 w-9 hover:bg-purple-500/10 hover:text-purple-600 transition-all"
-            aria-label="Toggle language"
-          >
-            <Globe className="h-4 w-4" />
-          </Button>
-
           <ThemeToggle />
 
           <Link href="/login" className="hidden sm:block">
             <Button variant="ghost" size="sm" className="hover:bg-purple-500/10 hover:text-purple-600">
-              {t.signIn}
+              Sign In
             </Button>
           </Link>
           <Link href="/signup">
@@ -116,7 +83,7 @@ export function Navigation({ locale, onLocaleChange, activeSection = "hero" }: N
               size="sm" 
               className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 shadow-lg hover:shadow-purple-500/50 transition-all duration-300"
             >
-              {t.getStarted}
+              Get Started
             </Button>
           </Link>
           <Button
@@ -150,7 +117,7 @@ export function Navigation({ locale, onLocaleChange, activeSection = "hero" }: N
             ))}
             <Link href="/login" className="block sm:hidden">
               <Button variant="ghost" size="sm" className="w-full justify-start">
-                {t.signIn}
+                Sign In
               </Button>
             </Link>
           </div>

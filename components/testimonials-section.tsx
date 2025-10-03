@@ -37,7 +37,7 @@ export function TestimonialsSection() {
     <section 
       id="testimonials" 
       ref={sectionRef}
-      className="relative py-24 overflow-hidden"
+      className="relative py-12 overflow-hidden"
     >
       {/* Background Elements */}
       <div className="absolute inset-0 -z-10">
@@ -49,7 +49,7 @@ export function TestimonialsSection() {
       <div className="container relative z-10 mx-auto px-4">
         {/* Header */}
         <div 
-          className={`text-center space-y-4 mb-16 transition-all duration-1000 ${
+          className={`text-center space-y-3 mb-10 transition-all duration-1000 ${
             isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
           }`}
         >
@@ -60,7 +60,7 @@ export function TestimonialsSection() {
             </span>
           </div>
 
-          <h2 className="text-4xl md:text-6xl font-bold text-balance leading-tight">
+          <h2 className="text-3xl md:text-5xl font-bold text-balance leading-tight">
             Loved by{" "}
             <span className="bg-gradient-to-r from-orange-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
               developers worldwide
@@ -73,7 +73,7 @@ export function TestimonialsSection() {
         </div>
 
         {/* Testimonials Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl mx-auto mb-16">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl mx-auto mb-10">
           {testimonials.map((testimonial, index) => (
             <div
               key={index}

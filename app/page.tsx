@@ -25,7 +25,6 @@ const Footer = dynamic(() => import("@/components/footer").then((mod) => ({ defa
 })
 
 export default function HomePage() {
-  const [locale, setLocale] = useState<"en" | "bn">("en")
   const [activeSection, setActiveSection] = useState("hero")
 
   // Smooth scroll behavior
@@ -67,10 +66,10 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <Navigation locale={locale} onLocaleChange={setLocale} activeSection={activeSection} />
+      <Navigation activeSection={activeSection} />
       <main>
-        <HeroSection locale={locale} />
-        <ToolsSection locale={locale} />
+        <HeroSection />
+        <ToolsSection />
         <PricingSection />
         <TestimonialsSection />
       </main>

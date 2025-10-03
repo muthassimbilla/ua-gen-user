@@ -24,7 +24,7 @@ export function PricingSection() {
     <section 
       id="pricing" 
       ref={sectionRef}
-      className="relative py-24 overflow-hidden"
+      className="relative py-12 overflow-hidden"
     >
       {/* Background Elements */}
       <div className="absolute inset-0 -z-10">
@@ -37,7 +37,7 @@ export function PricingSection() {
       <div className="container relative z-10 mx-auto px-4">
         {/* Header */}
         <div 
-          className={`text-center space-y-6 mb-16 transition-all duration-1000 ${
+          className={`text-center space-y-4 mb-10 transition-all duration-1000 ${
             isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
           }`}
         >
@@ -48,7 +48,7 @@ export function PricingSection() {
             </span>
           </div>
 
-          <h2 className="text-4xl md:text-6xl font-bold text-balance leading-tight">
+          <h2 className="text-3xl md:text-5xl font-bold text-balance leading-tight">
             Simple,{" "}
             <span className="bg-gradient-to-r from-green-600 via-blue-600 to-purple-600 bg-clip-text text-transparent">
               transparent pricing
@@ -87,13 +87,13 @@ export function PricingSection() {
 
         {/* Custom Plan CTA */}
         <div 
-          className={`mt-16 text-center space-y-4 transition-all duration-1000 delay-400 ${
+          className={`mt-10 text-center space-y-3 transition-all duration-1000 delay-400 ${
             isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
           }`}
         >
-          <div className="max-w-2xl mx-auto p-8 rounded-2xl bg-gradient-to-br from-purple-500/10 via-blue-500/10 to-green-500/10 border border-purple-500/20 backdrop-blur-sm">
-            <p className="text-xl font-semibold mb-2">Need a custom plan for your organization?</p>
-            <p className="text-muted-foreground mb-6">
+          <div className="max-w-2xl mx-auto p-6 rounded-2xl bg-gradient-to-br from-purple-500/10 via-blue-500/10 to-green-500/10 border border-purple-500/20 backdrop-blur-sm">
+            <p className="text-lg font-semibold mb-2">Need a custom plan for your organization?</p>
+            <p className="text-sm text-muted-foreground mb-4">
               Contact our sales team for enterprise pricing and custom features
             </p>
             <Button
