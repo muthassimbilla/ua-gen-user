@@ -471,7 +471,7 @@ export default function AddressGeneratorPage() {
                         }`}
                       >
                         <MapPin className="h-5 w-5 text-orange-600" />
-                        <AlertDescription className="text-lg font-medium text-orange-900 dark:text-orange-100 text-center">
+                        <AlertDescription className="text-sm font-medium text-orange-900 dark:text-orange-100 text-center">
                           {currentAddress.fullAddress}
                         </AlertDescription>
                       </Alert>
