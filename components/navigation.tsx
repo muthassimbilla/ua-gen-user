@@ -35,53 +35,52 @@ export function Navigation({ activeSection = "hero" }: NavigationProps) {
     <nav
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
         scrolled
-          ? "bg-background/95 backdrop-blur-xl border-b shadow-lg"
-          : "bg-background/80 backdrop-blur-md border-b border-transparent"
+          ? "bg-background/98 backdrop-blur-2xl border-b-2 border-border/50 shadow-xl shadow-black/5"
+          : "bg-background/60 backdrop-blur-lg border-b-2 border-transparent"
       }`}
     >
-      <div className="container mx-auto flex h-16 items-center justify-between px-4 md:px-6">
-        <Link href="/" className="flex items-center gap-2 group">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-blue-600 to-emerald-600 shadow-lg group-hover:shadow-blue-500/50 transition-all duration-300 group-hover:scale-110">
-            <Sparkles className="h-6 w-6 text-white" />
+      <div className="container mx-auto flex h-20 items-center justify-between px-6 md:px-8">
+        <Link href="/" className="flex items-center gap-3 group">
+          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-blue-600 to-emerald-600 shadow-xl group-hover:shadow-blue-500/50 transition-all duration-300 group-hover:scale-110 group-hover:rotate-6">
+            <Sparkles className="h-6 w-6 text-white group-hover:animate-pulse" />
           </div>
-          <span className="font-bold text-xl bg-gradient-to-r from-blue-600 to-emerald-600 bg-clip-text text-transparent">
+          <span className="font-extrabold text-2xl bg-gradient-to-r from-blue-600 to-emerald-600 bg-clip-text text-transparent">
             UGen Pro
           </span>
         </Link>
 
         {/* Desktop Navigation */}
-        <div className="hidden md:flex items-center gap-1">
+        <div className="hidden md:flex items-center gap-2">
           {navItems.map((item) => (
             <a
               key={item.id}
               href={item.href}
-              className={`relative px-4 py-2 text-sm font-semibold transition-all duration-300 rounded-lg ${
+              className={`relative px-5 py-2.5 text-sm font-bold transition-all duration-300 rounded-xl ${
                 activeSection === item.id
-                  ? "text-blue-600 dark:text-blue-400"
-                  : "text-muted-foreground hover:text-foreground"
+                  ? "text-blue-600 dark:text-blue-400 bg-blue-500/10"
+                  : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
               }`}
             >
               {item.label}
               {activeSection === item.id && (
-                <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-1.5 h-1.5 bg-blue-600 dark:bg-blue-400 rounded-full" />
+                <span className="absolute bottom-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 bg-blue-600 dark:bg-blue-400 rounded-full" />
               )}
             </a>
           ))}
         </div>
 
         {/* Right side controls */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
           <ThemeToggle />
 
           <Link href="/login" className="hidden sm:block">
-            <Button variant="ghost" size="sm" className="hover:bg-blue-500/10 hover:text-blue-600 font-semibold">
+            <Button variant="ghost" className="hover:bg-blue-500/10 hover:text-blue-600 font-bold px-5 py-2 rounded-xl text-sm">
               Sign In
             </Button>
           </Link>
           <Link href="/signup">
             <Button
-              size="sm"
-              className="bg-gradient-to-r from-blue-600 to-emerald-600 hover:from-blue-700 hover:to-emerald-700 shadow-lg hover:shadow-blue-500/50 transition-all duration-300 font-semibold"
+              className="bg-gradient-to-r from-blue-600 to-emerald-600 hover:from-blue-700 hover:to-emerald-700 shadow-xl hover:shadow-blue-500/50 transition-all duration-300 font-bold px-6 py-2.5 rounded-xl text-sm hover:scale-105"
             >
               Get Started
             </Button>
@@ -99,16 +98,16 @@ export function Navigation({ activeSection = "hero" }: NavigationProps) {
 
       {/* Mobile Menu */}
       {mobileMenuOpen && (
-        <div className="md:hidden border-t bg-background/98 backdrop-blur-xl animate-in slide-in-from-top-2 duration-300">
-          <div className="container mx-auto px-4 py-4 space-y-1">
+        <div className="md:hidden border-t-2 border-border/50 bg-background/98 backdrop-blur-2xl animate-in slide-in-from-top-2 duration-300 shadow-xl">
+          <div className="container mx-auto px-6 py-6 space-y-2">
             {navItems.map((item) => (
               <a
                 key={item.id}
                 href={item.href}
-                className={`block px-4 py-3 rounded-lg text-sm font-semibold transition-all ${
+                className={`block px-5 py-3.5 rounded-xl text-sm font-bold transition-all ${
                   activeSection === item.id
                     ? "bg-blue-500/10 text-blue-600 dark:text-blue-400"
-                    : "text-muted-foreground hover:bg-muted"
+                    : "text-muted-foreground hover:bg-muted/80"
                 }`}
                 onClick={() => setMobileMenuOpen(false)}
               >
@@ -116,7 +115,7 @@ export function Navigation({ activeSection = "hero" }: NavigationProps) {
               </a>
             ))}
             <Link href="/login" className="block sm:hidden">
-              <Button variant="ghost" size="sm" className="w-full justify-start">
+              <Button variant="ghost" className="w-full justify-start font-bold px-5 py-3.5 rounded-xl">
                 Sign In
               </Button>
             </Link>
