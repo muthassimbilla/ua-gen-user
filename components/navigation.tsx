@@ -33,18 +33,18 @@ export function Navigation({ activeSection = "hero" }: NavigationProps) {
 
   return (
     <nav
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
         scrolled
-          ? "bg-background/98 backdrop-blur-2xl border-b-2 border-border/50 shadow-xl shadow-black/5"
-          : "bg-background/60 backdrop-blur-lg border-b-2 border-transparent"
+          ? "bg-background/95 backdrop-blur-2xl border-b border-border/40 shadow-xl shadow-black/5"
+          : "bg-background/40 backdrop-blur-md border-b border-transparent"
       }`}
     >
       <div className="container mx-auto flex h-20 items-center justify-between px-6 md:px-8">
         <Link href="/" className="flex items-center gap-3 group">
-          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-blue-600 to-emerald-600 shadow-xl group-hover:shadow-blue-500/50 transition-all duration-300 group-hover:scale-110 group-hover:rotate-6">
+          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-600 to-emerald-600 shadow-lg group-hover:shadow-blue-500/50 transition-all duration-300 group-hover:scale-110 group-hover:rotate-3">
             <Sparkles className="h-6 w-6 text-white group-hover:animate-pulse" />
           </div>
-          <span className="font-extrabold text-2xl bg-gradient-to-r from-blue-600 to-emerald-600 bg-clip-text text-transparent">
+          <span className="font-extrabold text-2xl bg-gradient-to-r from-blue-600 via-emerald-600 to-cyan-600 bg-clip-text text-transparent">
             UGen Pro
           </span>
         </Link>
@@ -55,15 +55,15 @@ export function Navigation({ activeSection = "hero" }: NavigationProps) {
             <a
               key={item.id}
               href={item.href}
-              className={`relative px-5 py-2.5 text-sm font-bold transition-all duration-300 rounded-xl ${
+              className={`relative px-6 py-2.5 text-sm font-bold transition-all duration-300 rounded-xl ${
                 activeSection === item.id
-                  ? "text-blue-600 dark:text-blue-400 bg-blue-500/10"
+                  ? "text-blue-600 dark:text-blue-400 bg-gradient-to-r from-blue-500/10 to-emerald-500/10"
                   : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
               }`}
             >
               {item.label}
               {activeSection === item.id && (
-                <span className="absolute bottom-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 bg-blue-600 dark:bg-blue-400 rounded-full" />
+                <span className="absolute bottom-1.5 left-1/2 -translate-x-1/2 w-8 h-0.5 bg-gradient-to-r from-blue-600 to-emerald-600 rounded-full" />
               )}
             </a>
           ))}
@@ -74,13 +74,13 @@ export function Navigation({ activeSection = "hero" }: NavigationProps) {
           <ThemeToggle />
 
           <Link href="/login" className="hidden sm:block">
-            <Button variant="ghost" className="hover:bg-blue-500/10 hover:text-blue-600 font-bold px-5 py-2 rounded-xl text-sm">
+            <Button variant="ghost" className="hover:bg-blue-500/10 hover:text-blue-600 font-bold px-6 py-2.5 rounded-xl text-sm transition-all duration-300">
               Sign In
             </Button>
           </Link>
           <Link href="/signup">
             <Button
-              className="bg-gradient-to-r from-blue-600 to-emerald-600 hover:from-blue-700 hover:to-emerald-700 shadow-xl hover:shadow-blue-500/50 transition-all duration-300 font-bold px-6 py-2.5 rounded-xl text-sm hover:scale-105"
+              className="bg-gradient-to-r from-blue-600 via-emerald-600 to-cyan-600 hover:from-blue-700 hover:via-emerald-700 hover:to-cyan-700 shadow-lg hover:shadow-blue-500/50 transition-all duration-300 font-bold px-7 py-2.5 rounded-xl text-sm hover:scale-105"
             >
               Get Started
             </Button>
