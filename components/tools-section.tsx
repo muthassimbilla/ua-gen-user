@@ -6,6 +6,7 @@ import { useState, lazy, Suspense } from "react"
 import type { Tool } from "@/lib/tools-config"
 import { Wrench, Sparkles } from "lucide-react"
 import { useScrollAnimation } from "@/hooks/use-scroll-animation"
+import Image from "next/image"
 
 const LazyToolModal = lazy(() => import("@/components/tool-modal").then((mod) => ({ default: mod.ToolModal })))
 
@@ -51,8 +52,15 @@ export function ToolsSection() {
             isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
           }`}
         >
-          <div className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-blue-500/10 via-purple-500/10 to-pink-500/10 border border-blue-500/20 px-5 py-2.5 backdrop-blur-sm shadow-lg">
-            <Wrench className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+          <div className="inline-flex items-center gap-3 rounded-full bg-gradient-to-r from-blue-500/10 via-purple-500/10 to-pink-500/10 border border-blue-500/20 px-5 py-2.5 backdrop-blur-sm shadow-lg">
+            <div className="relative h-4 w-4">
+              <Image
+                src="/ugenpro-logo.svg"
+                alt="UGen Pro Logo"
+                fill
+                className="object-contain"
+              />
+            </div>
             <span className="text-sm font-semibold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
               {content.badge}
             </span>

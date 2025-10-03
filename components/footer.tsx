@@ -4,6 +4,7 @@ import Link from "next/link"
 import { Sparkles, Twitter, Github, Linkedin, Mail, Heart, ArrowUp } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useEffect, useState } from "react"
+import Image from "next/image"
 
 export function Footer() {
   const [showScrollTop, setShowScrollTop] = useState(false)
@@ -33,9 +34,14 @@ export function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-5 gap-8 mb-8">
           {/* Brand section */}
           <div className="md:col-span-2">
-            <Link href="/" className="flex items-center gap-2 mb-4 group">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-purple-600 to-blue-600 shadow-lg group-hover:shadow-purple-500/50 transition-all">
-                <Sparkles className="h-5 w-5 text-white" />
+            <Link href="/" className="flex items-center gap-3 mb-4 group">
+              <div className="relative h-10 w-10 rounded-xl overflow-hidden shadow-lg group-hover:shadow-purple-500/50 transition-all">
+                <Image
+                  src="/ugenpro-logo.svg"
+                  alt="UGen Pro Logo"
+                  fill
+                  className="object-contain"
+                />
               </div>
               <span className="font-bold text-2xl bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
                 UGen Pro

@@ -4,18 +4,19 @@ import { Button } from "@/components/ui/button"
 import { ArrowRight, Sparkles, Zap, Shield, Rocket } from "lucide-react"
 import Link from "next/link"
 import { useScrollAnimation } from "@/hooks/use-scroll-animation"
+import Image from "next/image"
 
 export function HeroSection() {
   const { ref: heroRef, isVisible } = useScrollAnimation({ threshold: 0.2 })
 
   const content = {
     badge: "🚀 Powerful Tools for Developers",
-    title: "The complete toolkit for",
-    titleHighlight: "modern development",
-    subtitle: "Build faster. Ship smarter.",
+    title: "Premium Tools For",
+    titleHighlight: "Self Sign-Up",
+    subtitle: "Work smarter. Earn bigger. Grow faster.",
     description:
-      "Advanced generator tools designed for developers and professionals. Create addresses, transform emails, and more with our AI-powered platform.",
-    ctaPrimary: "Get Started Free",
+      "AI-powered automation tools designed to generate user agents, addresses, and email names for CPA signup.",
+    ctaPrimary: "Get Started",
     ctaSecondary: "View Tools",
     feature1: "Lightning Fast",
     feature2: "Secure & Private",
@@ -48,11 +49,18 @@ export function HeroSection() {
             isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
           }`}
         >
-          {/* Badge */}
+          {/* Badge with Logo */}
           <div 
-            className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-purple-500/10 via-blue-500/10 to-pink-500/10 border border-purple-500/20 px-5 py-2.5 backdrop-blur-sm shadow-lg hover:shadow-purple-500/20 transition-all duration-300 cursor-pointer hover:scale-105"
+            className="inline-flex items-center gap-3 rounded-full bg-gradient-to-r from-purple-500/10 via-blue-500/10 to-pink-500/10 border border-purple-500/20 px-5 py-2.5 backdrop-blur-sm shadow-lg hover:shadow-purple-500/20 transition-all duration-300 cursor-pointer hover:scale-105"
           >
-            <Sparkles className="h-4 w-4 text-purple-600 dark:text-purple-400 animate-pulse" />
+            <div className="relative h-5 w-5">
+              <Image
+                src="/ugenpro-logo.svg"
+                alt="UGen Pro Logo"
+                fill
+                className="object-contain"
+              />
+            </div>
             <span className="text-sm font-semibold bg-gradient-to-r from-purple-600 via-blue-600 to-pink-600 bg-clip-text text-transparent">
               {content.badge}
             </span>

@@ -5,6 +5,7 @@ import Link from "next/link"
 import { Sparkles, Menu, X } from "lucide-react"
 import { useState, useEffect } from "react"
 import { ThemeToggle } from "@/components/theme-toggle"
+import Image from "next/image"
 
 interface NavigationProps {
   activeSection?: string
@@ -48,9 +49,15 @@ export function Navigation({ activeSection = "hero" }: NavigationProps) {
       }`}
     >
       <div className="container mx-auto flex h-16 items-center justify-between px-4 md:px-6">
-        <Link href="/" className="flex items-center gap-2 group">
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-purple-600 to-blue-600 shadow-lg group-hover:shadow-purple-500/50 transition-all duration-300 group-hover:scale-110">
-            <Sparkles className="h-5 w-5 text-white" />
+        <Link href="/" className="flex items-center gap-3 group">
+          <div className="relative h-9 w-9 rounded-xl overflow-hidden shadow-lg group-hover:shadow-purple-500/50 transition-all duration-300 group-hover:scale-110">
+            <Image
+              src="/ugenpro-logo.svg"
+              alt="UGen Pro Logo"
+              fill
+              className="object-contain"
+              priority
+            />
           </div>
           <span className="font-bold text-xl bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
             UGen Pro

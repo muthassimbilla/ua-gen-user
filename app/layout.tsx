@@ -24,10 +24,44 @@ export const metadata: Metadata = {
   creator: "UGen Pro",
   publisher: "UGen Pro",
   generator: "v0.app",
+  icons: {
+    icon: "/favicon.svg",
+    shortcut: "/favicon.svg",
+    apple: "/favicon.svg",
+  },
   openGraph: {
     title: "UGen Pro - Advanced Generator Tools Platform",
-    description: "The complete platform for advanced generator tools",
+    description: "The complete platform for advanced generator tools. Create user agents, addresses, and more with our powerful and secure tools.",
     type: "website",
+    url: "https://ugenpro.com",
+    siteName: "UGen Pro",
+    images: [
+      {
+        url: "/ugenpro-social-sharing.png",
+        width: 1200,
+        height: 630,
+        alt: "UGen Pro - Advanced Generator Tools Platform",
+      },
+    ],
+    locale: "en_US",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "UGen Pro - Advanced Generator Tools Platform",
+    description: "The complete platform for advanced generator tools. Create user agents, addresses, and more with our powerful and secure tools.",
+    images: ["/ugenpro-social-sharing.png"],
+    creator: "@ugenpro",
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
   },
 }
 

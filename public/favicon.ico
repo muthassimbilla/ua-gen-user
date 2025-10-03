@@ -1,0 +1,55 @@
+<svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background Circle with Gradient -->
+  <defs>
+    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#8B5CF6;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#3B82F6;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#EC4899;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="textGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FFFFFF;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#F3F4F6;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Background Circle -->
+  <circle cx="32" cy="32" r="30" fill="url(#bgGradient)" stroke="#FFFFFF" stroke-width="2"/>
+  
+  <!-- Main "U" Letter -->
+  <path d="M20 18 L20 38 Q20 46 28 46 L36 46 Q44 46 44 38 L44 18" 
+        stroke="url(#textGradient)" 
+        stroke-width="3" 
+        stroke-linecap="round" 
+        stroke-linejoin="round" 
+        fill="none"/>
+  
+  <!-- Generator Symbol (Gear) -->
+  <g transform="translate(32, 32)">
+    <!-- Outer Gear -->
+    <circle cx="0" cy="0" r="8" fill="url(#textGradient)" opacity="0.9"/>
+    <circle cx="0" cy="0" r="5" fill="url(#bgGradient)"/>
+    
+    <!-- Gear Teeth -->
+    <rect x="-1" y="-12" width="2" height="4" fill="url(#textGradient)" opacity="0.9"/>
+    <rect x="-1" y="8" width="2" height="4" fill="url(#textGradient)" opacity="0.9"/>
+    <rect x="-12" y="-1" width="4" height="2" fill="url(#textGradient)" opacity="0.9"/>
+    <rect x="8" y="-1" width="4" height="2" fill="url(#textGradient)" opacity="0.9"/>
+    
+    <!-- Diagonal Teeth -->
+    <rect x="-8.5" y="-8.5" width="2" height="4" fill="url(#textGradient)" opacity="0.9" transform="rotate(45)"/>
+    <rect x="6.5" y="6.5" width="2" height="4" fill="url(#textGradient)" opacity="0.9" transform="rotate(45)"/>
+    <rect x="6.5" y="-8.5" width="2" height="4" fill="url(#textGradient)" opacity="0.9" transform="rotate(-45)"/>
+    <rect x="-8.5" y="6.5" width="2" height="4" fill="url(#textGradient)" opacity="0.9" transform="rotate(-45)"/>
+  </g>
+  
+  <!-- Pro Badge -->
+  <rect x="38" y="12" width="14" height="8" rx="4" fill="#10B981" stroke="#FFFFFF" stroke-width="1"/>
+  <text x="45" y="18" text-anchor="middle" fill="#FFFFFF" font-family="Arial, sans-serif" font-size="6" font-weight="bold">PRO</text>
+  
+  <!-- Sparkle Effects -->
+  <g opacity="0.8">
+    <path d="M12 12 L13 15 L16 16 L13 17 L12 20 L11 17 L8 16 L11 15 Z" fill="#FFFFFF"/>
+    <path d="M48 20 L49 22 L51 23 L49 24 L48 26 L47 24 L45 23 L47 22 Z" fill="#FFFFFF"/>
+    <path d="M52 40 L53 42 L55 43 L53 44 L52 46 L51 44 L49 43 L51 42 Z" fill="#FFFFFF"/>
+  </g>
+</svg>

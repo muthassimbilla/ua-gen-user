@@ -2,6 +2,7 @@
 
 import { Star, Quote, TrendingUp, Users, Award } from "lucide-react"
 import { useScrollAnimation } from "@/hooks/use-scroll-animation"
+import Image from "next/image"
 
 const testimonials = [
   {
@@ -53,8 +54,15 @@ export function TestimonialsSection() {
             isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
           }`}
         >
-          <div className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-orange-500/10 via-purple-500/10 to-pink-500/10 border border-orange-500/20 px-5 py-2.5 backdrop-blur-sm shadow-lg">
-            <Star className="h-4 w-4 text-orange-600 dark:text-orange-400 fill-orange-600 dark:fill-orange-400" />
+          <div className="inline-flex items-center gap-3 rounded-full bg-gradient-to-r from-orange-500/10 via-purple-500/10 to-pink-500/10 border border-orange-500/20 px-5 py-2.5 backdrop-blur-sm shadow-lg">
+            <div className="relative h-4 w-4">
+              <Image
+                src="/ugenpro-logo.svg"
+                alt="UGen Pro Logo"
+                fill
+                className="object-contain"
+              />
+            </div>
             <span className="text-sm font-semibold bg-gradient-to-r from-orange-600 to-purple-600 bg-clip-text text-transparent">
               Testimonials
             </span>

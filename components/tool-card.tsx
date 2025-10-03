@@ -99,7 +99,7 @@ export function ToolCard({ tool, onClick }: ToolCardProps) {
             isHovered ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-4",
           )}
         >
-          <span>Try it now</span>
+          <span>Use it now</span>
           <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
         </div>
       </div>

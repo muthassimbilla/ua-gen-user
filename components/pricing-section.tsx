@@ -5,6 +5,7 @@ import { Sparkles, ArrowRight, Check } from "lucide-react"
 import { PricingCards } from "@/components/pricing-cards"
 import { useRouter } from "next/navigation"
 import { useScrollAnimation } from "@/hooks/use-scroll-animation"
+import Image from "next/image"
 
 export function PricingSection() {
   const router = useRouter()
@@ -41,8 +42,15 @@ export function PricingSection() {
             isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
           }`}
         >
-          <div className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-green-500/10 via-blue-500/10 to-purple-500/10 border border-green-500/20 px-5 py-2.5 backdrop-blur-sm shadow-lg">
-            <Sparkles className="h-4 w-4 text-green-600 dark:text-green-400 animate-pulse" />
+          <div className="inline-flex items-center gap-3 rounded-full bg-gradient-to-r from-green-500/10 via-blue-500/10 to-purple-500/10 border border-green-500/20 px-5 py-2.5 backdrop-blur-sm shadow-lg">
+            <div className="relative h-4 w-4">
+              <Image
+                src="/ugenpro-logo.svg"
+                alt="UGen Pro Logo"
+                fill
+                className="object-contain"
+              />
+            </div>
             <span className="text-sm font-semibold bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">
               Flexible Pricing
             </span>

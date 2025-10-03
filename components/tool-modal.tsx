@@ -6,7 +6,7 @@ import type { Tool } from "@/lib/tools-config"
 import { X, ArrowRight, Check } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 
 interface ToolModalProps {
   tool: Tool | null
@@ -15,6 +15,7 @@ interface ToolModalProps {
 }
 
 export function ToolModal({ tool, isOpen, onClose }: ToolModalProps) {
+  const [videoError, setVideoError] = useState(false)
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === "Escape" && isOpen) {
@@ -38,6 +39,10 @@ export function ToolModal({ tool, isOpen, onClose }: ToolModalProps) {
         tool_id: tool.id,
         tool_name: tool.name.en,
       })
+    }
+    // Reset video error state when modal opens
+    if (isOpen) {
+      setVideoError(false)
     }
   }, [isOpen, tool])
 
@@ -65,28 +70,66 @@ export function ToolModal({ tool, isOpen, onClose }: ToolModalProps) {
         </DialogHeader>
 
         <div className="space-y-6 pt-4">
-          {tool.demoVideo && (
+          {tool.demoVideo && !videoError && (
             <div className="relative w-full h-64 rounded-lg overflow-hidden border bg-muted">
               <iframe
                 src={tool.demoVideo}
                 title={tool.name.en}
                 className="w-full h-full"
                 frameBorder="0"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                 allowFullScreen
+                referrerPolicy="strict-origin-when-cross-origin"
+                loading="lazy"
+                onError={() => {
+                  console.log("Video failed to load, showing fallback");
+                  setVideoError(true);
+                }}
               />
+              {/* Always visible YouTube link */}
+              <div className="absolute bottom-2 right-2">
+                <a 
+                  href={tool.demoVideo.replace('/embed/', '/watch?v=')} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1 bg-red-600 hover:bg-red-700 text-white text-xs px-2 py-1 rounded transition-colors"
+                >
+                  <svg className="w-3 h-3" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+                  </svg>
+                  YouTube
+                </a>
+              </div>
             </div>
           )}
-          {tool.demoImage && !tool.demoVideo && (
+          {(videoError || !tool.demoVideo) && tool.demoImage && (
             <div className="relative w-full h-64 rounded-lg overflow-hidden border bg-muted">
               <Image
-                src={tool.demoImage || "/placeholder.svg"}
+                src={tool.demoImage}
                 alt={tool.name.en}
                 fill
                 className="object-cover"
                 loading="lazy"
                 sizes="(max-width: 768px) 100vw, 800px"
               />
+              {videoError && (
+                <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+                  <div className="text-center text-white">
+                    <p className="text-sm mb-2">Video not available</p>
+                    <a 
+                      href={tool.demoVideo?.replace('/embed/', '/watch?v=')} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1 bg-red-600 hover:bg-red-700 text-white text-xs px-3 py-1 rounded transition-colors"
+                    >
+                      <svg className="w-3 h-3" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+                      </svg>
+                      Watch on YouTube
+                    </a>
+                  </div>
+                </div>
+              )}
             </div>
           )}
 
