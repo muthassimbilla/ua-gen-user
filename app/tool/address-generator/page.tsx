@@ -302,7 +302,7 @@ export default function AddressGeneratorPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
       <div className="container mx-auto px-4 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8 min-h-[600px]">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
           {/* Left Side - Input Section */}
           <div className="space-y-6">
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
@@ -316,15 +316,15 @@ export default function AddressGeneratorPage() {
               </TabsList>
 
               <TabsContent value="ip" className="space-y-0">
-                <Card className="h-full">
-                  <CardHeader className="pb-4">
+                <Card className="h-[450px] flex flex-col">
+                  <CardHeader className="pb-4 flex-shrink-0">
                     <CardTitle className="flex items-center gap-2 text-lg">
                       <MapPin className="h-5 w-5 text-blue-500" />
                       Generate from IP Address
                     </CardTitle>
                     <CardDescription>Enter an IP address and get real addresses from that area</CardDescription>
                   </CardHeader>
-                  <CardContent className="space-y-6">
+                  <CardContent className="space-y-6 flex-1 flex flex-col justify-center">
                     <div className="space-y-3">
                       <Label htmlFor="ip-input" className="text-sm font-medium">
                         IP Address
@@ -367,15 +367,15 @@ export default function AddressGeneratorPage() {
               </TabsContent>
 
               <TabsContent value="zip" className="space-y-0">
-                <Card className="h-full">
-                  <CardHeader className="pb-4">
+                <Card className="h-[450px] flex flex-col">
+                  <CardHeader className="pb-4 flex-shrink-0">
                     <CardTitle className="flex items-center gap-2 text-lg">
                       <MapPin className="h-5 w-5 text-green-500" />
                       Generate from ZIP Code
                     </CardTitle>
                     <CardDescription>Enter a ZIP code and get random addresses from that area</CardDescription>
                   </CardHeader>
-                  <CardContent className="space-y-6">
+                  <CardContent className="space-y-6 flex-1 flex flex-col justify-center">
                     <div className="space-y-3">
                       <Label htmlFor="zip-input" className="text-sm font-medium">
                         ZIP Code
@@ -422,7 +422,7 @@ export default function AddressGeneratorPage() {
           {/* Right Side - Output Section */}
           <div className="space-y-6">
             {addressData.addresses.length > 0 && currentAddress ? (
-              <Card className="h-full flex flex-col">
+              <Card className="h-[450px] flex flex-col">
                 <CardHeader className="pb-4 flex-shrink-0">
                   <div className="flex items-center justify-between">
                     <div>
@@ -674,7 +674,7 @@ export default function AddressGeneratorPage() {
                 </CardContent>
               </Card>
             ) : (
-              <Card className="h-full flex flex-col">
+              <Card className="h-[450px] flex flex-col">
                 <CardContent className="flex flex-col items-center justify-center flex-1 text-center py-12">
                   <div className="w-24 h-24 bg-gradient-to-br from-blue-100 to-purple-100 dark:from-blue-900/30 dark:to-purple-900/30 rounded-full flex items-center justify-center mb-6">
                     <MapPin className="h-12 w-12 text-blue-500" />
