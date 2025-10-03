@@ -9,7 +9,7 @@ const testimonials = [
       "UGen Pro has completely transformed how our team works. The tools are incredibly intuitive and powerful. We've seen a 40% increase in productivity!",
     author: "Sarah Johnson",
     role: "CEO at TechStart",
-    color: "bg-gradient-to-br from-purple-500 to-purple-600",
+    color: "bg-gradient-to-br from-blue-500 to-blue-600",
     rating: 5,
   },
   {
@@ -17,7 +17,7 @@ const testimonials = [
       "The best generator tools we've ever used. The AI-powered features are exactly what we needed. Saves us hours every day.",
     author: "Michael Chen",
     role: "Product Manager at InnovateCo",
-    color: "bg-gradient-to-br from-blue-500 to-blue-600",
+    color: "bg-gradient-to-br from-emerald-500 to-emerald-600",
     rating: 5,
   },
   {
@@ -25,7 +25,7 @@ const testimonials = [
       "We tried dozens of tools before finding UGen Pro. It's the perfect balance of simplicity and power. Highly recommended!",
     author: "Emily Rodriguez",
     role: "CTO at DataFlow",
-    color: "bg-gradient-to-br from-orange-500 to-orange-600",
+    color: "bg-gradient-to-br from-cyan-500 to-cyan-600",
     rating: 5,
   },
 ]
@@ -41,9 +41,9 @@ export function TestimonialsSection() {
     >
       {/* Background Elements */}
       <div className="absolute inset-0 -z-10">
-        <div className="absolute inset-0 bg-gradient-to-b from-background via-orange-500/5 to-background" />
-        <div className="absolute top-1/3 -left-32 w-96 h-96 bg-orange-500/10 rounded-full blur-3xl" />
-        <div className="absolute bottom-1/3 -right-32 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl" />
+        <div className="absolute inset-0 bg-gradient-to-b from-background via-cyan-500/5 to-background" />
+        <div className="absolute top-1/3 -left-32 w-[500px] h-[500px] bg-cyan-500/10 rounded-full blur-3xl animate-pulse" />
+        <div className="absolute bottom-1/3 -right-32 w-[500px] h-[500px] bg-blue-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: "1.5s" }} />
       </div>
 
       <div className="container relative z-10 mx-auto px-4">
@@ -53,21 +53,21 @@ export function TestimonialsSection() {
             isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
           }`}
         >
-          <div className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-orange-500/10 via-purple-500/10 to-pink-500/10 border border-orange-500/20 px-5 py-2.5 backdrop-blur-sm shadow-lg">
-            <Star className="h-4 w-4 text-orange-600 dark:text-orange-400 fill-orange-600 dark:fill-orange-400" />
-            <span className="text-sm font-semibold bg-gradient-to-r from-orange-600 to-purple-600 bg-clip-text text-transparent">
+          <div className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-cyan-500/10 via-blue-500/10 to-emerald-500/10 border border-cyan-500/20 px-6 py-3 backdrop-blur-sm shadow-lg">
+            <Star className="h-5 w-5 text-cyan-600 dark:text-cyan-400 fill-cyan-600 dark:fill-cyan-400" />
+            <span className="text-sm font-semibold bg-gradient-to-r from-cyan-600 to-blue-600 bg-clip-text text-transparent">
               Testimonials
             </span>
           </div>
 
-          <h2 className="text-3xl md:text-5xl font-bold text-balance leading-tight">
+          <h2 className="text-4xl md:text-6xl font-extrabold text-balance leading-tight">
             Loved by{" "}
-            <span className="bg-gradient-to-r from-orange-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-cyan-600 via-blue-600 to-emerald-600 bg-clip-text text-transparent">
               developers worldwide
             </span>
           </h2>
 
-          <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto text-pretty">
+          <p className="text-xl text-muted-foreground/80 max-w-3xl mx-auto text-pretty leading-relaxed">
             Join thousands of developers who trust UGen Pro to boost their productivity
           </p>
         </div>
@@ -84,27 +84,27 @@ export function TestimonialsSection() {
               }`}
               style={{ transitionDelay: `${index * 150}ms` }}
             >
-              <div className="relative h-full rounded-2xl border border-border/50 bg-card/50 backdrop-blur-sm p-6 hover:border-orange-500/30 hover:shadow-xl hover:shadow-orange-500/10 transition-all duration-300 hover:-translate-y-1">
+              <div className="relative h-full rounded-2xl border border-border/50 bg-card/50 backdrop-blur-sm p-8 hover:border-cyan-500/30 hover:shadow-2xl hover:shadow-cyan-500/10 transition-all duration-300 hover:-translate-y-2">
                 {/* Quote Icon */}
                 <div className="absolute -top-3 -left-3">
-                  <div className="p-2 rounded-full bg-gradient-to-br from-orange-500/20 to-purple-500/20 border border-orange-500/30 backdrop-blur-sm">
-                    <Quote className="h-4 w-4 text-orange-600 dark:text-orange-400" />
+                  <div className="p-3 rounded-full bg-gradient-to-br from-cyan-500/20 to-blue-500/20 border border-cyan-500/30 backdrop-blur-sm">
+                    <Quote className="h-5 w-5 text-cyan-600 dark:text-cyan-400" />
                   </div>
                 </div>
 
                 {/* Stars */}
-                <div className="flex gap-1 mb-4">
+                <div className="flex gap-1 mb-5">
                   {[...Array(testimonial.rating)].map((_, i) => (
-                    <Star 
-                      key={i} 
-                      className="h-4 w-4 fill-orange-500 text-orange-500 animate-pulse" 
+                    <Star
+                      key={i}
+                      className="h-5 w-5 fill-cyan-500 text-cyan-500 animate-pulse"
                       style={{ animationDelay: `${i * 100}ms` }}
                     />
                   ))}
                 </div>
 
                 {/* Quote */}
-                <p className="text-sm md:text-base leading-relaxed mb-6 text-foreground/90">
+                <p className="text-base md:text-lg leading-relaxed mb-6 text-foreground/90">
                   "{testimonial.quote}"
                 </p>
 
@@ -126,39 +126,39 @@ export function TestimonialsSection() {
         </div>
 
         {/* Stats */}
-        <div 
-          className={`grid grid-cols-1 sm:grid-cols-3 gap-8 max-w-4xl mx-auto transition-all duration-1000 delay-400 ${
+        <div
+          className={`grid grid-cols-1 sm:grid-cols-3 gap-8 max-w-5xl mx-auto transition-all duration-1000 delay-400 ${
             isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
           }`}
         >
-          <div className="text-center p-6 rounded-2xl bg-gradient-to-br from-orange-500/10 to-orange-500/5 border border-orange-500/20 backdrop-blur-sm hover:scale-105 transition-transform">
-            <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-orange-500/10 mb-3">
-              <Award className="h-6 w-6 text-orange-600 dark:text-orange-400" />
+          <div className="text-center p-8 rounded-2xl bg-gradient-to-br from-cyan-500/10 to-cyan-500/5 border border-cyan-500/20 backdrop-blur-sm hover:scale-105 transition-transform">
+            <div className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-cyan-500/10 mb-4">
+              <Award className="h-7 w-7 text-cyan-600 dark:text-cyan-400" />
             </div>
-            <div className="text-3xl font-bold bg-gradient-to-r from-orange-600 to-orange-500 bg-clip-text text-transparent mb-1">
+            <div className="text-4xl font-extrabold bg-gradient-to-r from-cyan-600 to-cyan-500 bg-clip-text text-transparent mb-2">
               4.9/5
             </div>
-            <div className="text-sm text-muted-foreground">Average Rating</div>
+            <div className="text-sm text-muted-foreground/80 font-medium">Average Rating</div>
           </div>
 
-          <div className="text-center p-6 rounded-2xl bg-gradient-to-br from-purple-500/10 to-purple-500/5 border border-purple-500/20 backdrop-blur-sm hover:scale-105 transition-transform">
-            <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-purple-500/10 mb-3">
-              <Users className="h-6 w-6 text-purple-600 dark:text-purple-400" />
+          <div className="text-center p-8 rounded-2xl bg-gradient-to-br from-blue-500/10 to-blue-500/5 border border-blue-500/20 backdrop-blur-sm hover:scale-105 transition-transform">
+            <div className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-blue-500/10 mb-4">
+              <Users className="h-7 w-7 text-blue-600 dark:text-blue-400" />
             </div>
-            <div className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-purple-500 bg-clip-text text-transparent mb-1">
+            <div className="text-4xl font-extrabold bg-gradient-to-r from-blue-600 to-blue-500 bg-clip-text text-transparent mb-2">
               10,000+
             </div>
-            <div className="text-sm text-muted-foreground">Happy Customers</div>
+            <div className="text-sm text-muted-foreground/80 font-medium">Happy Customers</div>
           </div>
 
-          <div className="text-center p-6 rounded-2xl bg-gradient-to-br from-green-500/10 to-green-500/5 border border-green-500/20 backdrop-blur-sm hover:scale-105 transition-transform">
-            <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-green-500/10 mb-3">
-              <TrendingUp className="h-6 w-6 text-green-600 dark:text-green-400" />
+          <div className="text-center p-8 rounded-2xl bg-gradient-to-br from-emerald-500/10 to-emerald-500/5 border border-emerald-500/20 backdrop-blur-sm hover:scale-105 transition-transform">
+            <div className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-emerald-500/10 mb-4">
+              <TrendingUp className="h-7 w-7 text-emerald-600 dark:text-emerald-400" />
             </div>
-            <div className="text-3xl font-bold bg-gradient-to-r from-green-600 to-green-500 bg-clip-text text-transparent mb-1">
+            <div className="text-4xl font-extrabold bg-gradient-to-r from-emerald-600 to-emerald-500 bg-clip-text text-transparent mb-2">
               98%
             </div>
-            <div className="text-sm text-muted-foreground">Satisfaction Rate</div>
+            <div className="text-sm text-muted-foreground/80 font-medium">Satisfaction Rate</div>
           </div>
         </div>
       </div>

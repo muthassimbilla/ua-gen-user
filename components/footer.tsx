@@ -25,8 +25,8 @@ export function Footer() {
     <footer className="relative border-t bg-gradient-to-b from-background to-muted/30 overflow-hidden">
       {/* Background Elements */}
       <div className="absolute inset-0 -z-10">
-        <div className="absolute bottom-0 left-1/4 w-96 h-96 bg-purple-500/5 rounded-full blur-3xl" />
-        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-blue-500/5 rounded-full blur-3xl" />
+        <div className="absolute bottom-0 left-1/4 w-[500px] h-[500px] bg-blue-500/5 rounded-full blur-3xl" />
+        <div className="absolute bottom-0 right-1/4 w-[500px] h-[500px] bg-emerald-500/5 rounded-full blur-3xl" />
       </div>
 
       <div className="container relative z-10 mx-auto px-4 py-10">
@@ -34,10 +34,10 @@ export function Footer() {
           {/* Brand section */}
           <div className="md:col-span-2">
             <Link href="/" className="flex items-center gap-2 mb-4 group">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-purple-600 to-blue-600 shadow-lg group-hover:shadow-purple-500/50 transition-all">
-                <Sparkles className="h-5 w-5 text-white" />
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-blue-600 to-emerald-600 shadow-lg group-hover:shadow-blue-500/50 transition-all group-hover:scale-110 duration-300">
+                <Sparkles className="h-6 w-6 text-white" />
               </div>
-              <span className="font-bold text-2xl bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+              <span className="font-bold text-2xl bg-gradient-to-r from-blue-600 to-emerald-600 bg-clip-text text-transparent">
                 UGen Pro
               </span>
             </Link>
@@ -84,7 +84,7 @@ export function Footer() {
               <li>
                 <Link
                   href="#tools"
-                  className="text-sm text-muted-foreground hover:text-purple-600 dark:hover:text-purple-400 transition-colors hover:translate-x-1 inline-block"
+                  className="text-sm text-muted-foreground hover:text-blue-600 dark:hover:text-blue-400 transition-all hover:translate-x-1 inline-block font-medium"
                 >
                   Features
                 </Link>
@@ -92,7 +92,7 @@ export function Footer() {
               <li>
                 <Link
                   href="#pricing"
-                  className="text-sm text-muted-foreground hover:text-purple-600 dark:hover:text-purple-400 transition-colors hover:translate-x-1 inline-block"
+                  className="text-sm text-muted-foreground hover:text-blue-600 dark:hover:text-blue-400 transition-all hover:translate-x-1 inline-block font-medium"
                 >
                   Pricing
                 </Link>
@@ -100,7 +100,7 @@ export function Footer() {
               <li>
                 <Link
                   href="/tool"
-                  className="text-sm text-muted-foreground hover:text-purple-600 dark:hover:text-purple-400 transition-colors hover:translate-x-1 inline-block"
+                  className="text-sm text-muted-foreground hover:text-blue-600 dark:hover:text-blue-400 transition-all hover:translate-x-1 inline-block font-medium"
                 >
                   Tools
                 </Link>
@@ -108,7 +108,7 @@ export function Footer() {
               <li>
                 <Link
                   href="#"
-                  className="text-sm text-muted-foreground hover:text-purple-600 dark:hover:text-purple-400 transition-colors hover:translate-x-1 inline-block"
+                  className="text-sm text-muted-foreground hover:text-blue-600 dark:hover:text-blue-400 transition-all hover:translate-x-1 inline-block font-medium"
                 >
                   API
                 </Link>
@@ -123,7 +123,7 @@ export function Footer() {
               <li>
                 <Link
                   href="#"
-                  className="text-sm text-muted-foreground hover:text-purple-600 dark:hover:text-purple-400 transition-colors hover:translate-x-1 inline-block"
+                  className="text-sm text-muted-foreground hover:text-blue-600 dark:hover:text-blue-400 transition-all hover:translate-x-1 inline-block font-medium"
                 >
                   About
                 </Link>
@@ -131,7 +131,7 @@ export function Footer() {
               <li>
                 <Link
                   href="#"
-                  className="text-sm text-muted-foreground hover:text-purple-600 dark:hover:text-purple-400 transition-colors hover:translate-x-1 inline-block"
+                  className="text-sm text-muted-foreground hover:text-blue-600 dark:hover:text-blue-400 transition-all hover:translate-x-1 inline-block font-medium"
                 >
                   Blog
                 </Link>
@@ -139,7 +139,7 @@ export function Footer() {
               <li>
                 <Link
                   href="#"
-                  className="text-sm text-muted-foreground hover:text-purple-600 dark:hover:text-purple-400 transition-colors hover:translate-x-1 inline-block"
+                  className="text-sm text-muted-foreground hover:text-blue-600 dark:hover:text-blue-400 transition-all hover:translate-x-1 inline-block font-medium"
                 >
                   Careers
                 </Link>
@@ -147,7 +147,7 @@ export function Footer() {
               <li>
                 <Link
                   href="/contact"
-                  className="text-sm text-muted-foreground hover:text-purple-600 dark:hover:text-purple-400 transition-colors hover:translate-x-1 inline-block"
+                  className="text-sm text-muted-foreground hover:text-blue-600 dark:hover:text-blue-400 transition-all hover:translate-x-1 inline-block font-medium"
                 >
                   Contact
                 </Link>
@@ -162,7 +162,7 @@ export function Footer() {
               <li>
                 <Link
                   href="#"
-                  className="text-sm text-muted-foreground hover:text-purple-600 dark:hover:text-purple-400 transition-colors hover:translate-x-1 inline-block"
+                  className="text-sm text-muted-foreground hover:text-blue-600 dark:hover:text-blue-400 transition-all hover:translate-x-1 inline-block font-medium"
                 >
                   Privacy
                 </Link>
@@ -170,7 +170,7 @@ export function Footer() {
               <li>
                 <Link
                   href="#"
-                  className="text-sm text-muted-foreground hover:text-purple-600 dark:hover:text-purple-400 transition-colors hover:translate-x-1 inline-block"
+                  className="text-sm text-muted-foreground hover:text-blue-600 dark:hover:text-blue-400 transition-all hover:translate-x-1 inline-block font-medium"
                 >
                   Terms
                 </Link>
@@ -178,7 +178,7 @@ export function Footer() {
               <li>
                 <Link
                   href="#"
-                  className="text-sm text-muted-foreground hover:text-purple-600 dark:hover:text-purple-400 transition-colors hover:translate-x-1 inline-block"
+                  className="text-sm text-muted-foreground hover:text-blue-600 dark:hover:text-blue-400 transition-all hover:translate-x-1 inline-block font-medium"
                 >
                   Security
                 </Link>
@@ -186,7 +186,7 @@ export function Footer() {
               <li>
                 <Link
                   href="#"
-                  className="text-sm text-muted-foreground hover:text-purple-600 dark:hover:text-purple-400 transition-colors hover:translate-x-1 inline-block"
+                  className="text-sm text-muted-foreground hover:text-blue-600 dark:hover:text-blue-400 transition-all hover:translate-x-1 inline-block font-medium"
                 >
                   Cookies
                 </Link>
@@ -201,13 +201,13 @@ export function Footer() {
             © 2025 UGen Pro. Made with <Heart className="h-3 w-3 text-red-500 fill-red-500 animate-pulse" /> by developers, for developers.
           </p>
           <div className="flex items-center gap-6 text-sm text-muted-foreground">
-            <Link href="#" className="hover:text-purple-600 dark:hover:text-purple-400 transition-colors">
+            <Link href="#" className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors font-medium">
               Status
             </Link>
-            <Link href="#" className="hover:text-purple-600 dark:hover:text-purple-400 transition-colors">
+            <Link href="#" className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors font-medium">
               Changelog
             </Link>
-            <Link href="#" className="hover:text-purple-600 dark:hover:text-purple-400 transition-colors">
+            <Link href="#" className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors font-medium">
               Docs
             </Link>
           </div>
@@ -219,7 +219,7 @@ export function Footer() {
         <Button
           onClick={scrollToTop}
           size="icon"
-          className="fixed bottom-8 right-8 z-50 h-12 w-12 rounded-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 shadow-xl hover:shadow-purple-500/50 transition-all duration-300 hover:scale-110 animate-in slide-in-from-bottom-4"
+          className="fixed bottom-8 right-8 z-50 h-14 w-14 rounded-full bg-gradient-to-r from-blue-600 to-emerald-600 hover:from-blue-700 hover:to-emerald-700 shadow-2xl hover:shadow-blue-500/50 transition-all duration-300 hover:scale-110 animate-in slide-in-from-bottom-4"
         >
           <ArrowUp className="h-5 w-5" />
         </Button>

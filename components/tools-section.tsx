@@ -39,9 +39,9 @@ export function ToolsSection() {
     >
       {/* Background Elements */}
       <div className="absolute inset-0 -z-10">
-        <div className="absolute inset-0 bg-gradient-to-b from-background via-purple-500/5 to-background" />
-        <div className="absolute top-1/2 left-1/4 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl" />
-        <div className="absolute top-1/3 right-1/4 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl" />
+        <div className="absolute inset-0 bg-gradient-to-b from-background via-emerald-500/5 to-background" />
+        <div className="absolute top-1/2 left-1/4 w-[500px] h-[500px] bg-blue-500/10 rounded-full blur-3xl animate-pulse" />
+        <div className="absolute top-1/3 right-1/4 w-[500px] h-[500px] bg-emerald-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: "1s" }} />
       </div>
 
       <div className="container relative z-10 mx-auto px-4">
@@ -51,22 +51,22 @@ export function ToolsSection() {
             isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
           }`}
         >
-          <div className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-blue-500/10 via-purple-500/10 to-pink-500/10 border border-blue-500/20 px-5 py-2.5 backdrop-blur-sm shadow-lg">
-            <Wrench className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-            <span className="text-sm font-semibold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+          <div className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-blue-500/10 via-emerald-500/10 to-cyan-500/10 border border-blue-500/20 px-6 py-3 backdrop-blur-sm shadow-lg">
+            <Wrench className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+            <span className="text-sm font-semibold bg-gradient-to-r from-blue-600 to-emerald-600 bg-clip-text text-transparent">
               {content.badge}
             </span>
-            <Sparkles className="h-3 w-3 text-purple-600 dark:text-purple-400 animate-pulse" />
+            <Sparkles className="h-4 w-4 text-emerald-600 dark:text-emerald-400 animate-pulse" />
           </div>
 
-          <h2 className="text-3xl md:text-5xl font-bold text-balance leading-tight">
+          <h2 className="text-4xl md:text-6xl font-extrabold text-balance leading-tight">
             {content.title}{" "}
-            <span className="bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-blue-600 via-emerald-600 to-cyan-600 bg-clip-text text-transparent">
               {content.titleHighlight}
             </span>
           </h2>
 
-          <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto text-pretty leading-relaxed">
+          <p className="text-xl text-muted-foreground/80 max-w-3xl mx-auto text-pretty leading-relaxed">
             {content.description}
           </p>
         </div>

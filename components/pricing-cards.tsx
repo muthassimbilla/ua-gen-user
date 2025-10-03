@@ -67,7 +67,7 @@ const PricingCard = memo(
                 </span>
                 <span className="text-sm text-muted-foreground">/ {plan.duration}</span>
               </div>
-              {plan.original_price && (
+              {plan.original_price ? (
                 <div className="flex flex-col gap-1">
                   <div className="flex items-center gap-2">
                     <span className="text-sm text-muted-foreground line-through">{plan.original_price}</span>
@@ -81,6 +81,8 @@ const PricingCard = memo(
                     </span>
                   )}
                 </div>
+              ) : (
+                <div className="h-[40px]"></div>
               )}
             </div>
           </CardHeader>

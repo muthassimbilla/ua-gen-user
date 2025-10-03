@@ -41,10 +41,10 @@ export function Navigation({ activeSection = "hero" }: NavigationProps) {
     >
       <div className="container mx-auto flex h-16 items-center justify-between px-4 md:px-6">
         <Link href="/" className="flex items-center gap-2 group">
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-purple-600 to-blue-600 shadow-lg group-hover:shadow-purple-500/50 transition-all duration-300 group-hover:scale-110">
-            <Sparkles className="h-5 w-5 text-white" />
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-blue-600 to-emerald-600 shadow-lg group-hover:shadow-blue-500/50 transition-all duration-300 group-hover:scale-110">
+            <Sparkles className="h-6 w-6 text-white" />
           </div>
-          <span className="font-bold text-xl bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+          <span className="font-bold text-xl bg-gradient-to-r from-blue-600 to-emerald-600 bg-clip-text text-transparent">
             UGen Pro
           </span>
         </Link>
@@ -55,15 +55,15 @@ export function Navigation({ activeSection = "hero" }: NavigationProps) {
             <a
               key={item.id}
               href={item.href}
-              className={`relative px-4 py-2 text-sm font-medium transition-all duration-300 rounded-lg ${
+              className={`relative px-4 py-2 text-sm font-semibold transition-all duration-300 rounded-lg ${
                 activeSection === item.id
-                  ? "text-purple-600 dark:text-purple-400"
+                  ? "text-blue-600 dark:text-blue-400"
                   : "text-muted-foreground hover:text-foreground"
               }`}
             >
               {item.label}
               {activeSection === item.id && (
-                <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-1.5 h-1.5 bg-purple-600 dark:bg-purple-400 rounded-full" />
+                <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-1.5 h-1.5 bg-blue-600 dark:bg-blue-400 rounded-full" />
               )}
             </a>
           ))}
@@ -74,14 +74,14 @@ export function Navigation({ activeSection = "hero" }: NavigationProps) {
           <ThemeToggle />
 
           <Link href="/login" className="hidden sm:block">
-            <Button variant="ghost" size="sm" className="hover:bg-purple-500/10 hover:text-purple-600">
+            <Button variant="ghost" size="sm" className="hover:bg-blue-500/10 hover:text-blue-600 font-semibold">
               Sign In
             </Button>
           </Link>
           <Link href="/signup">
-            <Button 
-              size="sm" 
-              className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 shadow-lg hover:shadow-purple-500/50 transition-all duration-300"
+            <Button
+              size="sm"
+              className="bg-gradient-to-r from-blue-600 to-emerald-600 hover:from-blue-700 hover:to-emerald-700 shadow-lg hover:shadow-blue-500/50 transition-all duration-300 font-semibold"
             >
               Get Started
             </Button>
@@ -105,9 +105,9 @@ export function Navigation({ activeSection = "hero" }: NavigationProps) {
               <a
                 key={item.id}
                 href={item.href}
-                className={`block px-4 py-3 rounded-lg text-sm font-medium transition-all ${
+                className={`block px-4 py-3 rounded-lg text-sm font-semibold transition-all ${
                   activeSection === item.id
-                    ? "bg-purple-500/10 text-purple-600 dark:text-purple-400"
+                    ? "bg-blue-500/10 text-blue-600 dark:text-blue-400"
                     : "text-muted-foreground hover:bg-muted"
                 }`}
                 onClick={() => setMobileMenuOpen(false)}
