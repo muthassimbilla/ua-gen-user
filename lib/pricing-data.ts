@@ -1,16 +1,20 @@
-export interface PricingPlan {
-  id: string
-  name: string
-  price: string
-  duration: string
-  original_price?: string
-  discount?: string
-  description?: string
-  features: string[]
-  is_popular: boolean
-  icon?: string
-  gradient: string
-}
+import { z } from "zod"
+
+export const PricingPlanSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  price: z.string(),
+  duration: z.string(),
+  original_price: z.string().optional(),
+  discount: z.string().optional(),
+  description: z.string().optional(),
+  features: z.array(z.string()),
+  is_popular: z.boolean(),
+  icon: z.string().optional(),
+  gradient: z.string(),
+})
+
+export type PricingPlan = z.infer<typeof PricingPlanSchema>
 
 export const pricingPlans: PricingPlan[] = [
   {
@@ -66,3 +70,7 @@ export const pricingPlans: PricingPlan[] = [
     gradient: "from-orange-500 to-red-600",
   },
 ]
+
+pricingPlans.forEach((plan) => {
+  PricingPlanSchema.parse(plan)
+})
