@@ -86,9 +86,9 @@ export default function Email2NamePage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
       <div className="container mx-auto px-4 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 max-w-6xl mx-auto">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-7xl mx-auto">
           {/* Left Card - Input */}
-          <Card className="h-[450px] flex flex-col">
+          <Card className="h-[550px] flex flex-col">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Mail className="h-5 w-5 text-blue-500" />
@@ -96,7 +96,7 @@ export default function Email2NamePage() {
               </CardTitle>
               <CardDescription>Enter an email address to generate a name</CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4 flex-1">
+            <CardContent className="space-y-6 flex-1">
               <div className="space-y-2">
                 <Label htmlFor="email-input">Email Address</Label>
                 <div className="flex gap-2">
@@ -141,7 +141,7 @@ export default function Email2NamePage() {
           </Card>
 
           {/* Right Card - Output */}
-          <Card className="h-[450px] flex flex-col">
+          <Card className="h-[550px] flex flex-col">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <CheckCircle className="h-5 w-5 text-green-500" />
@@ -149,11 +149,11 @@ export default function Email2NamePage() {
               </CardTitle>
               <CardDescription>AI-generated name and details</CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4 flex-1 overflow-y-auto">
+            <CardContent className="space-y-6 flex-1 overflow-y-auto">
               {nameData ? (
                 <>
                   {/* Full Name */}
-                  <div className="space-y-2">
+                  <div className="space-y-3">
                     <div className="flex items-center justify-between">
                       <Label className="text-sm font-medium text-muted-foreground">Full Name</Label>
                       <Button
@@ -171,13 +171,13 @@ export default function Email2NamePage() {
                         )}
                       </Button>
                     </div>
-                    <div className="p-3 rounded-lg border bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800">
+                    <div className="p-4 rounded-lg border bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800">
                       <p className="font-medium">{nameData.fullName}</p>
                     </div>
                   </div>
 
                   {/* First Name */}
-                  <div className="space-y-2">
+                  <div className="space-y-3">
                     <div className="flex items-center justify-between">
                       <Label className="text-sm font-medium text-muted-foreground">First Name</Label>
                       <Button
@@ -195,13 +195,13 @@ export default function Email2NamePage() {
                         )}
                       </Button>
                     </div>
-                    <div className="p-3 rounded-lg border bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800">
+                    <div className="p-4 rounded-lg border bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800">
                       <p className="font-medium">{nameData.firstName}</p>
                     </div>
                   </div>
 
                   {/* Last Name */}
-                  <div className="space-y-2">
+                  <div className="space-y-3">
                     <div className="flex items-center justify-between">
                       <Label className="text-sm font-medium text-muted-foreground">Last Name</Label>
                       <Button
@@ -219,13 +219,13 @@ export default function Email2NamePage() {
                         )}
                       </Button>
                     </div>
-                    <div className="p-3 rounded-lg border bg-purple-50 dark:bg-purple-900/20 border-purple-200 dark:border-purple-800">
+                    <div className="p-4 rounded-lg border bg-purple-50 dark:bg-purple-900/20 border-purple-200 dark:border-purple-800">
                       <p className="font-medium">{nameData.lastName}</p>
                     </div>
                   </div>
 
                   {/* Gender */}
-                  <div className="space-y-2">
+                  <div className="space-y-3">
                     <div className="flex items-center justify-between">
                       <Label className="text-sm font-medium text-muted-foreground">Gender</Label>
                       <Button
@@ -243,13 +243,13 @@ export default function Email2NamePage() {
                         )}
                       </Button>
                     </div>
-                    <div className="p-3 rounded-lg border bg-orange-50 dark:bg-orange-900/20 border-orange-200 dark:border-orange-800">
+                    <div className="p-4 rounded-lg border bg-orange-50 dark:bg-orange-900/20 border-orange-200 dark:border-orange-800">
                       <p className="font-medium">{nameData.gender}</p>
                     </div>
                   </div>
 
                   {/* Country */}
-                  <div className="space-y-2">
+                  <div className="space-y-3">
                     <div className="flex items-center justify-between">
                       <Label className="text-sm font-medium text-muted-foreground">Country</Label>
                       <Button
@@ -267,13 +267,13 @@ export default function Email2NamePage() {
                         )}
                       </Button>
                     </div>
-                    <div className="p-3 rounded-lg border bg-cyan-50 dark:bg-cyan-900/20 border-cyan-200 dark:border-cyan-800">
+                    <div className="p-4 rounded-lg border bg-cyan-50 dark:bg-cyan-900/20 border-cyan-200 dark:border-cyan-800">
                       <p className="font-medium">{nameData.country}</p>
                     </div>
                   </div>
 
                   {/* Type */}
-                  <div className="space-y-2">
+                  <div className="space-y-3">
                     <div className="flex items-center justify-between">
                       <Label className="text-sm font-medium text-muted-foreground">Type</Label>
                       <Button
@@ -292,7 +292,7 @@ export default function Email2NamePage() {
                       </Button>
                     </div>
                     <div
-                      className={`p-3 rounded-lg border ${
+                      className={`p-4 rounded-lg border ${
                         nameData.type.toLowerCase() === "business"
                           ? "bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800"
                           : "bg-slate-50 dark:bg-slate-900/20 border-slate-200 dark:border-slate-800"
