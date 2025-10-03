@@ -61,141 +61,109 @@ export default function AdminLoginPage() {
   }
 
   return (
-    <div className="h-screen flex items-center justify-center p-4 bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 relative overflow-hidden">
+    <div className="h-screen flex items-center justify-center p-4 bg-background">
       {/* Theme Toggle Button */}
       <div className="absolute top-6 right-6 z-20">
         <AuthThemeToggle />
       </div>
 
-      {/* Background decorative elements */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-red-500/10 rounded-full blur-3xl animate-pulse" />
-        <div
-          className="absolute bottom-1/4 right-1/4 w-48 h-48 bg-orange-500/10 rounded-full blur-2xl animate-pulse"
-          style={{ animationDelay: "2s" }}
-        />
-        <div
-          className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-32 h-32 bg-blue-500/5 rounded-full blur-xl animate-pulse"
-          style={{ animationDelay: "1s" }}
-        />
-
-        {/* Floating particles */}
-        <div
-          className="absolute top-20 left-20 w-2 h-2 bg-red-400/60 rounded-full animate-bounce"
-          style={{ animationDelay: "0.5s" }}
-        />
-        <div
-          className="absolute top-40 right-32 w-1.5 h-1.5 bg-orange-400/60 rounded-full animate-bounce"
-          style={{ animationDelay: "1.5s" }}
-        />
-        <div
-          className="absolute bottom-32 left-16 w-2.5 h-2.5 bg-red-400/60 rounded-full animate-bounce"
-          style={{ animationDelay: "2.5s" }}
-        />
-        <div
-          className="absolute bottom-20 right-20 w-1 h-1 bg-orange-400/60 rounded-full animate-bounce"
-          style={{ animationDelay: "3s" }}
-        />
-      </div>
-
-      <div className="w-full max-w-md relative z-10">
-        {/* Main Login Card */}
-        <div className="glass-card p-8 rounded-3xl shadow-2xl border-0 backdrop-blur-xl bg-white/10 dark:bg-gray-900/10">
-          {/* Header */}
+      <div className="w-full max-w-md">
+        <div className="border rounded-lg p-8 bg-card shadow-sm">
           <div className="text-center mb-8">
-            <div className="w-20 h-20 mx-auto mb-6 rounded-2xl bg-gradient-to-br from-red-500 to-orange-600 flex items-center justify-center shadow-lg relative overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent" />
-              <Shield className="w-10 h-10 text-white relative z-10" />
+            <div className="w-16 h-16 mx-auto mb-4 rounded-lg bg-primary/10 flex items-center justify-center">
+              <Shield className="w-8 h-8 text-primary" />
             </div>
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-red-600 to-orange-600 bg-clip-text text-transparent mb-2">
-              অ্যাডমিন প্যানেল
-            </h1>
-            <p className="text-muted-foreground">সুরক্ষিত অ্যাডমিন লগইন</p>
+            <h1 className="text-2xl font-bold text-foreground mb-1">অ্যাডমিন প্যানেল</h1>
+            <p className="text-sm text-muted-foreground">সুরক্ষিত অ্যাডমিন লগইন</p>
           </div>
 
           {/* Login Form */}
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-4">
             {error && (
-              <div className="flex items-center gap-3 p-4 text-sm text-red-600 dark:text-red-400 bg-red-50/50 dark:bg-red-900/20 border border-red-200/50 dark:border-red-800/50 rounded-xl backdrop-blur-sm">
-                <AlertCircle className="w-5 h-5 flex-shrink-0" />
+              <div className="flex items-center gap-2 p-3 text-sm text-destructive bg-destructive/10 border border-destructive/20 rounded-md">
+                <AlertCircle className="w-4 h-4 flex-shrink-0" />
                 <span>{error}</span>
               </div>
             )}
 
             <div className="space-y-2">
-              <Label htmlFor="username" className="text-sm font-medium text-foreground">
-                অ্যাডমিন ইউজারনেম
-              </Label>
+              <Label htmlFor="username">অ্যাডমিন ইউজারনেম</Label>
               <div className="relative">
-                <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
                   id="username"
                   type="text"
                   value={credentials.username}
                   onChange={(e) => setCredentials((prev) => ({ ...prev, username: e.target.value }))}
                   placeholder="অ্যাডমিন ইউজারনেম লিখুন"
-                  className="pl-10 h-12 rounded-xl border-border/50 bg-background/50 backdrop-blur-sm focus:bg-background/80 transition-all duration-200"
+                  className="pl-10"
                   required
                 />
               </div>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="password" className="text-sm font-medium text-foreground">
-                পাসওয়ার্ড
-              </Label>
+              <Label htmlFor="password">পাসওয়ার্ড</Label>
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
                   id="password"
                   type={showPassword ? "text" : "password"}
                   value={credentials.password}
                   onChange={(e) => setCredentials((prev) => ({ ...prev, password: e.target.value }))}
                   placeholder="পাসওয়ার্ড লিখুন"
-                  className="pl-10 pr-12 h-12 rounded-xl border-border/50 bg-background/50 backdrop-blur-sm focus:bg-background/80 transition-all duration-200"
+                  className="pl-10 pr-10"
                   required
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground"
                 >
-                  {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
               </div>
             </div>
 
-            <Button
-              type="submit"
-              className="w-full h-12 bg-gradient-to-r from-red-500 to-orange-600 hover:from-red-600 hover:to-orange-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-[1.02]"
-              disabled={isLoading}
-            >
+            <Button type="submit" className="w-full" disabled={isLoading}>
               {isLoading ? (
                 <div className="flex items-center gap-2">
-                  <svg className="animate-spin spinner h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  <svg
+                    className="animate-spin h-4 w-4"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                    ></circle>
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                    ></path>
                   </svg>
                   লগইন হচ্ছে...
                 </div>
               ) : (
-                <div className="flex items-center gap-2">
-                  <Shield className="w-5 h-5" />
-                  লগইন
-                </div>
+                "লগইন"
               )}
             </Button>
           </form>
 
-          {/* Security Notice */}
           <div className="mt-6 text-center">
-            <p className="text-xs text-muted-foreground">এটি একটি সুরক্ষিত অ্যাডমিন প্যানেল। আপনার লগইন তথ্য এনক্রিপ্ট করা।</p>
+            <p className="text-xs text-muted-foreground">এটি একটি সুরক্ষিত অ্যাডমিন প্যানেল</p>
           </div>
         </div>
 
         {/* Footer */}
-        <div className="text-center mt-6">
-          <p className="text-sm text-muted-foreground">© 2025 UGen Pro. সর্বস্বত্ব সংরক্ষিত।</p>
+        <div className="text-center mt-4">
+          <p className="text-xs text-muted-foreground">© 2025 UGen Pro</p>
         </div>
       </div>
     </div>

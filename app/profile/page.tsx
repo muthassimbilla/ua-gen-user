@@ -100,15 +100,11 @@ export default function ProfilePage() {
 
   return (
     <ProtectedRoute>
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-700">
+      <div className="min-h-screen bg-background">
         <div className="container mx-auto px-4 py-8 max-w-6xl">
           <div className="space-y-8">
             {/* Hero Section */}
             <div className="relative overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-r from-blue-600/10 via-purple-600/10 to-indigo-600/10 rounded-3xl" />
-              <div className="absolute top-0 right-0 w-72 h-72 bg-gradient-to-br from-blue-400/20 to-purple-600/20 rounded-full blur-3xl" />
-              <div className="absolute bottom-0 left-0 w-64 h-64 bg-gradient-to-tr from-indigo-400/20 to-pink-600/20 rounded-full blur-3xl" />
-
               <div className="relative glass-card p-8 rounded-3xl">
                 <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
                   <div className="flex items-center gap-6">
@@ -160,7 +156,7 @@ export default function ProfilePage() {
 
             {/* Stats Overview */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <Card className="glass-card border-0 bg-gradient-to-br from-blue-500/10 to-indigo-500/10 hover:shadow-lg transition-all duration-300">
+              <Card className="glass-card border-0 hover:shadow-lg transition-all duration-300">
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between">
                     <div>
@@ -174,7 +170,7 @@ export default function ProfilePage() {
                 </CardContent>
               </Card>
 
-              <Card className="glass-card border-0 bg-gradient-to-br from-purple-500/10 to-pink-500/10 hover:shadow-lg transition-all duration-300">
+              <Card className="glass-card border-0 hover:shadow-lg transition-all duration-300">
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between">
                     <div>
@@ -192,7 +188,7 @@ export default function ProfilePage() {
                 </CardContent>
               </Card>
 
-              <Card className="glass-card border-0 bg-gradient-to-br from-orange-500/10 to-red-500/10 hover:shadow-lg transition-all duration-300">
+              <Card className="glass-card border-0 hover:shadow-lg transition-all duration-300">
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between">
                     <div>
