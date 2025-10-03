@@ -57,7 +57,8 @@
     "child_process": "1.0.2",
     "fs": "0.0.1-security",
     "path": "0.12.7",
-    "dotenv": "17.2.3"
+    "dotenv": "17.2.3",
+    "ai": "5.0.60"
   },
   "devDependencies": {
     "@types/node": "^22",
