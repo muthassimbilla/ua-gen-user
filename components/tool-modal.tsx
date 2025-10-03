@@ -107,3 +107,5 @@ export function ToolModal({ tool, isOpen, onClose, locale }: ToolModalProps) {
     </Dialog>
   )
 }
+
+export default ToolModal
