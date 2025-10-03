@@ -76,8 +76,8 @@ export function SidebarNav() {
                 className={cn(
                   "group relative flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-all duration-300 overflow-hidden",
                   isActive
-                    ? "bg-gradient-to-r from-purple-500 via-blue-500 to-pink-500 text-white shadow-lg shadow-purple-500/25 scale-[1.02]"
-                    : "text-slate-600 dark:text-slate-300 hover:bg-gradient-to-r hover:from-purple-50 hover:via-blue-50 hover:to-pink-50 dark:hover:from-purple-900/20 dark:hover:via-blue-900/20 dark:hover:to-pink-900/20 hover:text-slate-900 dark:hover:text-slate-100 hover:shadow-md hover:scale-[1.01]"
+                    ? "bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 text-white shadow-lg shadow-emerald-500/25 scale-[1.02]"
+                    : "text-slate-600 dark:text-slate-300 hover:bg-gradient-to-r hover:from-emerald-50 hover:via-teal-50 hover:to-cyan-50 dark:hover:from-emerald-900/20 dark:hover:via-teal-900/20 dark:hover:to-cyan-900/20 hover:text-slate-900 dark:hover:text-slate-100 hover:shadow-md hover:scale-[1.01]"
                 )}
                 onClick={(e) => {
                   if (item.hasDropdown) {
@@ -98,7 +98,7 @@ export function SidebarNav() {
                 )}>
                   <item.icon className={cn(
                     "h-5 w-5 flex-shrink-0 transition-all duration-300",
-                    isActive ? "text-white" : "text-slate-500 dark:text-slate-400 group-hover:text-purple-600 dark:group-hover:text-purple-400"
+                    isActive ? "text-white" : "text-slate-500 dark:text-slate-400 group-hover:text-emerald-600 dark:group-hover:text-emerald-400"
                   )} />
                 </div>
                 <span className="flex-1 font-semibold">{item.name}</span>
@@ -107,7 +107,7 @@ export function SidebarNav() {
                     "h-6 min-w-6 px-2 text-xs font-bold transition-all duration-300",
                     isActive 
                       ? "bg-white/20 text-white border-white/30" 
-                      : "bg-gradient-to-r from-purple-100 to-blue-100 dark:from-purple-900 dark:to-blue-900 text-purple-700 dark:text-purple-300 border-purple-200 dark:border-purple-700 group-hover:from-purple-200 group-hover:to-blue-200"
+                      : "bg-gradient-to-r from-emerald-100 to-teal-100 dark:from-emerald-900 dark:to-teal-900 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-700 group-hover:from-emerald-200 group-hover:to-teal-200"
                   )}>
                     {item.count}
                   </Badge>
@@ -115,7 +115,7 @@ export function SidebarNav() {
                 {item.hasDropdown && (
                   <ChevronDown className={cn(
                     "h-4 w-4 transition-all duration-300",
-                    isActive ? "text-white" : "text-slate-400 group-hover:text-purple-600",
+                    isActive ? "text-white" : "text-slate-400 group-hover:text-emerald-600",
                     isExpanded && "rotate-180"
                   )} />
                 )}
@@ -124,38 +124,38 @@ export function SidebarNav() {
               {item.name === "Tools" && isExpanded && (
                 <div className="ml-6 mt-2 space-y-1 relative">
                   {/* Connecting line */}
-                  <div className="absolute left-2 top-0 bottom-0 w-px bg-gradient-to-b from-purple-300 via-blue-300 to-pink-300 dark:from-purple-600 dark:via-blue-600 dark:to-pink-600"></div>
+                  <div className="absolute left-2 top-0 bottom-0 w-px bg-gradient-to-b from-emerald-300 via-teal-300 to-cyan-300 dark:from-emerald-600 dark:via-teal-600 dark:to-cyan-600"></div>
                   {toolsSubmenu.map((subItem, index) => {
                     const isSubActive = pathname === subItem.href
                     return (
                       <div key={subItem.name} className="relative">
                         {/* Connection dot */}
-                        <div className="absolute left-1.5 top-3 h-2 w-2 rounded-full bg-gradient-to-r from-purple-400 to-blue-400 dark:from-purple-500 dark:to-blue-500"></div>
+                        <div className="absolute left-1.5 top-3 h-2 w-2 rounded-full bg-gradient-to-r from-emerald-400 to-teal-400 dark:from-emerald-500 dark:to-teal-500"></div>
                         <Link
                           href={subItem.href}
                           className={cn(
                             "group relative flex items-center gap-3 rounded-lg px-4 py-2.5 text-sm font-medium transition-all duration-300 ml-4",
                             isSubActive
-                              ? "bg-gradient-to-r from-purple-100 via-blue-100 to-pink-100 dark:from-purple-900/40 dark:via-blue-900/40 dark:to-pink-900/40 text-purple-700 dark:text-purple-300 shadow-md border-l-2 border-purple-400"
+                              ? "bg-gradient-to-r from-emerald-100 via-teal-100 to-cyan-100 dark:from-emerald-900/40 dark:via-teal-900/40 dark:to-cyan-900/40 text-emerald-700 dark:text-emerald-300 shadow-md border-l-2 border-emerald-400"
                               : "text-slate-500 dark:text-slate-400 hover:bg-gradient-to-r hover:from-slate-50 hover:to-slate-100 dark:hover:from-slate-800 dark:hover:to-slate-700 hover:text-slate-700 dark:hover:text-slate-200 hover:shadow-sm"
                           )}
                         >
                           <div className={cn(
                             "p-1.5 rounded-md transition-all duration-300",
                             isSubActive 
-                              ? "bg-purple-200 dark:bg-purple-800" 
+                              ? "bg-emerald-200 dark:bg-emerald-800" 
                               : "group-hover:bg-slate-200 dark:group-hover:bg-slate-600"
                           )}>
                             <subItem.icon className={cn(
                               "h-4 w-4 flex-shrink-0 transition-all duration-300",
-                              isSubActive ? "text-purple-600 dark:text-purple-400" : "text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-300"
+                              isSubActive ? "text-emerald-600 dark:text-emerald-400" : "text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-300"
                             )} />
                           </div>
                           <span className="font-medium">{subItem.name}</span>
                           {/* Hover indicator */}
                           <div className={cn(
                             "absolute right-2 h-1 w-1 rounded-full transition-all duration-300",
-                            isSubActive ? "bg-purple-400" : "bg-transparent group-hover:bg-slate-400"
+                            isSubActive ? "bg-emerald-400" : "bg-transparent group-hover:bg-slate-400"
                           )}></div>
                         </Link>
                       </div>
