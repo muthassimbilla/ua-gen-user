@@ -2,9 +2,13 @@
 
 import dynamic from "next/dynamic"
 import { HeroSection } from "@/components/hero-section"
-import { ToolsSection } from "@/components/tools-section"
 import { Navigation } from "@/components/navigation"
 import { useState, useEffect } from "react"
+
+// Lazy load heavy components
+const ToolsSection = dynamic(() => import("@/components/tools-section").then(mod => ({ default: mod.ToolsSection })), {
+  loading: () => <div className="h-96 animate-pulse bg-muted/10" />,
+})
 
 const PricingSection = dynamic(
   () => import("@/components/pricing-section").then((mod) => ({ default: mod.PricingSection })),
@@ -35,32 +39,41 @@ export default function HomePage() {
     }
   }, [])
 
-  // Track active section for navigation highlighting
+  // Track active section for navigation highlighting - Optimized
   useEffect(() => {
     const sections = ["hero", "tools", "pricing", "testimonials"]
+    let timeoutId: NodeJS.Timeout
     
-    const observers = sections.map((sectionId) => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        // Debounce multiple intersection events
+        clearTimeout(timeoutId)
+        timeoutId = setTimeout(() => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              const sectionId = entry.target.id
+              if (sections.includes(sectionId)) {
+                setActiveSection(sectionId)
+              }
+            }
+          })
+        }, 100)
+      },
+      {
+        threshold: 0.3,
+        rootMargin: "-100px 0px -50% 0px",
+      }
+    )
+
+    // Observe all sections with single observer
+    sections.forEach((sectionId) => {
       const element = document.getElementById(sectionId)
-      if (!element) return null
-
-      const observer = new IntersectionObserver(
-        ([entry]) => {
-          if (entry.isIntersecting) {
-            setActiveSection(sectionId)
-          }
-        },
-        {
-          threshold: 0.3,
-          rootMargin: "-100px 0px -50% 0px",
-        }
-      )
-
-      observer.observe(element)
-      return observer
+      if (element) observer.observe(element)
     })
 
     return () => {
-      observers.forEach((observer) => observer?.disconnect())
+      clearTimeout(timeoutId)
+      observer.disconnect()
     }
   }, [])
 
