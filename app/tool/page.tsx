@@ -2,7 +2,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Smartphone, MapPin } from "lucide-react"
+import { Smartphone, MapPin, Mail } from "lucide-react"
 import Link from "next/link"
 import { ProtectedRoute } from "@/components/protected-route"
 
@@ -22,6 +22,14 @@ const tools = [
     icon: MapPin,
     status: "Active",
     color: "bg-orange-500",
+  },
+  {
+    name: "Email2Name",
+    description: "Generate realistic names from email addresses",
+    href: "/tool/email2name",
+    icon: Mail,
+    status: "Active",
+    color: "bg-blue-500",
   },
 ]
 

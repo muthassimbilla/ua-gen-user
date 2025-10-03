@@ -14,6 +14,7 @@ import {
   Sparkles,
   Smartphone,
   MapPin,
+  Mail,
   LogOut,
 } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
@@ -23,7 +24,7 @@ import { Button } from "@/components/ui/button"
 
 const navigation = [
   { name: "Home", href: "/tool", icon: Home, count: null },
-  { name: "Tools", href: "/tool", icon: Layers, count: 2, hasDropdown: true },
+  { name: "Tools", href: "/tool", icon: Layers, count: 3, hasDropdown: true },
   { name: "Profile", href: "/profile", icon: FileText, count: null },
   { name: "Premium", href: "/premium-tools", icon: FolderKanban, count: null },
 ]
@@ -31,6 +32,7 @@ const navigation = [
 const toolsSubmenu = [
   { name: "User Agent Generator", href: "/tool/user-agent-generator", icon: Smartphone },
   { name: "Address Generator", href: "/tool/address-generator", icon: MapPin },
+  { name: "Email2Name", href: "/tool/email2name", icon: Mail },
 ]
 
 export function SidebarNav() {

@@ -86,14 +86,9 @@ export default function Email2NamePage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
       <div className="container mx-auto px-4 py-8">
-        <div className="mb-8 text-center">
-          <h1 className="text-3xl font-bold mb-2">Email to Name Generator</h1>
-          <p className="text-muted-foreground">Generate realistic US-style names from email addresses using AI</p>
-        </div>
-
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 max-w-6xl mx-auto">
           {/* Left Card - Input */}
-          <Card className="h-fit">
+          <Card className="min-h-[600px] flex flex-col">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Mail className="h-5 w-5 text-blue-500" />
@@ -101,7 +96,7 @@ export default function Email2NamePage() {
               </CardTitle>
               <CardDescription>Enter an email address to generate a name</CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-4 flex-1">
               <div className="space-y-2">
                 <Label htmlFor="email-input">Email Address</Label>
                 <div className="flex gap-2">
@@ -146,7 +141,7 @@ export default function Email2NamePage() {
           </Card>
 
           {/* Right Card - Output */}
-          <Card className="h-fit">
+          <Card className="min-h-[600px] flex flex-col">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <CheckCircle className="h-5 w-5 text-green-500" />
@@ -154,7 +149,7 @@ export default function Email2NamePage() {
               </CardTitle>
               <CardDescription>AI-generated name and details</CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-4 flex-1 overflow-y-auto">
               {nameData ? (
                 <>
                   {/* Full Name */}
@@ -327,53 +322,6 @@ export default function Email2NamePage() {
             </CardContent>
           </Card>
         </div>
-
-        {/* Setup Guide */}
-        <Card className="mt-8 max-w-6xl mx-auto">
-          <CardHeader>
-            <CardTitle>Setup Guide</CardTitle>
-            <CardDescription>How to configure the Email to Name Generator</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <h3 className="font-semibold">Required Environment Variable:</h3>
-              <div className="bg-slate-100 dark:bg-slate-800 p-4 rounded-lg font-mono text-sm">
-                <p>GOOGLE_API_KEY=your_google_gemini_api_key_here</p>
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <h3 className="font-semibold">Steps to get Google Gemini API Key:</h3>
-              <ol className="list-decimal list-inside space-y-1 text-sm text-muted-foreground">
-                <li>Visit Google AI Studio: https://aistudio.google.com/app/apikey</li>
-                <li>Sign in with your Google account</li>
-                <li>Click "Create API Key" button</li>
-                <li>Copy the generated API key</li>
-                <li>Add it to your .env.local file or Vercel environment variables</li>
-              </ol>
-            </div>
-
-            <div className="space-y-2">
-              <h3 className="font-semibold">For Local Development:</h3>
-              <div className="bg-slate-100 dark:bg-slate-800 p-4 rounded-lg space-y-2">
-                <p className="text-sm">
-                  Create a <code className="font-mono">.env.local</code> file in your project root:
-                </p>
-                <pre className="font-mono text-sm">GOOGLE_API_KEY=your_api_key_here</pre>
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <h3 className="font-semibold">For Vercel Deployment:</h3>
-              <ol className="list-decimal list-inside space-y-1 text-sm text-muted-foreground">
-                <li>Go to your Vercel project dashboard</li>
-                <li>Navigate to Settings → Environment Variables</li>
-                <li>Add GOOGLE_API_KEY with your API key value</li>
-                <li>Redeploy your application</li>
-              </ol>
-            </div>
-          </CardContent>
-        </Card>
       </div>
     </div>
   )
