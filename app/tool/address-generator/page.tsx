@@ -302,7 +302,7 @@ export default function AddressGeneratorPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
       <div className="container mx-auto px-4 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-7xl mx-auto">
           {/* Left Side - Input Section */}
           <div className="space-y-6">
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
@@ -316,7 +316,7 @@ export default function AddressGeneratorPage() {
               </TabsList>
 
               <TabsContent value="ip" className="space-y-0">
-                <Card className="h-[450px] flex flex-col">
+                <Card className="h-[550px] flex flex-col">
                   <CardHeader className="pb-4 flex-shrink-0">
                     <CardTitle className="flex items-center gap-2 text-lg">
                       <MapPin className="h-5 w-5 text-blue-500" />
@@ -324,7 +324,7 @@ export default function AddressGeneratorPage() {
                     </CardTitle>
                     <CardDescription>Enter an IP address and get real addresses from that area</CardDescription>
                   </CardHeader>
-                  <CardContent className="space-y-6 flex-1 flex flex-col justify-center">
+                  <CardContent className="space-y-8 flex-1 flex flex-col justify-center">
                     <div className="space-y-3">
                       <Label htmlFor="ip-input" className="text-sm font-medium">
                         IP Address
@@ -367,7 +367,7 @@ export default function AddressGeneratorPage() {
               </TabsContent>
 
               <TabsContent value="zip" className="space-y-0">
-                <Card className="h-[450px] flex flex-col">
+                <Card className="h-[550px] flex flex-col">
                   <CardHeader className="pb-4 flex-shrink-0">
                     <CardTitle className="flex items-center gap-2 text-lg">
                       <MapPin className="h-5 w-5 text-green-500" />
@@ -375,7 +375,7 @@ export default function AddressGeneratorPage() {
                     </CardTitle>
                     <CardDescription>Enter a ZIP code and get random addresses from that area</CardDescription>
                   </CardHeader>
-                  <CardContent className="space-y-6 flex-1 flex flex-col justify-center">
+                  <CardContent className="space-y-8 flex-1 flex flex-col justify-center">
                     <div className="space-y-3">
                       <Label htmlFor="zip-input" className="text-sm font-medium">
                         ZIP Code
@@ -439,179 +439,11 @@ export default function AddressGeneratorPage() {
                     </Badge>
                   </div>
                 </CardHeader>
-                <CardContent className="space-y-4 flex-1 overflow-y-auto">
-                  {/* Address Parts */}
-                  <div className="space-y-4">
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                      <div className="space-y-2">
-                        <div className="flex items-center justify-between">
-                          <Label className="text-sm font-medium text-muted-foreground">Street Address</Label>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => copyAddressPart(currentAddress.street, "Street Address")}
-                            className={`h-8 w-8 p-0 transition-all duration-300 ${
-                              copiedField === "Street Address"
-                                ? "bg-green-100 dark:bg-green-800/30 scale-110"
-                                : "hover:bg-blue-100 dark:hover:bg-blue-800/30"
-                            }`}
-                          >
-                            {copiedField === "Street Address" ? (
-                              <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400" />
-                            ) : (
-                              <Copy className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-                            )}
-                          </Button>
-                        </div>
-                        <div
-                          className={`p-4 rounded-lg border transition-all duration-300 ${
-                            copiedField === "Street Address"
-                              ? "bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800 ring-2 ring-green-300 dark:ring-green-700"
-                              : "bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800 hover:bg-blue-100/50 dark:hover:bg-blue-900/30"
-                          }`}
-                        >
-                          <p className="text-blue-900 dark:text-blue-100 font-medium">{currentAddress.street}</p>
-                        </div>
-                      </div>
-
-                      <div className="space-y-2">
-                        <div className="flex items-center justify-between">
-                          <Label className="text-sm font-medium text-muted-foreground">City</Label>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => copyAddressPart(currentAddress.city, "City")}
-                            className={`h-8 w-8 p-0 transition-all duration-300 ${
-                              copiedField === "City"
-                                ? "bg-green-100 dark:bg-green-800/30 scale-110"
-                                : "hover:bg-green-100 dark:hover:bg-green-800/30"
-                            }`}
-                          >
-                            {copiedField === "City" ? (
-                              <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400" />
-                            ) : (
-                              <Copy className="h-4 w-4 text-green-600 dark:text-green-400" />
-                            )}
-                          </Button>
-                        </div>
-                        <div
-                          className={`p-4 rounded-lg border transition-all duration-300 ${
-                            copiedField === "City"
-                              ? "bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800 ring-2 ring-green-300 dark:ring-green-700"
-                              : "bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800 hover:bg-green-100/50 dark:hover:bg-green-900/30"
-                          }`}
-                        >
-                          <p className="text-green-900 dark:text-green-100 font-medium">
-                            {currentAddress.city || "N/A"}
-                          </p>
-                        </div>
-                      </div>
-
-                      <div className="space-y-2">
-                        <div className="flex items-center justify-between">
-                          <Label className="text-sm font-medium text-muted-foreground">State</Label>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => copyAddressPart(currentAddress.state, "State")}
-                            className={`h-8 w-8 p-0 transition-all duration-300 ${
-                              copiedField === "State"
-                                ? "bg-green-100 dark:bg-green-800/30 scale-110"
-                                : "hover:bg-purple-100 dark:hover:bg-purple-800/30"
-                            }`}
-                          >
-                            {copiedField === "State" ? (
-                              <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400" />
-                            ) : (
-                              <Copy className="h-4 w-4 text-purple-600 dark:text-purple-400" />
-                            )}
-                          </Button>
-                        </div>
-                        <div
-                          className={`p-4 rounded-lg border transition-all duration-300 ${
-                            copiedField === "State"
-                              ? "bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800 ring-2 ring-green-300 dark:ring-green-700"
-                              : "bg-purple-50 dark:bg-purple-900/20 border-purple-200 dark:border-purple-800 hover:bg-purple-100/50 dark:hover:bg-purple-900/30"
-                          }`}
-                        >
-                          <p className="text-purple-900 dark:text-purple-100 font-medium">
-                            {currentAddress.state || "N/A"}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* ZIP Code and Country Row */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <div className="flex items-center justify-between">
-                          <Label className="text-sm font-medium text-muted-foreground">ZIP Code</Label>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => copyAddressPart(currentAddress.zip, "ZIP Code")}
-                            className={`h-8 w-8 p-0 transition-all duration-300 ${
-                              copiedField === "ZIP Code"
-                                ? "bg-green-100 dark:bg-green-800/30 scale-110"
-                                : "hover:bg-orange-100 dark:hover:bg-orange-800/30"
-                            }`}
-                          >
-                            {copiedField === "ZIP Code" ? (
-                              <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400" />
-                            ) : (
-                              <Copy className="h-4 w-4 text-orange-600 dark:text-orange-400" />
-                            )}
-                          </Button>
-                        </div>
-                        <div
-                          className={`p-4 rounded-lg border transition-all duration-300 ${
-                            copiedField === "ZIP Code"
-                              ? "bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800 ring-2 ring-green-300 dark:ring-green-700"
-                              : "bg-orange-50 dark:bg-orange-900/20 border-orange-200 dark:border-orange-800 hover:bg-orange-100/50 dark:hover:bg-orange-900/30"
-                          }`}
-                        >
-                          <p className="text-orange-900 dark:text-orange-100 font-medium">
-                            {currentAddress.zip || "N/A"}
-                          </p>
-                        </div>
-                      </div>
-
-                      <div className="space-y-2">
-                        <div className="flex items-center justify-between">
-                          <Label className="text-sm font-medium text-muted-foreground">Country</Label>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => copyAddressPart(currentAddress.country, "Country")}
-                            className={`h-8 w-8 p-0 transition-all duration-300 ${
-                              copiedField === "Country"
-                                ? "bg-green-100 dark:bg-green-800/30 scale-110"
-                                : "hover:bg-cyan-100 dark:hover:bg-cyan-800/30"
-                            }`}
-                          >
-                            {copiedField === "Country" ? (
-                              <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400" />
-                            ) : (
-                              <Copy className="h-4 w-4 text-cyan-600 dark:text-cyan-400" />
-                            )}
-                          </Button>
-                        </div>
-                        <div
-                          className={`p-4 rounded-lg border transition-all duration-300 ${
-                            copiedField === "Country"
-                              ? "bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800 ring-2 ring-green-300 dark:ring-green-700"
-                              : "bg-cyan-50 dark:bg-cyan-900/20 border-cyan-200 dark:border-cyan-800 hover:bg-cyan-100/50 dark:hover:bg-cyan-900/30"
-                          }`}
-                        >
-                          <p className="text-cyan-900 dark:text-cyan-100 font-medium">
-                            {currentAddress.country || "N/A"}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Full Address */}
-                    <div className="space-y-2">
+                <CardContent className="space-y-6 flex-1 overflow-y-auto">
+                  {/* Address Parts - Grid Layout */}
+                  <div className="space-y-6">
+                    {/* Full Address - Full Width */}
+                    <div className="space-y-3">
                       <div className="flex items-center justify-between">
                         <Label className="text-sm font-medium text-muted-foreground">Full Address</Label>
                         <Button
@@ -639,11 +471,183 @@ export default function AddressGeneratorPage() {
                         }`}
                       >
                         <MapPin className="h-5 w-5 text-orange-600" />
-                        <AlertDescription className="text-lg font-medium text-orange-900 dark:text-orange-100">
+                        <AlertDescription className="text-lg font-medium text-orange-900 dark:text-orange-100 text-center">
                           {currentAddress.fullAddress}
                         </AlertDescription>
                       </Alert>
                     </div>
+
+                    {/* Address Details Grid */}
+                    <div className="grid grid-cols-2 gap-4">
+                      {/* Street Address */}
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between">
+                          <Label className="text-xs font-medium text-muted-foreground">Street Address</Label>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => copyAddressPart(currentAddress.street, "Street Address")}
+                            className={`h-6 w-6 p-0 transition-all duration-300 ${
+                              copiedField === "Street Address"
+                                ? "bg-green-100 dark:bg-green-800/30 scale-110"
+                                : "hover:bg-blue-100 dark:hover:bg-blue-800/30"
+                            }`}
+                          >
+                            {copiedField === "Street Address" ? (
+                              <CheckCircle className="h-3 w-3 text-green-600 dark:text-green-400" />
+                            ) : (
+                              <Copy className="h-3 w-3 text-blue-600 dark:text-blue-400" />
+                            )}
+                          </Button>
+                        </div>
+                        <div
+                          className={`p-3 rounded-lg border transition-all duration-300 ${
+                            copiedField === "Street Address"
+                              ? "bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800 ring-2 ring-green-300 dark:ring-green-700"
+                              : "bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800 hover:bg-blue-100/50 dark:hover:bg-blue-900/30"
+                          }`}
+                        >
+                          <p className="text-blue-900 dark:text-blue-100 font-medium text-center text-sm">{currentAddress.street}</p>
+                        </div>
+                      </div>
+
+                      {/* City */}
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between">
+                          <Label className="text-xs font-medium text-muted-foreground">City</Label>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => copyAddressPart(currentAddress.city, "City")}
+                            className={`h-6 w-6 p-0 transition-all duration-300 ${
+                              copiedField === "City"
+                                ? "bg-green-100 dark:bg-green-800/30 scale-110"
+                                : "hover:bg-green-100 dark:hover:bg-green-800/30"
+                            }`}
+                          >
+                            {copiedField === "City" ? (
+                              <CheckCircle className="h-3 w-3 text-green-600 dark:text-green-400" />
+                            ) : (
+                              <Copy className="h-3 w-3 text-green-600 dark:text-green-400" />
+                            )}
+                          </Button>
+                        </div>
+                        <div
+                          className={`p-3 rounded-lg border transition-all duration-300 ${
+                            copiedField === "City"
+                              ? "bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800 ring-2 ring-green-300 dark:ring-green-700"
+                              : "bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800 hover:bg-green-100/50 dark:hover:bg-green-900/30"
+                          }`}
+                        >
+                          <p className="text-green-900 dark:text-green-100 font-medium text-center text-sm">
+                            {currentAddress.city || "N/A"}
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* State */}
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between">
+                          <Label className="text-xs font-medium text-muted-foreground">State</Label>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => copyAddressPart(currentAddress.state, "State")}
+                            className={`h-6 w-6 p-0 transition-all duration-300 ${
+                              copiedField === "State"
+                                ? "bg-green-100 dark:bg-green-800/30 scale-110"
+                                : "hover:bg-purple-100 dark:hover:bg-purple-800/30"
+                            }`}
+                          >
+                            {copiedField === "State" ? (
+                              <CheckCircle className="h-3 w-3 text-green-600 dark:text-green-400" />
+                            ) : (
+                              <Copy className="h-3 w-3 text-purple-600 dark:text-purple-400" />
+                            )}
+                          </Button>
+                        </div>
+                        <div
+                          className={`p-3 rounded-lg border transition-all duration-300 ${
+                            copiedField === "State"
+                              ? "bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800 ring-2 ring-green-300 dark:ring-green-700"
+                              : "bg-purple-50 dark:bg-purple-900/20 border-purple-200 dark:border-purple-800 hover:bg-purple-100/50 dark:hover:bg-purple-900/30"
+                          }`}
+                        >
+                          <p className="text-purple-900 dark:text-purple-100 font-medium text-center text-sm">
+                            {currentAddress.state || "N/A"}
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* ZIP Code */}
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between">
+                          <Label className="text-xs font-medium text-muted-foreground">ZIP Code</Label>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => copyAddressPart(currentAddress.zip, "ZIP Code")}
+                            className={`h-6 w-6 p-0 transition-all duration-300 ${
+                              copiedField === "ZIP Code"
+                                ? "bg-green-100 dark:bg-green-800/30 scale-110"
+                                : "hover:bg-orange-100 dark:hover:bg-orange-800/30"
+                            }`}
+                          >
+                            {copiedField === "ZIP Code" ? (
+                              <CheckCircle className="h-3 w-3 text-green-600 dark:text-green-400" />
+                            ) : (
+                              <Copy className="h-3 w-3 text-orange-600 dark:text-orange-400" />
+                            )}
+                          </Button>
+                        </div>
+                        <div
+                          className={`p-3 rounded-lg border transition-all duration-300 ${
+                            copiedField === "ZIP Code"
+                              ? "bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800 ring-2 ring-green-300 dark:ring-green-700"
+                              : "bg-orange-50 dark:bg-orange-900/20 border-orange-200 dark:border-orange-800 hover:bg-orange-100/50 dark:hover:bg-orange-900/30"
+                          }`}
+                        >
+                          <p className="text-orange-900 dark:text-orange-100 font-medium text-center text-sm">
+                            {currentAddress.zip || "N/A"}
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Country */}
+                      <div className="space-y-2 col-span-2">
+                        <div className="flex items-center justify-between">
+                          <Label className="text-xs font-medium text-muted-foreground">Country</Label>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => copyAddressPart(currentAddress.country, "Country")}
+                            className={`h-6 w-6 p-0 transition-all duration-300 ${
+                              copiedField === "Country"
+                                ? "bg-green-100 dark:bg-green-800/30 scale-110"
+                                : "hover:bg-cyan-100 dark:hover:bg-cyan-800/30"
+                            }`}
+                          >
+                            {copiedField === "Country" ? (
+                              <CheckCircle className="h-3 w-3 text-green-600 dark:text-green-400" />
+                            ) : (
+                              <Copy className="h-3 w-3 text-cyan-600 dark:text-cyan-400" />
+                            )}
+                          </Button>
+                        </div>
+                        <div
+                          className={`p-3 rounded-lg border transition-all duration-300 ${
+                            copiedField === "Country"
+                              ? "bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800 ring-2 ring-green-300 dark:ring-green-700"
+                              : "bg-cyan-50 dark:bg-cyan-900/20 border-cyan-200 dark:border-cyan-800 hover:bg-cyan-100/50 dark:hover:bg-cyan-900/30"
+                          }`}
+                        >
+                          <p className="text-cyan-900 dark:text-cyan-100 font-medium text-center text-sm">
+                            {currentAddress.country || "N/A"}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
                   </div>
 
                   {/* Navigation - Fixed at bottom */}
