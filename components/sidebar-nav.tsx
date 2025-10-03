@@ -5,11 +5,7 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 import {
-  Home,
   Layers,
-  FileText,
-  FolderKanban,
-  Settings,
   ChevronDown,
   Sparkles,
   Smartphone,
@@ -18,15 +14,11 @@ import {
   LogOut,
 } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { useAuth } from "@/lib/auth-context"
 import { Button } from "@/components/ui/button"
 
 const navigation = [
-  { name: "Home", href: "/tool", icon: Home, count: null },
   { name: "Tools", href: "/tool", icon: Layers, count: 3, hasDropdown: true },
-  { name: "Profile", href: "/profile", icon: FileText, count: null },
-  { name: "Premium", href: "/premium-tools", icon: FolderKanban, count: null },
 ]
 
 const toolsSubmenu = [
@@ -126,22 +118,20 @@ export function SidebarNav() {
       </nav>
 
       <div className="border-t p-4 space-y-2">
-        <Link
-          href="/profile"
-          className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
-        >
-          <Settings className="h-5 w-5" />
-          <span>Settings</span>
-        </Link>
-        <div className="flex items-center gap-3 rounded-lg bg-muted px-3 py-2.5">
-          <Avatar className="h-8 w-8">
-            <AvatarFallback className="bg-gradient-to-br from-purple-500 to-blue-500 text-white text-xs font-semibold">
-              {user?.email?.substring(0, 2).toUpperCase() || "U"}
-            </AvatarFallback>
-          </Avatar>
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium truncate">{user?.email || "User"}</p>
-            <p className="text-xs text-muted-foreground">Pro Plan</p>
+        <div className="rounded-lg bg-gradient-to-r from-green-500/10 to-blue-500/10 border border-green-500/20 px-3 py-2.5">
+          <div className="flex items-center gap-2 mb-1">
+            <div className="h-2 w-2 bg-green-500 rounded-full animate-pulse"></div>
+            <p className="text-sm font-medium text-green-700 dark:text-green-400">Account Active</p>
+          </div>
+          <div className="space-y-1">
+            <p className="text-xs text-muted-foreground">Expires on:</p>
+            <p className="text-sm font-semibold">
+              {user?.expiryDate ? new Date(user.expiryDate).toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric'
+              }) : 'Dec 31, 2024'}
+            </p>
           </div>
         </div>
         <Button
