@@ -316,7 +316,7 @@ export default function AddressGeneratorPage() {
               </TabsList>
 
               <TabsContent value="ip" className="space-y-0">
-                <Card className="h-[650px] flex flex-col">
+                <Card className="h-[500px] flex flex-col">
                   <CardHeader className="pb-4 flex-shrink-0">
                     <CardTitle className="flex items-center gap-2">
                       <MapPin className="h-5 w-5 text-blue-500" />
@@ -367,7 +367,7 @@ export default function AddressGeneratorPage() {
               </TabsContent>
 
               <TabsContent value="zip" className="space-y-0">
-                <Card className="h-[650px] flex flex-col">
+                <Card className="h-[500px] flex flex-col">
                   <CardHeader className="pb-4 flex-shrink-0">
                     <CardTitle className="flex items-center gap-2">
                       <MapPin className="h-5 w-5 text-green-500" />
