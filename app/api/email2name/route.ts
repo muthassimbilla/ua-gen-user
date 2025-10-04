@@ -1,4 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server"
+import { addApiRequest } from "../admin/api-stats/route"
 
 const SYSTEM_PROMPT = `
 🧠 System Prompt for AI Agent (Advanced Email → Name & Type Classifier)
@@ -52,15 +53,18 @@ Type: <Business/Personal>
 `
 
 export async function POST(request: NextRequest) {
+  const startTime = Date.now()
+  const requestId = Math.random().toString(36).substring(7)
+  
   try {
     const { email } = await request.json()
 
     if (!email || !email.includes("@")) {
+      addApiRequest(false, Date.now() - startTime, "Invalid email address", email, requestId)
       return NextResponse.json({ success: false, error: "Invalid email address" }, { status: 400 })
     }
 
     // Log usage for monitoring
-    const requestId = Math.random().toString(36).substring(7)
     console.log(`[${requestId}] Email2Name API called for: ${email}`)
     
     // Log request details
@@ -71,111 +75,73 @@ export async function POST(request: NextRequest) {
       ip: request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown'
     })
 
-    // Check if DEEPSEEK_API_KEY is available
-    const deepseekApiKey = process.env.DEEPSEEK_API_KEY
-    const googleApiKey = process.env.GOOGLE_API_KEY
-    
-    if (!deepseekApiKey && !googleApiKey) {
+    // Check if GOOGLE_API_KEY is available
+    const apiKey = process.env.GOOGLE_API_KEY
+    if (!apiKey) {
+      addApiRequest(false, Date.now() - startTime, "GOOGLE_API_KEY not configured", email, requestId)
       return NextResponse.json(
-        { success: false, error: "No API key configured. Please add DEEPSEEK_API_KEY or GOOGLE_API_KEY to your environment variables." },
+        { success: false, error: "GOOGLE_API_KEY not configured. Please add it to your environment variables." },
         { status: 500 },
       )
     }
 
-    // Choose API provider (DeepSeek preferred)
-    let response: Response
-    let apiProvider = ""
-    
-    if (deepseekApiKey) {
-      // Use DeepSeek API
-      apiProvider = "DeepSeek"
-      console.log(`[${requestId}] Using DeepSeek API for email: ${email}`)
-      
-      response = await fetch("https://api.deepseek.com/v1/chat/completions", {
+    // Call Google Gemini API
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${apiKey}`,
+      {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${deepseekApiKey}`,
         },
         body: JSON.stringify({
-          model: "deepseek-chat",
-          messages: [
+          contents: [
             {
-              role: "system",
-              content: SYSTEM_PROMPT
+              parts: [
+                {
+                  text: `${SYSTEM_PROMPT}\n\nEmail: ${email}`,
+                },
+              ],
             },
-            {
-              role: "user",
-              content: `Email: ${email}`
-            }
           ],
-          temperature: 0.7,
-          max_tokens: 200,
-        }),
-      })
-    } else {
-      // Fallback to Google Gemini API
-      apiProvider = "Google Gemini"
-      console.log(`[${requestId}] Using Google Gemini API for email: ${email}`)
-      
-      response = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${googleApiKey}`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
+          generationConfig: {
+            temperature: 0.7,
+            maxOutputTokens: 200,
           },
-          body: JSON.stringify({
-            contents: [
-              {
-                parts: [
-                  {
-                    text: `${SYSTEM_PROMPT}\n\nEmail: ${email}`,
-                  },
-                ],
-              },
-            ],
-            generationConfig: {
-              temperature: 0.7,
-              maxOutputTokens: 200,
-            },
-          }),
-        },
-      )
-    }
+        }),
+      },
+    )
 
     if (!response.ok) {
       const errorData = await response.json()
-      console.error(`[${requestId}] ${apiProvider} API error:`, {
+      console.error(`[${requestId}] Gemini API error:`, {
         status: response.status,
         statusText: response.statusText,
         error: errorData,
         email: email,
-        apiProvider: apiProvider,
         timestamp: new Date().toISOString()
       })
       
       // Check for quota exceeded error
-      if (errorData.error?.message?.includes("quota") || errorData.error?.message?.includes("limit") || errorData.error?.message?.includes("rate")) {
-        console.error(`[${requestId}] QUOTA/RATE LIMIT EXCEEDED for email: ${email} using ${apiProvider}`)
+      if (errorData.error?.message?.includes("quota") || errorData.error?.message?.includes("limit")) {
+        console.error(`[${requestId}] QUOTA EXCEEDED for email: ${email}`)
+        addApiRequest(false, Date.now() - startTime, "API quota exceeded", email, requestId)
         return NextResponse.json(
           { 
             success: false, 
-            error: `${apiProvider} API quota/rate limit exceeded. Please check your API key limits or upgrade your plan.`,
+            error: "API quota exceeded. Please check your Google API key limits or upgrade your plan.",
             requestId: requestId,
-            apiProvider: apiProvider,
             timestamp: new Date().toISOString()
           },
           { status: 429 },
         )
       }
       
+      addApiRequest(false, Date.now() - startTime, errorData.error?.message || "Unknown error", email, requestId)
       return NextResponse.json(
         { 
           success: false, 
-          error: `Failed to generate name from email using ${apiProvider}: ${errorData.error?.message || "Unknown error"}`,
+          error: `Failed to generate name from email: ${errorData.error?.message || "Unknown error"}`,
           requestId: requestId,
-          apiProvider: apiProvider,
           timestamp: new Date().toISOString()
         },
         { status: 500 },
@@ -183,15 +149,10 @@ export async function POST(request: NextRequest) {
     }
 
     const data = await response.json()
-    let generatedText = ""
-    
-    if (apiProvider === "DeepSeek") {
-      generatedText = data.choices?.[0]?.message?.content || ""
-    } else {
-      generatedText = data.candidates?.[0]?.content?.parts?.[0]?.text || ""
-    }
+    const generatedText = data.candidates?.[0]?.content?.parts?.[0]?.text
 
     if (!generatedText) {
+      addApiRequest(false, Date.now() - startTime, "No response from AI", email, requestId)
       return NextResponse.json({ success: false, error: "No response from AI" }, { status: 500 })
     }
 
@@ -228,10 +189,12 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    console.log(`[${requestId}] Successfully generated name for: ${email} using ${apiProvider}`, {
+    const responseTime = Date.now() - startTime
+    addApiRequest(true, responseTime)
+    
+    console.log(`[${requestId}] Successfully generated name for: ${email}`, {
       result: result,
-      apiProvider: apiProvider,
-      responseTime: Date.now() - Date.now(),
+      responseTime: responseTime,
       timestamp: new Date().toISOString()
     })
 
@@ -239,11 +202,12 @@ export async function POST(request: NextRequest) {
       success: true,
       data: result,
       requestId: requestId,
-      apiProvider: apiProvider,
       timestamp: new Date().toISOString()
     })
   } catch (error) {
-    const requestId = Math.random().toString(36).substring(7)
+    const responseTime = Date.now() - startTime
+    addApiRequest(false, responseTime, error instanceof Error ? error.message : "Unknown error", email, requestId)
+    
     console.error(`[${requestId}] Email2Name API error:`, {
       error: error instanceof Error ? error.message : "Unknown error",
       stack: error instanceof Error ? error.stack : undefined,

@@ -1,21 +1,51 @@
 import { type NextRequest, NextResponse } from "next/server"
 
+// Simple in-memory cache (in production, use Redis or similar)
+let healthCache: {
+  status: string
+  timestamp: number
+  responseTime: number
+} | null = null
+
+const CACHE_DURATION = 5 * 60 * 1000 // 5 minutes
+
 export async function GET(request: NextRequest) {
   try {
+    const now = Date.now()
+    
+    // Check if we have a valid cached result
+    if (healthCache && (now - healthCache.timestamp) < CACHE_DURATION) {
+      return NextResponse.json({
+        status: "cached",
+        message: "Using cached health check result",
+        cachedResult: healthCache,
+        timestamp: new Date().toISOString()
+      })
+    }
+    
+    // Perform actual health check
     const startTime = Date.now()
     
-    // Check if GOOGLE_API_KEY is available
     const apiKey = process.env.GOOGLE_API_KEY
     if (!apiKey) {
-      return NextResponse.json({
+      const errorResult = {
         status: "error",
         message: "GOOGLE_API_KEY not configured",
         timestamp: new Date().toISOString(),
         responseTime: Date.now() - startTime
-      }, { status: 500 })
+      }
+      
+      // Cache the error result too
+      healthCache = {
+        status: "error",
+        timestamp: now,
+        responseTime: Date.now() - startTime
+      }
+      
+      return NextResponse.json(errorResult, { status: 500 })
     }
 
-    // Test API with a simple request
+    // Test API with minimal request
     const testResponse = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${apiKey}`,
       {
@@ -28,14 +58,14 @@ export async function GET(request: NextRequest) {
             {
               parts: [
                 {
-                  text: "Test API connection. Reply with 'OK' only.",
+                  text: "OK", // Minimal request
                 },
               ],
             },
           ],
           generationConfig: {
             temperature: 0.1,
-            maxOutputTokens: 10,
+            maxOutputTokens: 1, // Just 1 token
           },
         }),
       },
@@ -45,34 +75,61 @@ export async function GET(request: NextRequest) {
 
     if (!testResponse.ok) {
       const errorData = await testResponse.json()
-      return NextResponse.json({
+      const errorResult = {
         status: "error",
         message: "Google Gemini API error",
         error: errorData,
         responseTime,
         timestamp: new Date().toISOString()
-      }, { status: 500 })
+      }
+      
+      // Cache error result
+      healthCache = {
+        status: "error",
+        timestamp: now,
+        responseTime
+      }
+      
+      return NextResponse.json(errorResult, { status: 500 })
     }
 
     const data = await testResponse.json()
     const generatedText = data.candidates?.[0]?.content?.parts?.[0]?.text
 
-    return NextResponse.json({
+    const successResult = {
       status: "healthy",
       message: "Email2Name API is working",
       apiResponse: generatedText,
       responseTime,
       timestamp: new Date().toISOString(),
       apiKeyConfigured: true
-    })
+    }
+    
+    // Cache success result
+    healthCache = {
+      status: "healthy",
+      timestamp: now,
+      responseTime
+    }
+
+    return NextResponse.json(successResult)
 
   } catch (error) {
-    return NextResponse.json({
+    const errorResult = {
       status: "error",
       message: "Internal server error",
       error: error instanceof Error ? error.message : "Unknown error",
       timestamp: new Date().toISOString(),
       responseTime: Date.now() - Date.now()
-    }, { status: 500 })
+    }
+    
+    // Cache error result
+    healthCache = {
+      status: "error",
+      timestamp: Date.now(),
+      responseTime: 0
+    }
+    
+    return NextResponse.json(errorResult, { status: 500 })
   }
 }

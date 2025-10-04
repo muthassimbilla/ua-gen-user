@@ -27,10 +27,10 @@ export default function Email2NamePage() {
   const [apiStatus, setApiStatus] = useState<'checking' | 'healthy' | 'error' | 'unknown'>('unknown')
   const [lastError, setLastError] = useState<string | null>(null)
 
-  // Check API health on component mount
-  useEffect(() => {
-    checkApiHealth()
-  }, [])
+  // Check API health on component mount (disabled to save API calls)
+  // useEffect(() => {
+  //   checkApiHealth()
+  // }, [])
 
   const checkApiHealth = async () => {
     setApiStatus('checking')
@@ -158,8 +158,9 @@ export default function Email2NamePage() {
                     size="sm" 
                     onClick={checkApiHealth}
                     className="h-6 px-2 text-xs"
+                    title="Check API status (uses 1 API call)"
                   >
-                    Refresh
+                    Check Status
                   </Button>
                 </div>
               </CardTitle>
