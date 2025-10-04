@@ -59,6 +59,9 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, error: "Invalid email address" }, { status: 400 })
     }
 
+    // Log usage for monitoring
+    console.log(`[v0] Email2Name API called for: ${email}`)
+
     // Check if GOOGLE_API_KEY is available
     const apiKey = process.env.GOOGLE_API_KEY
     if (!apiKey) {
@@ -97,8 +100,17 @@ export async function POST(request: NextRequest) {
     if (!response.ok) {
       const errorData = await response.json()
       console.error("[v0] Gemini API error:", errorData)
+      
+      // Check for quota exceeded error
+      if (errorData.error?.message?.includes("quota") || errorData.error?.message?.includes("limit")) {
+        return NextResponse.json(
+          { success: false, error: "API quota exceeded. Please check your Google API key limits or upgrade your plan." },
+          { status: 429 },
+        )
+      }
+      
       return NextResponse.json(
-        { success: false, error: "Failed to generate name from email. Please check your API key." },
+        { success: false, error: `Failed to generate name from email: ${errorData.error?.message || "Unknown error"}` },
         { status: 500 },
       )
     }
