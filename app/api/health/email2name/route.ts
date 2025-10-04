@@ -4,42 +4,72 @@ export async function GET(request: NextRequest) {
   try {
     const startTime = Date.now()
     
-    // Check if GOOGLE_API_KEY is available
-    const apiKey = process.env.GOOGLE_API_KEY
-    if (!apiKey) {
+    // Check if API keys are available
+    const deepseekApiKey = process.env.DEEPSEEK_API_KEY
+    const googleApiKey = process.env.GOOGLE_API_KEY
+    
+    if (!deepseekApiKey && !googleApiKey) {
       return NextResponse.json({
         status: "error",
-        message: "GOOGLE_API_KEY not configured",
+        message: "No API key configured. Please add DEEPSEEK_API_KEY or GOOGLE_API_KEY",
         timestamp: new Date().toISOString(),
         responseTime: Date.now() - startTime
       }, { status: 500 })
     }
 
     // Test API with a simple request
-    const testResponse = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${apiKey}`,
-      {
+    let testResponse: Response
+    let apiProvider = ""
+    
+    if (deepseekApiKey) {
+      // Test DeepSeek API
+      apiProvider = "DeepSeek"
+      testResponse = await fetch("https://api.deepseek.com/v1/chat/completions", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "Authorization": `Bearer ${deepseekApiKey}`,
         },
         body: JSON.stringify({
-          contents: [
+          model: "deepseek-chat",
+          messages: [
             {
-              parts: [
-                {
-                  text: "Test API connection. Reply with 'OK' only.",
-                },
-              ],
-            },
+              role: "user",
+              content: "Test API connection. Reply with 'OK' only."
+            }
           ],
-          generationConfig: {
-            temperature: 0.1,
-            maxOutputTokens: 10,
-          },
+          temperature: 0.1,
+          max_tokens: 10,
         }),
-      },
-    )
+      })
+    } else {
+      // Test Google Gemini API
+      apiProvider = "Google Gemini"
+      testResponse = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${googleApiKey}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            contents: [
+              {
+                parts: [
+                  {
+                    text: "Test API connection. Reply with 'OK' only.",
+                  },
+                ],
+              },
+            ],
+            generationConfig: {
+              temperature: 0.1,
+              maxOutputTokens: 10,
+            },
+          }),
+        },
+      )
+    }
 
     const responseTime = Date.now() - startTime
 
@@ -47,20 +77,28 @@ export async function GET(request: NextRequest) {
       const errorData = await testResponse.json()
       return NextResponse.json({
         status: "error",
-        message: "Google Gemini API error",
+        message: `${apiProvider} API error`,
         error: errorData,
+        apiProvider: apiProvider,
         responseTime,
         timestamp: new Date().toISOString()
       }, { status: 500 })
     }
 
     const data = await testResponse.json()
-    const generatedText = data.candidates?.[0]?.content?.parts?.[0]?.text
+    let generatedText = ""
+    
+    if (apiProvider === "DeepSeek") {
+      generatedText = data.choices?.[0]?.message?.content || ""
+    } else {
+      generatedText = data.candidates?.[0]?.content?.parts?.[0]?.text || ""
+    }
 
     return NextResponse.json({
       status: "healthy",
       message: "Email2Name API is working",
       apiResponse: generatedText,
+      apiProvider: apiProvider,
       responseTime,
       timestamp: new Date().toISOString(),
       apiKeyConfigured: true
