@@ -1,131 +1,158 @@
 "use client"
 
 import { Button } from "@/components/ui/button"
-import { ArrowRight, Sparkles, Zap, Shield, Rocket } from "lucide-react"
-import Link from "next/link"
-import { useScrollAnimation } from "@/hooks/use-scroll-animation"
-import Image from "next/image"
+import { ArrowRight, Sparkles, Zap, TrendingUp } from "lucide-react"
+import { useRouter } from "next/navigation"
+import { motion } from "framer-motion"
+import { FlippingText } from "./flipping-text"
+import { TextGenerateEffect } from "./text-generate-effect"
 
 export function HeroSection() {
-  const { ref: heroRef, isVisible } = useScrollAnimation({ threshold: 0.2 })
+  const router = useRouter()
 
-  const content = {
-    badge: "🚀 Powerful Tools for Developers",
-    title: "Premium Tools For",
-    titleHighlight: "Self Sign-Up",
-    subtitle: "Work smarter. Earn bigger. Grow faster.",
-    description:
-      "AI-powered automation tools designed to generate user agents, addresses, and email names for CPA signup.",
-    ctaPrimary: "Get Started",
-    ctaSecondary: "View Tools",
-    feature1: "Lightning Fast",
-    feature2: "Secure & Private",
-    feature3: "AI Powered",
+  const handleGetStarted = () => {
+    if (typeof window !== "undefined" && (window as any).gtag) {
+      ;(window as any).gtag("event", "cta_click", {
+        event_category: "engagement",
+        event_label: "hero_get_started",
+      })
+    }
+    router.push("/signup")
   }
 
   return (
-    <section 
-      id="hero" 
-      ref={heroRef}
-      className="relative min-h-[80vh] flex items-center justify-center pt-16 pb-8 overflow-hidden"
-    >
-      {/* Animated Background */}
+    <section id="hero" className="relative min-h-[80vh] flex items-center justify-center overflow-hidden pt-16">
+      {/* Enhanced background with beautiful gradient layers */}
+      <div className="absolute inset-0 bg-gradient-to-br from-primary/8 via-accent/6 via-tertiary/4 to-background -z-10" />
+      <div className="absolute inset-0 bg-gradient-radial from-primary/10 via-transparent to-transparent -z-10" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_30%,hsl(var(--primary)/0.15),transparent_40%)] -z-10" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_20%,hsl(var(--accent)/0.12),transparent_50%)] -z-10" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_40%_80%,hsl(var(--tertiary)/0.08),transparent_50%)] -z-10" />
+      
+      {/* Animated floating orbs */}
       <div className="absolute inset-0 -z-10">
-        {/* Grid Pattern */}
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,#8080800a_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-[size:24px_24px]" />
-        
-        {/* Gradient Orbs - Optimized */}
-        <div className="absolute top-0 -left-4 w-72 h-72 bg-purple-500 rounded-full mix-blend-multiply filter blur-3xl opacity-10" />
-        <div className="absolute top-0 -right-4 w-72 h-72 bg-blue-500 rounded-full mix-blend-multiply filter blur-3xl opacity-10" />
-        <div className="absolute -bottom-8 left-20 w-72 h-72 bg-pink-500 rounded-full mix-blend-multiply filter blur-3xl opacity-10" />
-        
-        {/* Radial Gradient */}
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-background/50 to-background" />
+        <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-gradient-to-r from-primary/20 to-accent/20 rounded-full blur-3xl animate-pulse opacity-60" />
+        <div className="absolute top-3/4 right-1/4 w-48 h-48 bg-gradient-to-r from-accent/15 to-tertiary/15 rounded-full blur-2xl animate-pulse opacity-50" />
+        <div className="absolute bottom-1/4 left-1/3 w-32 h-32 bg-gradient-to-r from-tertiary/20 to-primary/20 rounded-full blur-xl animate-pulse opacity-40" />
+        <div className="absolute top-1/2 right-1/3 w-40 h-40 bg-gradient-to-r from-primary/10 to-accent/10 rounded-full blur-2xl animate-pulse opacity-30" />
       </div>
+      
+      
+      {/* Gradient mesh overlay */}
+      <div className="absolute inset-0 -z-10 bg-gradient-to-t from-background/20 via-transparent to-background/10" />
 
-      <div className="container relative z-10 mx-auto px-4 py-6">
-        <div 
-          className={`mx-auto max-w-5xl text-center space-y-6 transition-all duration-1000 ${
-            isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
-          }`}
-        >
-          {/* Badge with Logo */}
-          <div 
-            className="inline-flex items-center gap-3 rounded-full bg-gradient-to-r from-purple-500/10 via-blue-500/10 to-pink-500/10 border border-purple-500/20 px-5 py-2.5 backdrop-blur-sm shadow-lg hover:shadow-purple-500/20 transition-all duration-300 cursor-pointer hover:scale-105"
+      <div className="container mx-auto px-4 py-12">
+        <div className="max-w-4xl mx-auto text-center">
+          {/* Centered Content */}
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            className="space-y-8"
           >
-            <div className="relative h-5 w-5">
-              <Image
-                src="/ugenpro-logo.svg"
-                alt="UGen Pro Logo"
-                fill
-                className="object-contain"
-              />
-            </div>
-            <span className="text-sm font-semibold bg-gradient-to-r from-purple-600 via-blue-600 to-pink-600 bg-clip-text text-transparent">
-              {content.badge}
-            </span>
-          </div>
-
-          {/* Main Heading */}
-          <div className="space-y-3">
-            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight text-balance leading-tight">
-              {content.title}{" "}
-              <span className="bg-gradient-to-r from-purple-600 via-blue-600 to-pink-600 bg-clip-text text-transparent animate-gradient-x">
-                {content.titleHighlight}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass shadow-glow text-sm font-semibold hover-lift"
+            >
+              <Sparkles className="h-4 w-4 text-primary animate-pulse" />
+              <span className="gradient-text font-bold">
+                Next-Gen AI Tools
               </span>
-            </h1>
-            <p className="text-xl md:text-2xl font-medium text-muted-foreground/80">
-              {content.subtitle}
-            </p>
-          </div>
+            </motion.div>
 
-          {/* Description */}
-          <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto text-pretty leading-relaxed">
-            {content.description}
-          </p>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.3 }}
+            >
+              <FlippingText 
+                text="Premium Tools For" 
+                words={["CPA Marketing", "CPA Self Sign-Up"]}
+                duration={2000}
+              />
+            </motion.div>
 
-          {/* CTA Buttons */}
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-4">
-            <Link href="/signup">
-              <Button 
-                size="lg" 
-                className="text-base px-8 py-7 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 shadow-xl hover:shadow-purple-500/50 transition-all duration-300 hover:scale-105 group"
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.5 }}
+              className="text-lg md:text-xl text-muted-foreground leading-relaxed max-w-2xl mx-auto text-balance font-medium"
+            >
+              Unlock the power of AI-driven development. Generate code, content, and designs in seconds with our 
+              <span className="text-primary font-semibold"> professional toolkit</span>.
+            </motion.p>
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.6 }}
+              className="flex flex-col sm:flex-row gap-3 justify-center"
+            >
+              <Button
+                size="lg"
+                onClick={handleGetStarted}
+                className="text-base px-8 py-6 bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 text-primary-foreground rounded-xl font-bold shadow-color hover:shadow-glow-accent transition-all group interactive-scale"
               >
-                {content.ctaPrimary}
+                Get Started Free
                 <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
               </Button>
-            </Link>
-            <a href="#tools">
-              <Button 
-                size="lg" 
-                variant="outline" 
-                className="text-base px-8 py-7 bg-transparent border-2 hover:bg-purple-500/5 hover:border-purple-500/50 transition-all duration-300 hover:scale-105"
+              <Button
+                size="lg"
+                variant="outline"
+                onClick={() => {
+                  document.getElementById("tools")?.scrollIntoView({ behavior: "smooth" })
+                }}
+                className="text-base px-8 py-6 glass hover:glass-strong border-2 border-primary/30 hover:border-primary/60 rounded-xl font-bold interactive-scale"
               >
-                {content.ctaSecondary}
+                Explore Tools
               </Button>
-            </a>
-          </div>
+            </motion.div>
 
-          {/* Feature Pills */}
-          <div className="flex flex-wrap items-center justify-center gap-3 pt-4">
-            <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-blue-500/10 border border-blue-500/20 backdrop-blur-sm">
-              <Zap className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-              <span className="text-sm font-medium text-blue-700 dark:text-blue-300">{content.feature1}</span>
-            </div>
-            <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-green-500/10 border border-green-500/20 backdrop-blur-sm">
-              <Shield className="h-4 w-4 text-green-600 dark:text-green-400" />
-              <span className="text-sm font-medium text-green-700 dark:text-green-300">{content.feature2}</span>
-            </div>
-            <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-purple-500/10 border border-purple-500/20 backdrop-blur-sm">
-              <Rocket className="h-4 w-4 text-purple-600 dark:text-purple-400" />
-              <span className="text-sm font-medium text-purple-700 dark:text-purple-300">{content.feature3}</span>
-            </div>
-          </div>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.7 }}
+              className="flex flex-wrap gap-8 justify-center"
+            >
+              <div className="flex items-center gap-3 hover-lift">
+                <div className="p-2 rounded-xl bg-gradient-to-br from-primary/20 to-primary/10 shadow-glow">
+                  <Zap className="h-5 w-5 text-primary" />
+                </div>
+                <div>
+                  <div className="text-2xl font-bold gradient-text">10x</div>
+                  <div className="text-sm text-muted-foreground font-medium">Faster</div>
+                </div>
+              </div>
+              <div className="flex items-center gap-3 hover-lift">
+                <div className="p-2 rounded-xl bg-gradient-to-br from-accent/20 to-accent/10 shadow-glow-accent">
+                  <TrendingUp className="h-5 w-5 text-accent" />
+                </div>
+                <div>
+                  <div className="text-2xl font-bold gradient-text">10K+</div>
+                  <div className="text-sm text-muted-foreground font-medium">Users</div>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
         </div>
-      </div>
 
-      {/* Bottom Fade */}
-      <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-background to-transparent" />
+        {/* Animated text section */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.9 }}
+          className="mt-16 text-center"
+        >
+          <TextGenerateEffect 
+            words="Join thousands of developers building the future with AI-powered tools"
+            className="text-lg md:text-xl text-muted-foreground"
+            duration={0.8}
+            repeatInterval={3000}
+          />
+        </motion.div>
+      </div>
     </section>
   )
 }

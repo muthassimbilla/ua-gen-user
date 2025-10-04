@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-import { createContext, useContext, useEffect, useState } from "react"
+import { createContext, useContext, useEffect, useState, useTransition } from "react"
 import type { User } from "./auth-client"
 import { AuthService } from "./auth-client"
 import { useStatusMiddleware } from "./status-middleware"
@@ -26,6 +26,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true)
   const [userStatus, setUserStatus] = useState<UserStatus | null>(null)
   const [isLoginInProgress, setIsLoginInProgress] = useState(false)
+  const [isPending, startTransition] = useTransition()
+  const [initialCheckComplete, setInitialCheckComplete] = useState(false)
 
   const { showNotification } = useStatusNotification()
 
@@ -52,6 +54,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setUser(null)
     } finally {
       setLoading(false)
+      setInitialCheckComplete(true)
     }
   }
 
@@ -62,46 +65,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setIsLoginInProgress(true)
       setLoading(true)
 
-      return new Promise<void>((resolve, reject) => {
-        requestAnimationFrame(async () => {
-          try {
-            const loginTimeout = setTimeout(() => {
-              console.error("[v0] Login timeout")
-              setLoading(false)
-              setIsLoginInProgress(false)
-              reject(new Error("Login is taking longer than expected. Please try again."))
-            }, 10000)
-
-            try {
-              const { user: loggedInUser, userStatus } = await AuthService.login({
-                email,
-                password,
-              })
-
-              clearTimeout(loginTimeout)
-              console.log("[v0] Login successful with status:", userStatus)
-
-              setUser(loggedInUser)
-              setUserStatus(userStatus)
-
-              console.log("[v0] User set successfully")
-              resolve()
-            } catch (loginError) {
-              clearTimeout(loginTimeout)
-              reject(loginError)
-            }
-          } catch (error) {
-            console.error("[v0] Login failed:", error)
-            reject(error)
-          } finally {
-            setLoading(false)
-            setIsLoginInProgress(false)
-          }
-        })
+      const { user: loggedInUser, userStatus } = await AuthService.login({
+        email,
+        password,
       })
+
+      console.log("[v0] Login successful with status:", userStatus)
+
+      startTransition(() => {
+        setUser(loggedInUser)
+        setUserStatus(userStatus)
+      })
+
+      console.log("[v0] User set successfully")
     } catch (error) {
       console.error("[v0] Login failed:", error)
       throw error
+    } finally {
+      setLoading(false)
+      setIsLoginInProgress(false)
     }
   }
 
@@ -166,16 +148,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   useEffect(() => {
-    if (typeof window !== "undefined") {
+    if (typeof window !== "undefined" && !initialCheckComplete) {
       try {
         checkAuth()
       } catch (error) {
         console.warn("[v0] Error in auth useEffect:", error)
       }
     }
-  }, [])
+  }, [initialCheckComplete])
 
-  // Start status checking when user is logged in
   useEffect(() => {
     if (user && !loading) {
       console.log("[v0] Starting status checking for user:", user.id)

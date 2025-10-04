@@ -125,6 +125,8 @@ export class AuthService {
 
       const supabase = createClient()
 
+      const ipPromise = this.getUserCurrentIP().catch(() => "unknown")
+
       // Sign in with Supabase Auth
       const { data, error } = await supabase.auth.signInWithPassword({
         email: credentials.email,
@@ -140,12 +142,13 @@ export class AuthService {
         throw new Error("No user data returned from login")
       }
 
-      // Get user profile
-      const { data: profile, error: profileError } = await supabase
-        .from("profiles")
-        .select("*")
-        .eq("id", data.user.id)
-        .single()
+      const [profileResponse, currentIP] = await Promise.all([
+        supabase.from("profiles").select("*").eq("id", data.user.id).single(),
+        ipPromise,
+      ])
+
+      const profile = profileResponse.data
+      const profileError = profileResponse.error
 
       if (profileError) {
         console.error("[v0] Profile fetch error:", profileError)
@@ -175,20 +178,10 @@ export class AuthService {
         throw new Error("Account is deactivated")
       }
 
-      // Get current IP for session tracking
-      let currentIP: string | null = null
-      try {
-        currentIP = await this.getUserCurrentIP()
-      } catch (error) {
-        console.warn("[v0] IP detection failed:", error)
-        currentIP = "unknown"
-      }
-
-      // Create custom session for tracking
       const sessionToken = uuidv4() + "-" + Date.now().toString(36)
       const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // 7 days
 
-      await supabase.from("user_sessions").insert({
+      const sessionPromise = supabase.from("user_sessions").insert({
         user_id: data.user.id,
         session_token: sessionToken,
         expires_at: expiresAt.toISOString(),
@@ -197,14 +190,18 @@ export class AuthService {
         is_active: true,
       })
 
-      // Track IP history
       if (currentIP && currentIP !== "unknown") {
-        await supabase.from("user_ip_history").insert({
-          user_id: data.user.id,
-          ip_address: currentIP,
-          is_current: true,
-        })
+        supabase
+          .from("user_ip_history")
+          .insert({
+            user_id: data.user.id,
+            ip_address: currentIP,
+            is_current: true,
+          })
+          .catch((err) => console.warn("[v0] IP history tracking failed:", err))
       }
+
+      await sessionPromise
 
       const user: User = {
         id: data.user.id,
@@ -331,7 +328,7 @@ export class AuthService {
   static async getUserCurrentIP(): Promise<string | null> {
     try {
       const controller = new AbortController()
-      const timeoutId = setTimeout(() => controller.abort(), 2000)
+      const timeoutId = setTimeout(() => controller.abort(), 1000)
 
       const response = await fetch("https://api.ipify.org?format=json", {
         signal: controller.signal,

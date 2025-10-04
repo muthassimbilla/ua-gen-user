@@ -25,9 +25,13 @@ export const metadata: Metadata = {
   publisher: "UGen Pro",
   generator: "v0.app",
   icons: {
-    icon: "/favicon.svg",
+    icon: [
+      { url: "/favicon.svg", type: "image/svg+xml" },
+      { url: "/favicon-32x32.png", sizes: "32x32", type: "image/png" },
+      { url: "/favicon-16x16.png", sizes: "16x16", type: "image/png" },
+    ],
     shortcut: "/favicon.svg",
-    apple: "/favicon.svg",
+    apple: "/apple-touch-icon.png",
   },
   openGraph: {
     title: "UGen Pro - Advanced Generator Tools Platform",
@@ -37,10 +41,10 @@ export const metadata: Metadata = {
     siteName: "UGen Pro",
     images: [
       {
-        url: "/ugenpro-social-sharing.png",
+        url: "/ugenpro-social-sharing.svg",
         width: 1200,
         height: 630,
-        alt: "UGen Pro - Advanced Generator Tools Platform",
+        alt: "UGen Pro - Premium Tools For CPA Marketing",
       },
     ],
     locale: "en_US",
@@ -49,7 +53,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "UGen Pro - Advanced Generator Tools Platform",
     description: "The complete platform for advanced generator tools. Create user agents, addresses, and more with our powerful and secure tools.",
-    images: ["/ugenpro-social-sharing.png"],
+    images: ["/ugenpro-social-sharing.svg"],
     creator: "@ugenpro",
   },
   robots: {

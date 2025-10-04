@@ -17,8 +17,8 @@ const PricingSection = dynamic(
   },
 )
 
-const TestimonialsSection = dynamic(
-  () => import("@/components/testimonials-section").then((mod) => ({ default: mod.TestimonialsSection })),
+const ContactSection = dynamic(
+  () => import("@/components/contact-section").then((mod) => ({ default: mod.ContactSection })),
   {
     loading: () => <div className="h-96 animate-pulse bg-muted/20" />,
   },
@@ -41,7 +41,7 @@ export default function HomePage() {
 
   // Track active section for navigation highlighting - Optimized
   useEffect(() => {
-    const sections = ["hero", "tools", "pricing", "testimonials"]
+    const sections = ["hero", "tools", "pricing", "contact"]
     let timeoutId: NodeJS.Timeout
     
     const observer = new IntersectionObserver(
@@ -78,13 +78,15 @@ export default function HomePage() {
   }, [])
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen marble-bg">
       <Navigation activeSection={activeSection} />
-      <main>
+      <main className="relative">
         <HeroSection />
-        <ToolsSection />
-        <PricingSection />
-        <TestimonialsSection />
+        <div>
+          <ToolsSection />
+          <PricingSection />
+          <ContactSection />
+        </div>
       </main>
       <Footer />
     </div>

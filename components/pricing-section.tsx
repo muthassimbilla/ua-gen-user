@@ -1,11 +1,9 @@
 "use client"
 
-import { Button } from "@/components/ui/button"
-import { Sparkles, ArrowRight, Check } from "lucide-react"
 import { PricingCards } from "@/components/pricing-cards"
 import { useRouter } from "next/navigation"
 import { useScrollAnimation } from "@/hooks/use-scroll-animation"
-import Image from "next/image"
+import { motion } from "framer-motion"
 
 export function PricingSection() {
   const router = useRouter()
@@ -22,88 +20,36 @@ export function PricingSection() {
   }
 
   return (
-    <section 
-      id="pricing" 
-      ref={sectionRef}
-      className="relative py-12 overflow-hidden"
-    >
-      {/* Background Elements */}
-      <div className="absolute inset-0 -z-10">
-        <div className="absolute inset-0 bg-gradient-to-b from-background via-green-500/5 to-background" />
-        <div className="absolute top-1/4 -left-48 w-96 h-96 bg-green-500/20 rounded-full blur-3xl animate-pulse" />
-        <div className="absolute bottom-1/4 -right-48 w-96 h-96 bg-blue-500/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: "1s" }} />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl" />
-      </div>
+    <section id="pricing" ref={sectionRef} className="relative py-16 md:py-20 overflow-hidden">
+      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-primary/5 to-transparent -z-10" />
 
       <div className="container relative z-10 mx-auto px-4">
-        {/* Header */}
-        <div 
-          className={`text-center space-y-4 mb-10 transition-all duration-1000 ${
-            isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
-          }`}
+        <motion.div
+          className="max-w-4xl mx-auto text-center mb-12"
+          initial={{ opacity: 0, y: 20 }}
+          animate={isVisible ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+          transition={{ duration: 0.6 }}
         >
-          <div className="inline-flex items-center gap-3 rounded-full bg-gradient-to-r from-green-500/10 via-blue-500/10 to-purple-500/10 border border-green-500/20 px-5 py-2.5 backdrop-blur-sm shadow-lg">
-            <div className="relative h-4 w-4">
-              <Image
-                src="/ugenpro-logo.svg"
-                alt="UGen Pro Logo"
-                fill
-                className="object-contain"
-              />
-            </div>
-            <span className="text-sm font-semibold bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">
-              Flexible Pricing
-            </span>
+          <div className="inline-flex items-center gap-2 px-6 py-3 rounded-full glass shadow-glow border border-primary/20 text-sm font-bold mb-6">
+            <span className="gradient-text">Pricing Plans</span>
           </div>
-
-          <h2 className="text-3xl md:text-5xl font-bold text-balance leading-tight">
-            Simple,{" "}
-            <span className="bg-gradient-to-r from-green-600 via-blue-600 to-purple-600 bg-clip-text text-transparent">
-              transparent pricing
-            </span>
+          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-6 leading-tight text-balance">
+            Simple, transparent pricing
           </h2>
-
-        </div>
+          <p className="text-base md:text-lg text-muted-foreground leading-relaxed text-balance max-w-2xl mx-auto">
+            Choose the perfect plan for your needs. Premium tools for professional results.
+          </p>
+        </motion.div>
 
         {/* Pricing Cards */}
-        <div 
-          className={`transition-all duration-1000 delay-200 ${
-            isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-12"
-          }`}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={isVisible ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+          transition={{ duration: 0.6, delay: 0.2 }}
         >
           <PricingCards onSelectPlan={handleSelectPlan} buttonText="Get Started" />
-        </div>
+        </motion.div>
 
-        {/* Custom Plan CTA */}
-        <div 
-          className={`mt-10 text-center space-y-3 transition-all duration-1000 delay-400 ${
-            isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
-          }`}
-        >
-          <div className="max-w-2xl mx-auto p-6 rounded-2xl bg-gradient-to-br from-purple-500/10 via-blue-500/10 to-green-500/10 border border-purple-500/20 backdrop-blur-sm">
-            <p className="text-lg font-semibold mb-2">Need a custom plan for your organization?</p>
-            <p className="text-sm text-muted-foreground mb-4">
-              Contact our sales team for enterprise pricing and custom features
-            </p>
-            <Button
-              size="lg"
-              variant="outline"
-              className="border-2 border-green-500/30 hover:bg-green-500/10 bg-transparent hover:border-green-500/50 transition-all duration-300 hover:scale-105 group"
-              onClick={() => {
-                if (typeof window !== "undefined" && (window as any).gtag) {
-                  ;(window as any).gtag("event", "contact_sales_click", {
-                    event_category: "pricing",
-                    event_label: "contact_sales",
-                  })
-                }
-                window.location.href = "mailto:sales@ugenpro.com"
-              }}
-            >
-              Contact Sales
-              <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
-            </Button>
-          </div>
-        </div>
       </div>
     </section>
   )

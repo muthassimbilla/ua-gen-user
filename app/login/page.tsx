@@ -1,22 +1,22 @@
 "use client"
 
 import type React from "react"
-import { useState, useEffect, useCallback, memo } from "react"
+import { useState, useEffect, useCallback, memo, useTransition } from "react"
 import ClientOnly from "@/components/client-only"
 import { useRouter, useSearchParams } from "next/navigation"
 import { useAuth } from "@/lib/auth-context"
 import { getClientFlashMessage, clearClientFlashMessage, type FlashMessage } from "@/lib/flash-messages"
 import { useNetwork } from "@/contexts/network-context"
 import NoInternet from "@/components/no-internet"
-import { AuthService } from "@/lib/auth-client"
 import AuthLayout from "@/components/auth/auth-layout"
 import AuthHero from "@/components/auth/auth-hero"
 import AuthForm from "@/components/auth/auth-form"
+import AuthLoadingSpinner from "@/components/auth-loading-spinner"
 
 const LoginPage = memo(function LoginPage() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const { login, user } = useAuth()
+  const { login, user, loading: authLoading } = useAuth()
   const { isOnline, retryConnection, isReconnecting } = useNetwork()
 
   const [formData, setFormData] = useState({
@@ -33,6 +33,8 @@ const LoginPage = memo(function LoginPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [ipChangeLogout, setIpChangeLogout] = useState(false)
   const [sessionInvalidReason, setSessionInvalidReason] = useState(false)
+  const [isPending, startTransition] = useTransition()
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true)
 
   const clearSessionData = () => {
     try {
@@ -105,45 +107,21 @@ const LoginPage = memo(function LoginPage() {
         return
       }
 
-      const loginTimeout = setTimeout(() => {
-        console.error("[v0] Login timeout")
-        setLoading(false)
-        setIsSubmitting(false)
-        setErrors(["Login is taking longer than expected. Please try again."])
-      }, 10000)
+      await login(formData.email.trim(), formData.password)
 
-      try {
-        await login(formData.email.trim(), formData.password)
+      startTransition(() => {
+        const isPending = !user?.is_approved
+        const isSuspended = user?.account_status === "suspended"
+        const isExpired = user?.expiration_date && new Date(user.expiration_date) < new Date()
 
-        clearTimeout(loginTimeout)
-
-        // Get the current user from auth context to check their status
-        const currentUser = await AuthService.getCurrentUser()
-
-        if (currentUser) {
-          const isPending = !currentUser.is_approved
-          const isSuspended = currentUser.account_status === "suspended"
-          const isExpired = currentUser.expiration_date && new Date(currentUser.expiration_date) < new Date()
-
-          // If user is pending, suspended, or expired, redirect to premium-tools directly
-          if (isPending || isSuspended || isExpired) {
-            console.log("[v0] User has restricted access, redirecting to premium-tools")
-            setTimeout(() => {
-              router.push("/premium-tools")
-            }, 100)
-            return
-          }
-        }
-
-        // For approved users, redirect to tool page or custom redirect
-        const redirectTo = searchParams.get("redirect") || "/tool"
-        setTimeout(() => {
+        if (isPending || isSuspended || isExpired) {
+          console.log("[v0] User has restricted access, redirecting to premium-tools")
+          router.push("/premium-tools")
+        } else {
+          const redirectTo = searchParams.get("redirect") || "/tool"
           router.push(redirectTo)
-        }, 100)
-      } catch (loginError) {
-        clearTimeout(loginTimeout)
-        throw loginError
-      }
+        }
+      })
     } catch (error: any) {
       console.error("[v0] Login error:", error)
 
@@ -215,30 +193,14 @@ const LoginPage = memo(function LoginPage() {
   }, [searchParams])
 
   useEffect(() => {
-    async function checkAuthAndRedirect() {
-      if (user) {
-        console.log("[v0] User already logged in, redirecting...")
-        setLoading(true)
-        const currentUser = await AuthService.getCurrentUser()
-
-        if (currentUser) {
-          const isPending = !currentUser.is_approved
-          const isSuspended = currentUser.account_status === "suspended"
-          const isExpired = currentUser.expiration_date && new Date(currentUser.expiration_date) < new Date()
-
-          if (isPending || isSuspended || isExpired) {
-            router.push("/premium-tools")
-          } else {
-            router.push("/tool")
-          }
-        } else {
-          router.push("/tool")
-        }
-      }
+    if (!authLoading) {
+      setIsCheckingAuth(false)
     }
+  }, [authLoading])
 
-    checkAuthAndRedirect()
-  }, [user, router])
+  if (isCheckingAuth || authLoading) {
+    return <AuthLoadingSpinner />
+  }
 
   if (!isOnline) {
     return <NoInternet onRetry={retryConnection} isReconnecting={isReconnecting} />

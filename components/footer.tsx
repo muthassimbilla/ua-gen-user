@@ -1,10 +1,9 @@
 "use client"
 
 import Link from "next/link"
-import { Sparkles, Twitter, Github, Linkedin, Mail, Heart, ArrowUp } from "lucide-react"
+import { ArrowUp, Twitter, Linkedin, Github } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useEffect, useState } from "react"
-import Image from "next/image"
 
 export function Footer() {
   const [showScrollTop, setShowScrollTop] = useState(false)
@@ -23,211 +22,125 @@ export function Footer() {
   }
 
   return (
-    <footer className="relative border-t bg-gradient-to-b from-background to-muted/30 overflow-hidden">
-      {/* Background Elements */}
-      <div className="absolute inset-0 -z-10">
-        <div className="absolute bottom-0 left-1/4 w-96 h-96 bg-purple-500/5 rounded-full blur-3xl" />
-        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-blue-500/5 rounded-full blur-3xl" />
-      </div>
+    <footer className="relative bg-card border-t border-border overflow-hidden">
+      {/* Enhanced decorative purple gradient overlays */}
+      <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-accent/3 to-tertiary/2" />
+      <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-radial from-primary/8 to-transparent blur-3xl animate-pulse" />
+      <div className="absolute bottom-0 left-0 w-96 h-96 bg-gradient-radial from-accent/6 to-transparent blur-3xl animate-pulse" />
 
-      <div className="container relative z-10 mx-auto px-4 py-10">
-        <div className="grid grid-cols-1 md:grid-cols-5 gap-8 mb-8">
-          {/* Brand section */}
-          <div className="md:col-span-2">
-            <Link href="/" className="flex items-center gap-3 mb-4 group">
-              <div className="relative h-10 w-10 rounded-xl overflow-hidden shadow-lg group-hover:shadow-purple-500/50 transition-all">
-                <Image
-                  src="/ugenpro-logo.svg"
-                  alt="UGen Pro Logo"
-                  fill
-                  className="object-contain"
+      <div className="container relative z-10 mx-auto px-4 py-12">
+        {/* Card-based Footer Layout */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl mx-auto">
+          
+          {/* Company Info Card */}
+          <div className="glass rounded-2xl p-6 hover:glass-strong transition-all duration-300 shadow-glow hover:shadow-glow-accent">
+            <Link href="/" className="inline-flex items-center gap-3 mb-4 group">
+              <div className="w-10 h-10 rounded-xl transition-all duration-300 group-hover:scale-110 shadow-glow">
+                <img 
+                  src="/logo.svg" 
+                  alt="UGen Pro Logo" 
+                  className="w-full h-full rounded-xl"
                 />
               </div>
-              <span className="font-bold text-2xl bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
-                UGen Pro
-              </span>
+              <span className="font-bold text-xl gradient-text">UGen Pro</span>
             </Link>
-            <p className="text-muted-foreground text-sm leading-relaxed mb-6 max-w-sm">
-              Advanced generator tools for developers and professionals. Create user agents, addresses, and more with
-              our powerful AI-powered platform.
+            <p className="text-sm text-muted-foreground leading-relaxed mb-4">
+              Professional AI-powered tools for developers and teams. Fast, reliable, and built for scale.
             </p>
-
-            <div className="flex items-center gap-2">
-              <Link
+            
+            {/* Social Icons */}
+            <div className="flex gap-3">
+              <a
                 href="https://twitter.com"
                 target="_blank"
-                className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-500/10 border border-blue-500/20 text-blue-600 dark:text-blue-400 hover:bg-blue-500/20 hover:scale-110 transition-all"
+                rel="noopener noreferrer"
+                className="w-9 h-9 rounded-xl glass hover:glass-strong flex items-center justify-center transition-all duration-300 hover-lift shadow-glow group"
               >
-                <Twitter className="h-4 w-4" />
-              </Link>
-              <Link
-                href="https://github.com"
-                target="_blank"
-                className="flex h-10 w-10 items-center justify-center rounded-xl bg-purple-500/10 border border-purple-500/20 text-purple-600 dark:text-purple-400 hover:bg-purple-500/20 hover:scale-110 transition-all"
-              >
-                <Github className="h-4 w-4" />
-              </Link>
-              <Link
+                <Twitter className="w-4 h-4 text-foreground group-hover:text-primary transition-colors" />
+              </a>
+              <a
                 href="https://linkedin.com"
                 target="_blank"
-                className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-500/20 hover:scale-110 transition-all"
+                rel="noopener noreferrer"
+                className="w-9 h-9 rounded-xl glass hover:glass-strong flex items-center justify-center transition-all duration-300 hover-lift shadow-glow group"
               >
-                <Linkedin className="h-4 w-4" />
-              </Link>
-              <Link
-                href="mailto:hello@ugenpro.com"
-                className="flex h-10 w-10 items-center justify-center rounded-xl bg-orange-500/10 border border-orange-500/20 text-orange-600 dark:text-orange-400 hover:bg-orange-500/20 hover:scale-110 transition-all"
+                <Linkedin className="w-4 h-4 text-foreground group-hover:text-accent transition-colors" />
+              </a>
+              <a
+                href="https://github.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-9 h-9 rounded-xl glass hover:glass-strong flex items-center justify-center transition-all duration-300 hover-lift shadow-glow group"
               >
-                <Mail className="h-4 w-4" />
-              </Link>
+                <Github className="w-4 h-4 text-foreground group-hover:text-tertiary transition-colors" />
+              </a>
             </div>
           </div>
 
-          {/* Product */}
-          <div>
-            <h3 className="font-bold mb-4 text-foreground">Product</h3>
-            <ul className="space-y-3">
+          {/* Quick Links Card */}
+          <div className="glass rounded-2xl p-6 hover:glass-strong transition-all duration-300 shadow-glow hover:shadow-glow-accent">
+            <h3 className="font-bold text-lg mb-4 text-foreground">Quick Links</h3>
+            <ul className="space-y-2">
               <li>
-                <Link
-                  href="#tools"
-                  className="text-sm text-muted-foreground hover:text-purple-600 dark:hover:text-purple-400 transition-colors hover:translate-x-1 inline-block"
-                >
-                  Features
+                <Link href="/" className="text-sm text-muted-foreground hover:text-foreground transition-colors font-medium hover-lift block py-1 hover:text-primary">
+                  🏠 Home
                 </Link>
               </li>
               <li>
-                <Link
-                  href="#pricing"
-                  className="text-sm text-muted-foreground hover:text-purple-600 dark:hover:text-purple-400 transition-colors hover:translate-x-1 inline-block"
-                >
-                  Pricing
+                <Link href="#tools" className="text-sm text-muted-foreground hover:text-foreground transition-colors font-medium hover-lift block py-1 hover:text-accent">
+                  🛠️ Tools
                 </Link>
               </li>
               <li>
-                <Link
-                  href="/tool"
-                  className="text-sm text-muted-foreground hover:text-purple-600 dark:hover:text-purple-400 transition-colors hover:translate-x-1 inline-block"
-                >
-                  Tools
+                <Link href="#pricing" className="text-sm text-muted-foreground hover:text-foreground transition-colors font-medium hover-lift block py-1 hover:text-tertiary">
+                  💰 Pricing
                 </Link>
               </li>
               <li>
-                <Link
-                  href="#"
-                  className="text-sm text-muted-foreground hover:text-purple-600 dark:hover:text-purple-400 transition-colors hover:translate-x-1 inline-block"
-                >
-                  API
+                <Link href="/contact" className="text-sm text-muted-foreground hover:text-foreground transition-colors font-medium hover-lift block py-1 hover:text-primary">
+                  📞 Contact
                 </Link>
               </li>
             </ul>
           </div>
 
-          {/* Company */}
-          <div>
-            <h3 className="font-bold mb-4 text-foreground">Company</h3>
-            <ul className="space-y-3">
+          {/* Support Card */}
+          <div className="glass rounded-2xl p-6 hover:glass-strong transition-all duration-300 shadow-glow hover:shadow-glow-accent">
+            <h3 className="font-bold text-lg mb-4 text-foreground">Support</h3>
+            <ul className="space-y-2 mb-4">
               <li>
-                <Link
-                  href="#"
-                  className="text-sm text-muted-foreground hover:text-purple-600 dark:hover:text-purple-400 transition-colors hover:translate-x-1 inline-block"
-                >
-                  About
+                <Link href="/help" className="text-sm text-muted-foreground hover:text-foreground transition-colors font-medium hover-lift block py-1 hover:text-primary">
+                  📚 Help Center
                 </Link>
               </li>
               <li>
-                <Link
-                  href="#"
-                  className="text-sm text-muted-foreground hover:text-purple-600 dark:hover:text-purple-400 transition-colors hover:translate-x-1 inline-block"
-                >
-                  Blog
+                <Link href="/docs" className="text-sm text-muted-foreground hover:text-foreground transition-colors font-medium hover-lift block py-1 hover:text-accent">
+                  📖 Documentation
                 </Link>
               </li>
               <li>
-                <Link
-                  href="#"
-                  className="text-sm text-muted-foreground hover:text-purple-600 dark:hover:text-purple-400 transition-colors hover:translate-x-1 inline-block"
-                >
-                  Careers
+                <Link href="/api" className="text-sm text-muted-foreground hover:text-foreground transition-colors font-medium hover-lift block py-1 hover:text-tertiary">
+                  🔌 API Reference
                 </Link>
               </li>
               <li>
-                <Link
-                  href="/contact"
-                  className="text-sm text-muted-foreground hover:text-purple-600 dark:hover:text-purple-400 transition-colors hover:translate-x-1 inline-block"
-                >
-                  Contact
-                </Link>
-              </li>
-            </ul>
-          </div>
-
-          {/* Legal */}
-          <div>
-            <h3 className="font-bold mb-4 text-foreground">Legal</h3>
-            <ul className="space-y-3">
-              <li>
-                <Link
-                  href="#"
-                  className="text-sm text-muted-foreground hover:text-purple-600 dark:hover:text-purple-400 transition-colors hover:translate-x-1 inline-block"
-                >
-                  Privacy
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="#"
-                  className="text-sm text-muted-foreground hover:text-purple-600 dark:hover:text-purple-400 transition-colors hover:translate-x-1 inline-block"
-                >
-                  Terms
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="#"
-                  className="text-sm text-muted-foreground hover:text-purple-600 dark:hover:text-purple-400 transition-colors hover:translate-x-1 inline-block"
-                >
-                  Security
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="#"
-                  className="text-sm text-muted-foreground hover:text-purple-600 dark:hover:text-purple-400 transition-colors hover:translate-x-1 inline-block"
-                >
-                  Cookies
+                <Link href="/community" className="text-sm text-muted-foreground hover:text-foreground transition-colors font-medium hover-lift block py-1 hover:text-primary">
+                  👥 Community
                 </Link>
               </li>
             </ul>
           </div>
         </div>
 
-        {/* Bottom bar */}
-        <div className="border-t pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
-          <p className="text-sm text-muted-foreground flex items-center gap-1">
-            © 2025 UGen Pro. Made with <Heart className="h-3 w-3 text-red-500 fill-red-500 animate-pulse" /> by developers, for developers.
-          </p>
-          <div className="flex items-center gap-6 text-sm text-muted-foreground">
-            <Link href="#" className="hover:text-purple-600 dark:hover:text-purple-400 transition-colors">
-              Status
-            </Link>
-            <Link href="#" className="hover:text-purple-600 dark:hover:text-purple-400 transition-colors">
-              Changelog
-            </Link>
-            <Link href="#" className="hover:text-purple-600 dark:hover:text-purple-400 transition-colors">
-              Docs
-            </Link>
-          </div>
-        </div>
       </div>
 
-      {/* Scroll to Top Button */}
       {showScrollTop && (
         <Button
           onClick={scrollToTop}
           size="icon"
-          className="fixed bottom-8 right-8 z-50 h-12 w-12 rounded-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 shadow-xl hover:shadow-purple-500/50 transition-all duration-300 hover:scale-110 animate-in slide-in-from-bottom-4"
+          className="fixed bottom-6 right-6 z-50 h-12 w-12 rounded-xl bg-gradient-to-r from-primary via-accent to-tertiary hover:from-primary/90 hover:via-accent/90 hover:to-tertiary/90 text-primary-foreground shadow-color hover:shadow-glow-accent interactive-scale group"
         >
-          <ArrowUp className="h-5 w-5" />
+          <ArrowUp className="h-5 w-5 group-hover:animate-bounce" />
         </Button>
       )}
     </footer>

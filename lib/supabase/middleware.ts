@@ -10,8 +10,6 @@ export async function updateSession(request: NextRequest) {
     request,
   })
 
-  // With Fluid compute, don't put this client in a global environment
-  // variable. Always create a new one on each request.
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -31,10 +29,15 @@ export async function updateSession(request: NextRequest) {
     },
   )
 
-  // IMPORTANT: Do not run code between createServerClient and supabase.auth.getUser()
   const {
     data: { user },
   } = await supabase.auth.getUser()
+
+  if (user && (request.nextUrl.pathname === "/login" || request.nextUrl.pathname === "/signup")) {
+    const url = request.nextUrl.clone()
+    url.pathname = "/tool"
+    return NextResponse.redirect(url)
+  }
 
   // Redirect to login if not authenticated and trying to access protected routes
   if (
@@ -43,6 +46,7 @@ export async function updateSession(request: NextRequest) {
     !request.nextUrl.pathname.startsWith("/signup") &&
     !request.nextUrl.pathname.startsWith("/auth") &&
     !request.nextUrl.pathname.startsWith("/adminbilla") &&
+    !request.nextUrl.pathname.startsWith("/contact") &&
     request.nextUrl.pathname !== "/"
   ) {
     const url = request.nextUrl.clone()

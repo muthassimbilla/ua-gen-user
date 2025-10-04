@@ -37,7 +37,7 @@ export function ToolModal({ tool, isOpen, onClose }: ToolModalProps) {
     if (isOpen && tool && typeof window !== "undefined" && (window as any).gtag) {
       ;(window as any).gtag("event", "modal_open", {
         tool_id: tool.id,
-        tool_name: tool.name.en,
+        tool_name: tool.name,
       })
     }
     // Reset video error state when modal opens
@@ -52,77 +52,57 @@ export function ToolModal({ tool, isOpen, onClose }: ToolModalProps) {
     if (typeof window !== "undefined" && (window as any).gtag) {
       ;(window as any).gtag("event", "cta_click", {
         tool_id: tool.id,
-        tool_name: tool.name.en,
-        cta_text: tool.ctaText.en,
+        tool_name: tool.name,
+        cta_text: tool.ctaText,
       })
     }
   }
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="text-3xl font-bold flex items-center gap-3">
-            <tool.icon className="h-8 w-8" />
-            {tool.name.en}
-          </DialogTitle>
-          <DialogDescription className="text-base pt-2">{tool.description.en}</DialogDescription>
-        </DialogHeader>
-
-        <div className="space-y-6 pt-4">
+      <DialogContent className="w-[90vw] max-w-[800px] h-[56.25vw] max-h-[450px] p-0 border-0 bg-transparent shadow-none [&>button]:hidden">
+        <DialogTitle className="sr-only">{tool.name} Demo Video</DialogTitle>
+        <div className="relative w-full h-full rounded-lg overflow-hidden bg-black">
+          {/* Video Section */}
           {tool.demoVideo && !videoError && (
-            <div className="relative w-full h-64 rounded-lg overflow-hidden border bg-muted">
-              <iframe
-                src={tool.demoVideo}
-                title={tool.name.en}
-                className="w-full h-full"
-                frameBorder="0"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                allowFullScreen
-                referrerPolicy="strict-origin-when-cross-origin"
-                loading="lazy"
-                onError={() => {
-                  console.log("Video failed to load, showing fallback");
-                  setVideoError(true);
-                }}
-              />
-              {/* Always visible YouTube link */}
-              <div className="absolute bottom-2 right-2">
-                <a 
-                  href={tool.demoVideo.replace('/embed/', '/watch?v=')} 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 bg-red-600 hover:bg-red-700 text-white text-xs px-2 py-1 rounded transition-colors"
-                >
-                  <svg className="w-3 h-3" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
-                  </svg>
-                  YouTube
-                </a>
-              </div>
-            </div>
+            <iframe
+              src={tool.demoVideo}
+              title={tool.name}
+              className="w-full h-full"
+              frameBorder="0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              allowFullScreen
+              referrerPolicy="strict-origin-when-cross-origin"
+              loading="lazy"
+              onError={() => {
+                console.log("Video failed to load, showing fallback");
+                setVideoError(true);
+              }}
+            />
           )}
+          
+          {/* Fallback Image */}
           {(videoError || !tool.demoVideo) && tool.demoImage && (
-            <div className="relative w-full h-64 rounded-lg overflow-hidden border bg-muted">
+            <div className="relative w-full h-full">
               <Image
                 src={tool.demoImage}
-                alt={tool.name.en}
+                alt={tool.name}
                 fill
                 className="object-cover"
                 loading="lazy"
                 sizes="(max-width: 768px) 100vw, 800px"
               />
               {videoError && (
-                <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+                <div className="absolute inset-0 bg-black/80 flex items-center justify-center">
                   <div className="text-center text-white">
-                    <p className="text-sm mb-2">Video not available</p>
+                    <p className="text-xl mb-4 font-semibold">Demo Video Not Available</p>
                     <a 
                       href={tool.demoVideo?.replace('/embed/', '/watch?v=')} 
                       target="_blank" 
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1 bg-red-600 hover:bg-red-700 text-white text-xs px-3 py-1 rounded transition-colors"
+                      className="inline-flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white text-sm px-4 py-2 rounded-lg transition-colors"
                     >
-                      <svg className="w-3 h-3" viewBox="0 0 24 24" fill="currentColor">
+                      <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
                         <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
                       </svg>
                       Watch on YouTube
@@ -132,30 +112,6 @@ export function ToolModal({ tool, isOpen, onClose }: ToolModalProps) {
               )}
             </div>
           )}
-
-          <div>
-            <h3 className="text-xl font-semibold mb-4">Key Features</h3>
-            <ul className="space-y-3">
-              {tool.features.map((feature, index) => (
-                <li key={index} className="flex items-start gap-3">
-                  <Check className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
-                  <span className="text-muted-foreground">{feature.en}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          <div className="flex gap-3 pt-4">
-            <Link href={tool.ctaLink} className="flex-1" onClick={handleCtaClick}>
-              <Button size="lg" className="w-full text-base">
-                {tool.ctaText.en}
-                <ArrowRight className="ml-2 h-5 w-5" />
-              </Button>
-            </Link>
-            <Button size="lg" variant="outline" onClick={onClose}>
-              <X className="h-5 w-5" />
-            </Button>
-          </div>
         </div>
       </DialogContent>
     </Dialog>

@@ -5,7 +5,6 @@ import { AuthProvider } from "@/lib/auth-context"
 import { StatusNotificationProvider } from "@/components/status-notification-provider"
 import { NetworkProvider } from "@/contexts/network-context"
 import ConditionalLayout from "@/components/conditional-layout"
-import PageTransition from "@/components/page-transition"
 
 interface ClientProvidersProps {
   children: React.ReactNode
@@ -17,7 +16,7 @@ export default function ClientProviders({ children }: ClientProvidersProps) {
       <StatusNotificationProvider>
         <AuthProvider>
           <ConditionalLayout>
-            <PageTransition>{children}</PageTransition>
+            {children}
           </ConditionalLayout>
         </AuthProvider>
       </StatusNotificationProvider>

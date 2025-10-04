@@ -4,9 +4,8 @@ import { toolsData } from "@/lib/tools-config"
 import { ToolCard } from "@/components/tool-card"
 import { useState, lazy, Suspense } from "react"
 import type { Tool } from "@/lib/tools-config"
-import { Wrench, Sparkles } from "lucide-react"
 import { useScrollAnimation } from "@/hooks/use-scroll-animation"
-import Image from "next/image"
+import { motion } from "framer-motion"
 
 const LazyToolModal = lazy(() => import("@/components/tool-modal").then((mod) => ({ default: mod.ToolModal })))
 
@@ -14,13 +13,6 @@ export function ToolsSection() {
   const [selectedTool, setSelectedTool] = useState<Tool | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const { ref: sectionRef, isVisible } = useScrollAnimation({ threshold: 0.15 })
-
-  const content = {
-    badge: "Our Tools",
-    title: "Everything you need to",
-    titleHighlight: "build faster",
-    description: "Powerful tools designed to help you work smarter and ship faster. Explore our suite of AI-powered generators.",
-  }
 
   const handleToolClick = (tool: Tool) => {
     setSelectedTool(tool)
@@ -32,69 +24,65 @@ export function ToolsSection() {
     setTimeout(() => setSelectedTool(null), 300)
   }
 
+  const featuredTools = toolsData.slice(0, 2)
+  const regularTools = toolsData.slice(2)
+
   return (
-    <section 
-      id="tools" 
-      ref={sectionRef}
-      className="relative py-12 overflow-hidden"
-    >
-      {/* Background Elements */}
-      <div className="absolute inset-0 -z-10">
-        <div className="absolute inset-0 bg-gradient-to-b from-background via-purple-500/5 to-background" />
-        <div className="absolute top-1/2 left-1/4 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl" />
-        <div className="absolute top-1/3 right-1/4 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl" />
-      </div>
-
+    <section id="tools" ref={sectionRef} className="relative py-16 md:py-20 overflow-hidden">
       <div className="container relative z-10 mx-auto px-4">
-        {/* Header */}
-        <div 
-          className={`text-center space-y-3 mb-10 transition-all duration-1000 ${
-            isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
-          }`}
+        <motion.div
+          className="max-w-4xl mb-8 text-center mx-auto"
+          initial={{ opacity: 0, y: 20 }}
+          animate={isVisible ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+          transition={{ duration: 0.6 }}
         >
-          <div className="inline-flex items-center gap-3 rounded-full bg-gradient-to-r from-blue-500/10 via-purple-500/10 to-pink-500/10 border border-blue-500/20 px-5 py-2.5 backdrop-blur-sm shadow-lg">
-            <div className="relative h-4 w-4">
-              <Image
-                src="/ugenpro-logo.svg"
-                alt="UGen Pro Logo"
-                fill
-                className="object-contain"
-              />
-            </div>
-            <span className="text-sm font-semibold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-              {content.badge}
-            </span>
-            <Sparkles className="h-3 w-3 text-purple-600 dark:text-purple-400 animate-pulse" />
+          <div className="inline-flex items-center gap-2 px-6 py-3 rounded-full glass shadow-glow border border-primary/20 text-sm font-bold mb-6">
+            <span className="gradient-text">Powerful Tools</span>
           </div>
-
-          <h2 className="text-3xl md:text-5xl font-bold text-balance leading-tight">
-            {content.title}{" "}
-            <span className="bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
-              {content.titleHighlight}
-            </span>
+          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold leading-tight text-balance">
+            Everything you need to build faster
           </h2>
+        </motion.div>
 
-          <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto text-pretty leading-relaxed">
-            {content.description}
-          </p>
-        </div>
-
-        {/* Tools Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 max-w-5xl mx-auto">
-          {toolsData.map((tool, index) => (
-            <div
+        {/* All tools in same size - 3 cards in one row */}
+        <motion.div
+          className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto"
+          initial={{ opacity: 0, y: 20 }}
+          animate={isVisible ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+          transition={{ duration: 0.6, delay: 0.2 }}
+        >
+          {toolsData.slice(0, 3).map((tool, index) => (
+            <motion.div
               key={tool.id}
-              className={`transition-all duration-700 ${
-                isVisible 
-                  ? "opacity-100 translate-y-0" 
-                  : "opacity-0 translate-y-12"
-              }`}
-              style={{ transitionDelay: `${index * 150}ms` }}
+              initial={{ opacity: 0, y: 20 }}
+              animate={isVisible ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+              transition={{ duration: 0.6, delay: 0.1 * index }}
             >
               <ToolCard tool={tool} onClick={() => handleToolClick(tool)} />
-            </div>
+            </motion.div>
           ))}
-        </div>
+        </motion.div>
+
+        {/* Additional tools if more than 3 */}
+        {toolsData.length > 3 && (
+          <motion.div
+            className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto mt-8"
+            initial={{ opacity: 0, y: 20 }}
+            animate={isVisible ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+            transition={{ duration: 0.6, delay: 0.4 }}
+          >
+            {toolsData.slice(3).map((tool, index) => (
+              <motion.div
+                key={tool.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={isVisible ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+                transition={{ duration: 0.6, delay: 0.1 * index }}
+              >
+                <ToolCard tool={tool} onClick={() => handleToolClick(tool)} />
+              </motion.div>
+            ))}
+          </motion.div>
+        )}
       </div>
 
       <Suspense fallback={null}>

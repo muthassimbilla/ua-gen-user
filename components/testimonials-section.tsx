@@ -1,8 +1,8 @@
 "use client"
 
-import { Star, Quote, TrendingUp, Users, Award } from "lucide-react"
+import { Star, TrendingUp, Users, Award } from "lucide-react"
 import { useScrollAnimation } from "@/hooks/use-scroll-animation"
-import Image from "next/image"
+import { motion } from "framer-motion"
 
 const testimonials = [
   {
@@ -10,7 +10,6 @@ const testimonials = [
       "UGen Pro has completely transformed how our team works. The tools are incredibly intuitive and powerful. We've seen a 40% increase in productivity!",
     author: "Sarah Johnson",
     role: "CEO at TechStart",
-    color: "bg-gradient-to-br from-purple-500 to-purple-600",
     rating: 5,
   },
   {
@@ -18,7 +17,6 @@ const testimonials = [
       "The best generator tools we've ever used. The AI-powered features are exactly what we needed. Saves us hours every day.",
     author: "Michael Chen",
     role: "Product Manager at InnovateCo",
-    color: "bg-gradient-to-br from-blue-500 to-blue-600",
     rating: 5,
   },
   {
@@ -26,149 +24,130 @@ const testimonials = [
       "We tried dozens of tools before finding UGen Pro. It's the perfect balance of simplicity and power. Highly recommended!",
     author: "Emily Rodriguez",
     role: "CTO at DataFlow",
-    color: "bg-gradient-to-br from-orange-500 to-orange-600",
     rating: 5,
   },
+]
+
+const stats = [
+  { icon: Star, value: "4.9/5", label: "Average Rating" },
+  { icon: Users, value: "10,000+", label: "Happy Customers" },
+  { icon: TrendingUp, value: "98%", label: "Satisfaction Rate" },
+  { icon: Award, value: "50+", label: "Awards Won" },
 ]
 
 export function TestimonialsSection() {
   const { ref: sectionRef, isVisible } = useScrollAnimation({ threshold: 0.15 })
 
   return (
-    <section 
-      id="testimonials" 
-      ref={sectionRef}
-      className="relative py-12 overflow-hidden"
-    >
-      {/* Background Elements */}
+    <section id="testimonials" ref={sectionRef} className="relative py-16 md:py-20 overflow-hidden">
+      {/* Enhanced background with purple gradient layers */}
       <div className="absolute inset-0 -z-10">
-        <div className="absolute inset-0 bg-gradient-to-b from-background via-orange-500/5 to-background" />
-        <div className="absolute top-1/3 -left-32 w-96 h-96 bg-orange-500/10 rounded-full blur-3xl" />
-        <div className="absolute bottom-1/3 -right-32 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl" />
+        <div className="absolute inset-0 bg-gradient-to-b from-background via-accent/2 to-background" />
+        <div className="absolute top-1/3 right-1/4 w-64 h-64 bg-gradient-radial from-primary/6 to-transparent rounded-full blur-3xl" />
+        <div className="absolute bottom-1/3 left-1/4 w-64 h-64 bg-gradient-radial from-tertiary/4 to-transparent rounded-full blur-3xl" />
       </div>
 
       <div className="container relative z-10 mx-auto px-4">
-        {/* Header */}
-        <div 
-          className={`text-center space-y-3 mb-10 transition-all duration-1000 ${
-            isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
-          }`}
+        <motion.div
+          className="max-w-4xl mb-12 text-center mx-auto"
+          initial={{ opacity: 0, y: 20 }}
+          animate={isVisible ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+          transition={{ duration: 0.6 }}
         >
-          <div className="inline-flex items-center gap-3 rounded-full bg-gradient-to-r from-orange-500/10 via-purple-500/10 to-pink-500/10 border border-orange-500/20 px-5 py-2.5 backdrop-blur-sm shadow-lg">
-            <div className="relative h-4 w-4">
-              <Image
-                src="/ugenpro-logo.svg"
-                alt="UGen Pro Logo"
-                fill
-                className="object-contain"
-              />
-            </div>
-            <span className="text-sm font-semibold bg-gradient-to-r from-orange-600 to-purple-600 bg-clip-text text-transparent">
-              Testimonials
-            </span>
+          <div className="inline-flex items-center gap-2 px-6 py-3 rounded-full glass shadow-glow text-sm font-bold mb-6 backdrop-blur-xl">
+            <Star className="h-4 w-4 text-primary animate-pulse" />
+            <span className="gradient-text">Customer Stories</span>
           </div>
-
-          <h2 className="text-3xl md:text-5xl font-bold text-balance leading-tight">
-            Loved by{" "}
-            <span className="bg-gradient-to-r from-orange-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
-              developers worldwide
-            </span>
+          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-6 leading-tight text-balance">
+            <span className="text-shadow-lg">Loved by developers</span>{" "}
+            <span className="gradient-text-rainbow text-shadow-lg">worldwide</span>
           </h2>
-
-          <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto text-pretty">
-            Join thousands of developers who trust UGen Pro to boost their productivity
+          <p className="text-base md:text-lg text-muted-foreground leading-relaxed text-balance font-medium max-w-2xl mx-auto">
+            Join thousands of developers who trust UGen Pro to{" "}
+            <span className="text-primary font-semibold">boost their productivity</span>
           </p>
-        </div>
+        </motion.div>
 
-        {/* Testimonials Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl mx-auto mb-10">
+        <motion.div
+          className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12 max-w-6xl mx-auto"
+          initial={{ opacity: 0, y: 20 }}
+          animate={isVisible ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+          transition={{ duration: 0.6, delay: 0.2 }}
+        >
           {testimonials.map((testimonial, index) => (
-            <div
+            <motion.div
               key={index}
-              className={`group transition-all duration-700 ${
-                isVisible 
-                  ? "opacity-100 translate-y-0" 
-                  : "opacity-0 translate-y-12"
-              }`}
-              style={{ transitionDelay: `${index * 150}ms` }}
+              initial={{ opacity: 0, y: 20 }}
+              animate={isVisible ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+              transition={{ duration: 0.6, delay: 0.1 * index }}
+              className="p-6 rounded-2xl border-2 border-border glass hover:glass-strong hover:border-primary/50 hover:shadow-color transition-all duration-500 hover-lift cursor-pointer relative overflow-hidden"
             >
-              <div className="relative h-full rounded-2xl border border-border/50 bg-card/50 backdrop-blur-sm p-6 hover:border-orange-500/30 hover:shadow-xl hover:shadow-orange-500/10 transition-all duration-300 hover:-translate-y-1">
-                {/* Quote Icon */}
-                <div className="absolute -top-3 -left-3">
-                  <div className="p-2 rounded-full bg-gradient-to-br from-orange-500/20 to-purple-500/20 border border-orange-500/30 backdrop-blur-sm">
-                    <Quote className="h-4 w-4 text-orange-600 dark:text-orange-400" />
-                  </div>
-                </div>
-
-                {/* Stars */}
+              {/* Decorative gradient overlay */}
+              <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5 opacity-0 hover:opacity-100 transition-opacity duration-500 rounded-2xl" />
+              
+              <div className="relative z-10">
+                {/* Enhanced Stars */}
                 <div className="flex gap-1 mb-4">
                   {[...Array(testimonial.rating)].map((_, i) => (
-                    <Star 
-                      key={i} 
-                      className="h-4 w-4 fill-orange-500 text-orange-500 animate-pulse" 
-                      style={{ animationDelay: `${i * 100}ms` }}
-                    />
+                    <div key={i} className="relative">
+                      <Star className="h-4 w-4 fill-primary/20 text-primary/20" />
+                      <Star className="h-4 w-4 fill-primary text-primary absolute top-0 left-0 animate-pulse" style={{ animationDelay: `${i * 0.2}s` }} />
+                    </div>
                   ))}
                 </div>
 
-                {/* Quote */}
-                <p className="text-sm md:text-base leading-relaxed mb-6 text-foreground/90">
-                  "{testimonial.quote}"
+                {/* Quote with better styling */}
+                <p className="text-sm leading-relaxed mb-6 text-foreground/90 font-medium relative">
+                  <span className="text-primary text-2xl absolute -top-1 -left-1 font-serif">"</span>
+                  <span className="ml-3">{testimonial.quote}</span>
+                  <span className="text-primary text-2xl absolute -bottom-3 -right-1 font-serif">"</span>
                 </p>
 
-                {/* Author */}
-                <div className="flex items-center gap-3 mt-auto">
-                  <div
-                    className={`h-12 w-12 rounded-full ${testimonial.color} flex items-center justify-center text-white font-bold text-lg shadow-lg group-hover:scale-110 transition-transform`}
-                  >
-                    {testimonial.author.charAt(0)}
-                  </div>
-                  <div>
-                    <div className="font-bold text-sm">{testimonial.author}</div>
-                    <div className="text-xs text-muted-foreground">{testimonial.role}</div>
+                {/* Enhanced Author section */}
+                <div className="border-t-2 border-gradient-to-r from-primary/20 to-accent/20 pt-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary/20 to-accent/10 flex items-center justify-center">
+                      <div className="w-6 h-6 rounded-lg bg-gradient-to-br from-primary to-accent"></div>
+                    </div>
+                    <div>
+                      <div className="font-bold text-base text-foreground">{testimonial.author}</div>
+                      <div className="text-xs text-muted-foreground font-medium mt-1">{testimonial.role}</div>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
+            </motion.div>
           ))}
-        </div>
+        </motion.div>
 
-        {/* Stats */}
-        <div 
-          className={`grid grid-cols-1 sm:grid-cols-3 gap-8 max-w-4xl mx-auto transition-all duration-1000 delay-400 ${
-            isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
-          }`}
+        {/* Enhanced stats section */}
+        <motion.div
+          className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-5xl mx-auto"
+          initial={{ opacity: 0, y: 20 }}
+          animate={isVisible ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+          transition={{ duration: 0.6, delay: 0.4 }}
         >
-          <div className="text-center p-6 rounded-2xl bg-gradient-to-br from-orange-500/10 to-orange-500/5 border border-orange-500/20 backdrop-blur-sm hover:scale-105 transition-transform">
-            <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-orange-500/10 mb-3">
-              <Award className="h-6 w-6 text-orange-600 dark:text-orange-400" />
-            </div>
-            <div className="text-3xl font-bold bg-gradient-to-r from-orange-600 to-orange-500 bg-clip-text text-transparent mb-1">
-              4.9/5
-            </div>
-            <div className="text-sm text-muted-foreground">Average Rating</div>
-          </div>
-
-          <div className="text-center p-6 rounded-2xl bg-gradient-to-br from-purple-500/10 to-purple-500/5 border border-purple-500/20 backdrop-blur-sm hover:scale-105 transition-transform">
-            <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-purple-500/10 mb-3">
-              <Users className="h-6 w-6 text-purple-600 dark:text-purple-400" />
-            </div>
-            <div className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-purple-500 bg-clip-text text-transparent mb-1">
-              10,000+
-            </div>
-            <div className="text-sm text-muted-foreground">Happy Customers</div>
-          </div>
-
-          <div className="text-center p-6 rounded-2xl bg-gradient-to-br from-green-500/10 to-green-500/5 border border-green-500/20 backdrop-blur-sm hover:scale-105 transition-transform">
-            <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-green-500/10 mb-3">
-              <TrendingUp className="h-6 w-6 text-green-600 dark:text-green-400" />
-            </div>
-            <div className="text-3xl font-bold bg-gradient-to-r from-green-600 to-green-500 bg-clip-text text-transparent mb-1">
-              98%
-            </div>
-            <div className="text-sm text-muted-foreground">Satisfaction Rate</div>
-          </div>
-        </div>
+          {stats.map((stat, index) => (
+            <motion.div
+              key={index}
+              initial={{ opacity: 0, y: 20 }}
+              animate={isVisible ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+              transition={{ duration: 0.6, delay: 0.1 * index }}
+              className="text-center p-6 rounded-2xl border-2 border-border glass hover:glass-strong hover:border-primary/50 transition-all duration-500 hover-lift relative overflow-hidden"
+            >
+              {/* Decorative gradient overlay */}
+              <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-accent/5 opacity-0 hover:opacity-100 transition-opacity duration-500 rounded-2xl" />
+              
+              <div className="relative z-10">
+                <div className="inline-flex p-3 rounded-xl bg-gradient-to-br from-primary/20 to-accent/10 mb-4 shadow-glow">
+                  <stat.icon className="h-5 w-5 text-primary" />
+                </div>
+                <div className="text-2xl md:text-3xl font-bold mb-2 gradient-text-rainbow">{stat.value}</div>
+                <div className="text-xs text-muted-foreground font-semibold uppercase tracking-wider">{stat.label}</div>
+              </div>
+            </motion.div>
+          ))}
+        </motion.div>
       </div>
     </section>
   )
