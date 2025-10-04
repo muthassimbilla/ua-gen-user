@@ -4,7 +4,6 @@ import type { Tool } from "@/lib/tools-config"
 import { Card } from "@/components/ui/card"
 import { useState } from "react"
 import { cn } from "@/lib/utils"
-import { ArrowRight } from "lucide-react"
 
 interface ToolCardProps {
   tool: Tool
@@ -46,7 +45,7 @@ export function ToolCard({ tool, onClick, featured = false }: ToolCardProps) {
 
       <div className={cn("p-8 space-y-6 h-full flex flex-col relative z-10", featured && "md:p-10")}>
         {/* Icon with enhanced styling */}
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-start">
           <div
             className={cn(
               "p-4 rounded-xl bg-primary/10 border border-primary/20 group-hover:bg-primary/20 transition-all duration-300",
@@ -55,12 +54,6 @@ export function ToolCard({ tool, onClick, featured = false }: ToolCardProps) {
           >
             <tool.icon className={cn("text-primary", featured ? "h-8 w-8" : "h-6 w-6")} />
           </div>
-          <ArrowRight
-            className={cn(
-              "h-6 w-6 text-primary transition-all duration-300",
-              isHovered ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-2",
-            )}
-          />
         </div>
 
         {/* Content */}
@@ -90,13 +83,9 @@ export function ToolCard({ tool, onClick, featured = false }: ToolCardProps) {
         </div>
 
         {/* CTA */}
-        <div className="flex items-center justify-between pt-4">
-          <div className="flex items-center gap-2 text-sm font-semibold text-primary">
-            <span>Deno</span>
-            <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
-          </div>
+        <div className="flex items-center justify-center pt-4">
           <div className="px-3 py-1.5 bg-gradient-to-r from-primary/10 to-accent/10 border border-primary/20 rounded-lg text-xs font-bold text-primary hover:from-primary/20 hover:to-accent/20 transition-all duration-300 cursor-pointer">
-            Try Now
+            Demo
           </div>
         </div>
       </div>

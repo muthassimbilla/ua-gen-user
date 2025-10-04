@@ -1,5 +1,6 @@
 "use client"
 
+import type React from "react"
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
@@ -9,17 +10,7 @@ import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { ProtectedRoute } from "@/components/protected-route"
-import { 
-  Eye, 
-  EyeOff, 
-  Lock, 
-  CheckCircle, 
-  XCircle, 
-  AlertTriangle, 
-  ArrowLeft,
-  Key,
-  Shield
-} from "lucide-react"
+import { Eye, EyeOff, Lock, CheckCircle, XCircle, ArrowLeft, Key, Shield } from "lucide-react"
 import AuthThemeToggle from "@/components/auth-theme-toggle"
 import { useNetwork } from "@/contexts/network-context"
 import NoInternet from "@/components/no-internet"
@@ -27,7 +18,7 @@ import NoInternet from "@/components/no-internet"
 export default function ChangePasswordPage() {
   const router = useRouter()
   const { isOnline, retryConnection, isReconnecting } = useNetwork()
-  
+
   const [formData, setFormData] = useState({
     currentPassword: "",
     newPassword: "",
@@ -88,10 +79,10 @@ export default function ChangePasswordPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    
+
     // Prevent multiple submissions
     if (isSubmitting) return
-    
+
     // Immediate UI feedback
     setIsSubmitting(true)
     setLoading(true)
@@ -120,7 +111,7 @@ export default function ChangePasswordPage() {
 
         // Get session token from localStorage
         const sessionToken = localStorage.getItem("session_token")
-        
+
         if (!sessionToken) {
           throw new Error("Session expired. Please login again.")
         }
@@ -130,7 +121,7 @@ export default function ChangePasswordPage() {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            "Authorization": `Bearer ${sessionToken}`,
+            Authorization: `Bearer ${sessionToken}`,
           },
           body: JSON.stringify({
             currentPassword: formData.currentPassword,
@@ -150,7 +141,7 @@ export default function ChangePasswordPage() {
 
         // Show success message
         setSuccessMessage("Password changed successfully! You will be redirected to your profile.")
-        
+
         // Clear form
         setFormData({
           currentPassword: "",
@@ -162,7 +153,6 @@ export default function ChangePasswordPage() {
         setTimeout(() => {
           router.push("/profile")
         }, 2000)
-
       } catch (changePasswordError) {
         clearTimeout(changePasswordTimeout)
         throw changePasswordError
@@ -181,8 +171,8 @@ export default function ChangePasswordPage() {
       <div className="h-screen flex items-center justify-center p-4 relative overflow-hidden bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
         {/* Go Back Button */}
         <div className="absolute top-6 left-6 z-20">
-          <Link 
-            href="/profile" 
+          <Link
+            href="/profile"
             className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-white/10 dark:bg-gray-800/20 backdrop-blur-sm border border-white/20 dark:border-gray-700/30 text-blue-600 dark:text-blue-400 hover:bg-white/20 dark:hover:bg-gray-800/30 hover:border-blue-300/50 dark:hover:border-blue-500/50 transition-all duration-200 hover:scale-105 shadow-sm hover:shadow-md group"
           >
             <ArrowLeft className="w-4 h-4 transition-transform duration-200 group-hover:-translate-x-1" />
@@ -245,7 +235,9 @@ export default function ChangePasswordPage() {
                   <AlertDescription>
                     <ul className="list-disc list-inside space-y-1 text-sm">
                       {errors.map((error, index) => (
-                        <li key={index} className="font-medium">{error}</li>
+                        <li key={index} className="font-medium">
+                          {error}
+                        </li>
                       ))}
                     </ul>
                   </AlertDescription>
@@ -256,7 +248,10 @@ export default function ChangePasswordPage() {
               <form onSubmit={handleSubmit} className="space-y-4">
                 {/* Current Password Field */}
                 <div className="space-y-2">
-                  <Label htmlFor="currentPassword" className="text-sm font-semibold text-foreground flex items-center gap-2">
+                  <Label
+                    htmlFor="currentPassword"
+                    className="text-sm font-semibold text-foreground flex items-center gap-2"
+                  >
                     <Lock className="w-4 h-4" />
                     Current Password
                   </Label>
@@ -285,7 +280,10 @@ export default function ChangePasswordPage() {
 
                 {/* New Password Field */}
                 <div className="space-y-2">
-                  <Label htmlFor="newPassword" className="text-sm font-semibold text-foreground flex items-center gap-2">
+                  <Label
+                    htmlFor="newPassword"
+                    className="text-sm font-semibold text-foreground flex items-center gap-2"
+                  >
                     <Shield className="w-4 h-4" />
                     New Password
                   </Label>
@@ -315,7 +313,10 @@ export default function ChangePasswordPage() {
 
                 {/* Confirm Password Field */}
                 <div className="space-y-2">
-                  <Label htmlFor="confirmPassword" className="text-sm font-semibold text-foreground flex items-center gap-2">
+                  <Label
+                    htmlFor="confirmPassword"
+                    className="text-sm font-semibold text-foreground flex items-center gap-2"
+                  >
                     <CheckCircle className="w-4 h-4" />
                     Confirm New Password
                   </Label>
@@ -340,7 +341,7 @@ export default function ChangePasswordPage() {
                       {showConfirmPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                     </button>
                   </div>
-                  
+
                   {/* Password Match Indicators */}
                   {formData.confirmPassword && (
                     <div className="flex items-center space-x-2 text-xs">
@@ -360,16 +361,32 @@ export default function ChangePasswordPage() {
                 </div>
 
                 {/* Submit Button */}
-                <Button 
-                  type="submit" 
-                  className="w-full h-12 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 relative overflow-hidden active:scale-[0.98] active:shadow-md" 
+                <Button
+                  type="submit"
+                  className="w-full h-12 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 relative overflow-hidden active:scale-[0.98] active:shadow-md"
                   disabled={loading || isSubmitting}
                 >
                   {loading ? (
                     <div className="flex items-center gap-2">
-                      <svg className="animate-spin spinner h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      <svg
+                        className="animate-spin spinner h-5 w-5 text-white"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                      >
+                        <circle
+                          className="opacity-25"
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          stroke="currentColor"
+                          strokeWidth="4"
+                        ></circle>
+                        <path
+                          className="opacity-75"
+                          fill="currentColor"
+                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                        ></path>
                       </svg>
                       <span>Changing Password...</span>
                     </div>

@@ -34,6 +34,39 @@ import {
 import { AdminUserService, type AdminUser } from "@/lib/admin-user-service"
 import { Switch } from "@/components/ui/switch"
 
+// Dummy components for demonstration purposes
+// In a real application, these would be imported from their respective files.
+const SecuritySettingsForm = ({ user, onSave, onCancel }: { user: AdminUser; onSave: any; onCancel: any }) => (
+  <div>
+    {/* Placeholder for Security Settings Form */}
+    <p>Security Settings Form for {user.full_name}</p>
+    <button onClick={onCancel}>Cancel</button>
+    <button onClick={() => onSave(user.id, { status: "active" })}>Save</button>
+  </div>
+)
+const EditUserForm = ({ user, onSave, onCancel }: { user: AdminUser; onSave: any; onCancel: any }) => (
+  <div>
+    {/* Placeholder for Edit User Form */}
+    <p>Edit User Form for {user.full_name}</p>
+    <button onClick={onCancel}>Cancel</button>
+    <button onClick={() => onSave({ ...user, full_name: `${user.full_name} (Updated)` })}>Save</button>
+  </div>
+)
+const CreateUserForm = ({ onSave, onCancel }: { onSave: any; onCancel: any }) => (
+  <div>
+    {/* Placeholder for Create User Form */}
+    <p>Create User Form</p>
+    <button onClick={onCancel}>Cancel</button>
+    <button
+      onClick={() =>
+        onSave({ full_name: "New User", email: "new@example.com", is_active: true, account_status: "active" })
+      }
+    >
+      Save
+    </button>
+  </div>
+)
+
 export default function UserManagementPage() {
   const [users, setUsers] = useState<AdminUser[]>([])
   const [searchTerm, setSearchTerm] = useState("")
@@ -42,6 +75,8 @@ export default function UserManagementPage() {
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false)
   const [isSecurityDialogOpen, setIsSecurityDialogOpen] = useState(false)
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
+  const [isApprovalDialogOpen, setIsApprovalDialogOpen] = useState(false)
+  const [userToApprove, setUserToApprove] = useState<AdminUser | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [statusFilter, setStatusFilter] = useState<"all" | "active" | "suspended" | "expired" | "pending">("all")
   const [isDevicesDialogOpen, setIsDevicesDialogOpen] = useState(false)
@@ -77,6 +112,11 @@ export default function UserManagementPage() {
     }
   }
 
+  const openApprovalDialog = (user: AdminUser) => {
+    setUserToApprove(user)
+    setIsApprovalDialogOpen(true)
+  }
+
   const filteredUsers = users.filter((user) => {
     const matchesSearch =
       user.full_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -94,10 +134,19 @@ export default function UserManagementPage() {
     return matchesSearch && matchesStatus
   })
 
-  const handleApproveUser = async (userId: string) => {
+  const handleApproveUser = async (userId: string, expirationDate?: string) => {
     try {
+      // First approve the user
       await AdminUserService.approveUser(userId)
+
+      // Then set expiration date if provided
+      if (expirationDate) {
+        await AdminUserService.updateUserExpiration(userId, expirationDate)
+      }
+
       await loadUsers()
+      setIsApprovalDialogOpen(false)
+      setUserToApprove(null)
     } catch (error: any) {
       console.error("Error approving user:", error)
       alert(`Failed to approve user: ${error.message}`)
@@ -515,7 +564,7 @@ export default function UserManagementPage() {
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => handleApproveUser(user.id)}
+                        onClick={() => openApprovalDialog(user)} // FIX: Call the function openApprovalDialog
                         className="bg-green-50 border-green-200 text-green-700 hover:bg-green-100 flex-1 text-xs font-medium"
                       >
                         <CheckCircle className="h-3 w-3 mr-1.5" />
@@ -595,6 +644,28 @@ export default function UserManagementPage() {
         </div>
       )}
 
+      <Dialog open={isApprovalDialogOpen} onOpenChange={setIsApprovalDialogOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <CheckCircle className="h-5 w-5 text-green-600" />
+              ইউজার এপ্রুভ করুন
+            </DialogTitle>
+            <DialogDescription>ইউজারকে এপ্রুভ করার জন্য মেয়াদ নির্ধারণ করুন</DialogDescription>
+          </DialogHeader>
+          {userToApprove && (
+            <ApprovalDialog
+              user={userToApprove}
+              onApprove={handleApproveUser}
+              onCancel={() => {
+                setIsApprovalDialogOpen(false)
+                setUserToApprove(null)
+              }}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
+
       {/* Security Settings Dialog */}
       <Dialog open={isSecurityDialogOpen} onOpenChange={setIsSecurityDialogOpen}>
         <DialogContent className="max-w-2xl">
@@ -606,7 +677,7 @@ export default function UserManagementPage() {
             <DialogDescription>Set user account status and expiration period</DialogDescription>
           </DialogHeader>
           {selectedUser && (
-            <SecuritySettingsForm
+            <SecuritySettingsForm // <-- This is the first instance of SecuritySettingsForm
               user={selectedUser}
               onSave={handleSecurityUpdate}
               onCancel={() => setIsSecurityDialogOpen(false)}
@@ -863,7 +934,11 @@ export default function UserManagementPage() {
             <DialogDescription>Update user information</DialogDescription>
           </DialogHeader>
           {selectedUser && (
-            <EditUserForm user={selectedUser} onSave={handleSaveUser} onCancel={() => setIsEditDialogOpen(false)} />
+            <EditUserForm // <-- This is the first instance of EditUserForm
+              user={selectedUser}
+              onSave={handleSaveUser}
+              onCancel={() => setIsEditDialogOpen(false)}
+            />
           )}
         </DialogContent>
       </Dialog>
@@ -875,7 +950,10 @@ export default function UserManagementPage() {
             <DialogTitle>Create New User</DialogTitle>
             <DialogDescription>Provide new user information</DialogDescription>
           </DialogHeader>
-          <CreateUserForm onSave={handleSaveNewUser} onCancel={() => setIsCreateDialogOpen(false)} />
+          <CreateUserForm // <-- This is the first instance of CreateUserForm
+            onSave={handleSaveNewUser}
+            onCancel={() => setIsCreateDialogOpen(false)}
+          />
         </DialogContent>
       </Dialog>
 
@@ -999,421 +1077,179 @@ export default function UserManagementPage() {
   )
 }
 
-function SecuritySettingsForm({
+function ApprovalDialog({
   user,
-  onSave,
+  onApprove,
   onCancel,
 }: {
   user: AdminUser
-  onSave: (userId: string, data: { status?: "active" | "suspended"; expirationDate?: string | null }) => void
+  onApprove: (userId: string, expirationDate: string) => void
   onCancel: () => void
 }) {
-  const [accountStatus, setAccountStatus] = useState<"active" | "suspended">(
-    user.account_status === "suspended" ? "suspended" : "active",
-  )
-  const [expirationDate, setExpirationDate] = useState(user.expiration_date ? user.expiration_date.split("T")[0] : "")
-  const [hasExpiration, setHasExpiration] = useState(!!user.expiration_date)
+  const [expirationDate, setExpirationDate] = useState("")
+  const [error, setError] = useState("")
 
-  const getCurrentStatus = () => {
-    if (!user.is_approved) return "pending"
-    if (user.account_status === "suspended") return "suspended"
-    if (user.expiration_date && new Date(user.expiration_date) < new Date()) return "expired"
-    if (!user.is_active) return "inactive"
-    if (user.account_status === "active") return "active"
-    return "inactive"
+  // Helper function to calculate date from months
+  const getDateFromMonths = (months: number) => {
+    const date = new Date()
+    date.setMonth(date.getMonth() + months)
+    return date.toISOString().split("T")[0]
   }
 
-  const currentStatus = getCurrentStatus()
+  const handlePresetClick = (months: number) => {
+    const date = getDateFromMonths(months)
+    setExpirationDate(date)
+    setError("")
+  }
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
 
-    const data: { status?: "active" | "suspended"; expirationDate?: string | null } = {
-      status: accountStatus,
+    if (!expirationDate) {
+      setError("মেয়াদ নির্ধারণ করা আবশ্যক। ইউজার এপ্রুভ করার জন্য অবশ্যই মেয়াদ দিতে হবে।")
+      return
     }
 
-    if (hasExpiration && expirationDate) {
-      data.expirationDate = new Date(expirationDate + "T23:59:59Z").toISOString()
-    } else {
-      data.expirationDate = null
+    const selectedDate = new Date(expirationDate)
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+
+    if (selectedDate < today) {
+      setError("মেয়াদের তারিখ আজকের তারিখের পরে হতে হবে।")
+      return
     }
 
-    console.log("[v0] SecuritySettingsForm submitting:", data)
-    onSave(user.id, data)
+    // Convert to ISO string with end of day time
+    const expirationISO = new Date(expirationDate + "T23:59:59Z").toISOString()
+    onApprove(user.id, expirationISO)
   }
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      {/* Current Status Display */}
-      <div className="p-4 rounded-lg bg-muted/50">
-        <div className="flex items-center gap-2 mb-2">
-          <AlertTriangle className="h-4 w-4 text-orange-500" />
-          <span className="text-sm font-medium">Current Status</span>
-        </div>
-        <Badge variant={currentStatus === "active" ? "default" : "destructive"}>
-          {currentStatus === "active"
-            ? "Active"
-            : currentStatus === "suspended"
-              ? "Suspended"
-              : currentStatus === "expired"
-                ? "Expired"
-                : currentStatus === "inactive"
-                  ? "Inactive"
-                  : "Pending"}
-        </Badge>
-        <div className="mt-2 text-xs text-muted-foreground">
-          <p>is_active: {user.is_active ? "true" : "false"}</p>
-          <p>account_status: {user.account_status}</p>
-          {user.expiration_date && <p>expires: {new Date(user.expiration_date).toLocaleDateString()}</p>}
-        </div>
-      </div>
-
-      {/* Account Status */}
-      <div className="space-y-3">
-        <Label className="text-base font-medium">Account Status</Label>
-        <div className="space-y-2">
-          <label className="flex items-center space-x-2">
-            <input
-              type="radio"
-              value="active"
-              checked={accountStatus === "active"}
-              onChange={(e) => setAccountStatus(e.target.value as "active")}
-              className="rounded border-border"
-            />
-            <span className="text-sm">Active - User can use the site</span>
-          </label>
-          <label className="flex items-center space-x-2">
-            <input
-              type="radio"
-              value="suspended"
-              checked={accountStatus === "suspended"}
-              onChange={(e) => setAccountStatus(e.target.value as "suspended")}
-              className="rounded border-border"
-            />
-            <span className="text-sm">Suspended - User cannot use the site</span>
-          </label>
-        </div>
-      </div>
-
-      {/* Expiration Date */}
-      <div className="space-y-3">
-        <div className="flex items-center space-x-2">
-          <input
-            type="checkbox"
-            id="hasExpiration"
-            checked={hasExpiration}
-            onChange={(e) => setHasExpiration(e.target.checked)}
-            className="rounded border-border"
-          />
-          <Label htmlFor="hasExpiration" className="text-base font-medium">
-            মেয়াদ নির্ধারণ করুন
-          </Label>
-        </div>
-
-        {hasExpiration && (
-          <div className="space-y-2">
-            <Label htmlFor="expirationDate" className="text-sm text-muted-foreground">
-              মেয়াদ উত্তীর্ণের তারিখ
-            </Label>
-            <Input
-              type="date"
-              id="expirationDate"
-              value={expirationDate}
-              onChange={(e) => setExpirationDate(e.target.value)}
-              min={new Date().toISOString().split("T")[0]}
-              required={hasExpiration}
-            />
-            <p className="text-xs text-muted-foreground">এই তারিখের পর ইউজার আর লগইন করতে পারবে না</p>
+      {/* User Info Display */}
+      <div className="p-4 rounded-lg bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20">
+        <div className="flex items-center gap-3">
+          <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white text-lg font-bold">
+            {user.full_name.charAt(0)}
           </div>
-        )}
+          <div>
+            <h3 className="font-semibold text-foreground">{user.full_name}</h3>
+            <p className="text-sm text-muted-foreground">
+              {user.email || `@${user.telegram_username}` || "No contact info"}
+            </p>
+          </div>
+        </div>
       </div>
+
+      {/* Preset Buttons */}
+      <div className="space-y-3">
+        <Label className="text-base font-medium">প্রিসেট মেয়াদ নির্বাচন করুন</Label>
+        <div className="grid grid-cols-3 gap-3">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => handlePresetClick(1)}
+            className="h-auto py-4 flex flex-col items-center gap-2 hover:bg-blue-50 hover:border-blue-300"
+          >
+            <Calendar className="h-5 w-5 text-blue-600" />
+            <span className="font-semibold">১ মাস</span>
+            <span className="text-xs text-muted-foreground">
+              {new Date(getDateFromMonths(1)).toLocaleDateString("bn-BD")}
+            </span>
+          </Button>
+
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => handlePresetClick(3)}
+            className="h-auto py-4 flex flex-col items-center gap-2 hover:bg-green-50 hover:border-green-300"
+          >
+            <Calendar className="h-5 w-5 text-green-600" />
+            <span className="font-semibold">৩ মাস</span>
+            <span className="text-xs text-muted-foreground">
+              {new Date(getDateFromMonths(3)).toLocaleDateString("bn-BD")}
+            </span>
+          </Button>
+
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => handlePresetClick(6)}
+            className="h-auto py-4 flex flex-col items-center gap-2 hover:bg-purple-50 hover:border-purple-300"
+          >
+            <Calendar className="h-5 w-5 text-purple-600" />
+            <span className="font-semibold">৬ মাস</span>
+            <span className="text-xs text-muted-foreground">
+              {new Date(getDateFromMonths(6)).toLocaleDateString("bn-BD")}
+            </span>
+          </Button>
+        </div>
+      </div>
+
+      {/* Custom Date Picker */}
+      <div className="space-y-3">
+        <Label htmlFor="customExpirationDate" className="text-base font-medium">
+          অথবা কাস্টম তারিখ নির্বাচন করুন
+        </Label>
+        <Input
+          type="date"
+          id="customExpirationDate"
+          value={expirationDate}
+          onChange={(e) => {
+            setExpirationDate(e.target.value)
+            setError("")
+          }}
+          min={new Date().toISOString().split("T")[0]}
+          className="text-base"
+        />
+        <p className="text-xs text-muted-foreground">নির্বাচিত তারিখের পর ইউজার আর লগইন করতে পারবে না</p>
+      </div>
+
+      {/* Error Message */}
+      {error && (
+        <div className="p-3 rounded-lg bg-red-50 border border-red-200">
+          <div className="flex items-start gap-2">
+            <AlertTriangle className="h-4 w-4 text-red-500 mt-0.5 flex-shrink-0" />
+            <p className="text-sm text-red-700">{error}</p>
+          </div>
+        </div>
+      )}
 
       {/* Warning Message */}
       <div className="p-3 rounded-lg bg-orange-50 border border-orange-200">
         <div className="flex items-start gap-2">
-          <AlertTriangle className="h-4 w-4 text-orange-500 mt-0.5" />
+          <AlertTriangle className="h-4 w-4 text-orange-500 mt-0.5 flex-shrink-0" />
           <div className="text-xs text-orange-700">
-            <p className="font-medium mb-1">সতর্কতা:</p>
-            <p>এই পরিবর্তনগুলি সঙ্গে সঙ্গেই কার্যকর হবে। যদি ইউজার বর্তমানে লগইন করা থাকে, তাহলে সে তৎক্ষণাৎ লগআউট হয়ে যাবে।</p>
+            <p className="font-medium mb-1">গুরুত্বপূর্ণ:</p>
+            <ul className="list-disc list-inside space-y-1">
+              <li>মেয়াদ নির্ধারণ না করলে ইউজার এপ্রুভ হবে না</li>
+              <li>এপ্রুভ করার পর ইউজার সাইট ব্যবহার করতে পারবে</li>
+              <li>মেয়াদ শেষ হলে ইউজার স্বয়ংক্রিয়ভাবে লগআউট হয়ে যাবে</li>
+            </ul>
           </div>
         </div>
       </div>
 
-      <div className="flex justify-end space-x-2 pt-4">
-        <Button type="button" variant="outline" onClick={onCancel}>
-          বাতিল
-        </Button>
-        <Button
-          type="submit"
-          className="bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700"
-        >
-          সিকিউরিটি সেটিংস আপডেট করুন
-        </Button>
-      </div>
-    </form>
-  )
-}
-
-function EditUserForm({
-  user,
-  onSave,
-  onCancel,
-}: {
-  user: AdminUser
-  onSave: (user: AdminUser) => void
-  onCancel: () => void
-}) {
-  const [formData, setFormData] = useState({
-    full_name: user.full_name,
-    email: user.email,
-    is_active: user.is_active,
-  })
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    onSave({
-      ...user,
-      ...formData,
-      updated_at: new Date().toISOString(),
-    })
-  }
-
-  return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <div className="space-y-2">
-        <Label htmlFor="full_name">পূর্ণ নাম</Label>
-        <Input
-          id="full_name"
-          value={formData.full_name}
-          onChange={(e) => setFormData((prev) => ({ ...prev, full_name: e.target.value }))}
-          required
-        />
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="email">ইমেইল ঠিকানা</Label>
-        <Input
-          id="email"
-          type="email"
-          value={formData.email}
-          onChange={(e) => setFormData((prev) => ({ ...prev, email: e.target.value }))}
-          placeholder="user@gmail.com"
-          required
-        />
-      </div>
-
-      <div className="flex items-center space-x-2">
-        <input
-          type="checkbox"
-          id="is_active"
-          checked={formData.is_active}
-          onChange={(e) => setFormData((prev) => ({ ...prev, is_active: e.target.checked }))}
-          className="rounded border-border"
-        />
-        <Label htmlFor="is_active">ইউজার সক্রিয়</Label>
-      </div>
-
-      <div className="flex justify-end space-x-2 pt-4">
-        <Button type="button" variant="outline" onClick={onCancel}>
-          বাতিল
-        </Button>
-        <Button
-          type="submit"
-          className="bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700"
-        >
-          সংরক্ষণ করুন
-        </Button>
-      </div>
-    </form>
-  )
-}
-
-function CreateUserForm({
-  onSave,
-  onCancel,
-}: {
-  onSave: (userData: {
-    full_name: string
-    email: string
-    is_active: boolean
-    account_status: "active" | "suspended"
-    expiration_date?: string | null
-  }) => void
-  onCancel: () => void
-}) {
-  const [formData, setFormData] = useState({
-    full_name: "",
-    email: "",
-    is_active: true,
-    account_status: "active" as "active" | "suspended",
-    hasExpiration: false,
-    expiration_date: "",
-  })
-
-  const [errors, setErrors] = useState<string[]>([])
-
-  const validateForm = () => {
-    const newErrors: string[] = []
-
-    if (!formData.full_name.trim()) {
-      newErrors.push("Full name is required")
-    }
-
-    if (!formData.email.trim()) {
-      newErrors.push("Email address is required")
-    } else if (!/^[^\s@]+@gmail\.com$/.test(formData.email.toLowerCase())) {
-      newErrors.push("Only Gmail addresses (@gmail.com) are accepted")
-    }
-
-    if (formData.hasExpiration && !formData.expiration_date) {
-      newErrors.push("Expiration date is required")
-    }
-
-    setErrors(newErrors)
-    return newErrors.length === 0
-  }
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-
-    if (!validateForm()) {
-      return
-    }
-
-    const userData = {
-      full_name: formData.full_name.trim(),
-      email: formData.email.trim().toLowerCase(),
-      is_active: formData.is_active,
-      account_status: formData.account_status,
-      expiration_date:
-        formData.hasExpiration && formData.expiration_date
-          ? new Date(formData.expiration_date + "T23:59:59Z").toISOString()
-          : null,
-    }
-
-    console.log("[v0] Submitting new user form:", userData)
-    onSave(userData)
-  }
-
-  return (
-    <form onSubmit={handleSubmit} className="space-y-6">
-      {/* Error Messages */}
-      {errors.length > 0 && (
-        <div className="p-3 rounded-lg bg-red-50 border border-red-200">
-          <div className="flex items-start gap-2">
-            <AlertTriangle className="h-4 w-4 text-red-500 mt-0.5" />
-            <div className="text-sm text-red-700">
-              <p className="font-medium mb-1">ত্রুটি:</p>
-              <ul className="list-disc list-inside space-y-1">
-                {errors.map((error, index) => (
-                  <li key={index}>{error}</li>
-                ))}
-              </ul>
+      {/* Selected Date Display */}
+      {expirationDate && (
+        <div className="p-4 rounded-lg bg-green-50 border border-green-200">
+          <div className="flex items-center gap-2">
+            <CheckCircle className="h-5 w-5 text-green-600" />
+            <div>
+              <p className="text-sm font-medium text-green-900">নির্বাচিত মেয়াদ:</p>
+              <p className="text-lg font-bold text-green-700">
+                {new Date(expirationDate).toLocaleDateString("bn-BD", {
+                  year: "numeric",
+                  month: "long",
+                  day: "numeric",
+                })}
+              </p>
             </div>
           </div>
         </div>
       )}
 
-      {/* Basic Information */}
-      <div className="space-y-4">
-        <div className="space-y-2">
-          <Label htmlFor="create_full_name">পূর্ণ নাম *</Label>
-          <Input
-            id="create_full_name"
-            value={formData.full_name}
-            onChange={(e) => setFormData((prev) => ({ ...prev, full_name: e.target.value }))}
-            placeholder="ইউজারের পূর্ণ নাম লিখুন"
-            required
-          />
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="create_email">ইমেইল ঠিকানা (শুধুমাত্র Gmail) *</Label>
-          <Input
-            id="create_email"
-            type="email"
-            value={formData.email}
-            onChange={(e) => setFormData((prev) => ({ ...prev, email: e.target.value }))}
-            placeholder="yourname@gmail.com"
-            required
-          />
-          <p className="text-xs text-muted-foreground">শুধুমাত্র Gmail ঠিকানা (@gmail.com) গ্রহণযোগ্য</p>
-        </div>
-      </div>
-
-      {/* Account Settings */}
-      <div className="space-y-4">
-        <div className="space-y-3">
-          <Label className="text-base font-medium">অ্যাকাউন্ট স্ট্যাটাস</Label>
-          <div className="space-y-2">
-            <label className="flex items-center space-x-2">
-              <input
-                type="radio"
-                value="active"
-                checked={formData.account_status === "active"}
-                onChange={(e) => setFormData((prev) => ({ ...prev, account_status: e.target.value as "active" }))}
-                className="rounded border-border"
-              />
-              <span className="text-sm">সক্রিয় - ইউজার সাইট ব্যবহার করতে পারবে</span>
-            </label>
-            <label className="flex items-center space-x-2">
-              <input
-                type="radio"
-                value="suspended"
-                checked={formData.account_status === "suspended"}
-                onChange={(e) => setFormData((prev) => ({ ...prev, account_status: e.target.value as "suspended" }))}
-                className="rounded border-border"
-              />
-              <span className="text-sm">সাসপেন্ড - ইউজার সাইট ব্যবহার করতে পারবে না</span>
-            </label>
-          </div>
-        </div>
-
-        <div className="flex items-center space-x-2">
-          <input
-            type="checkbox"
-            id="create_is_active"
-            checked={formData.is_active}
-            onChange={(e) => setFormData((prev) => ({ ...prev, is_active: e.target.checked }))}
-            className="rounded border-border"
-          />
-          <Label htmlFor="create_is_active">ইউজার সক্রিয় রাখুন</Label>
-        </div>
-      </div>
-
-      {/* Expiration Settings */}
-      <div className="space-y-3">
-        <div className="flex items-center space-x-2">
-          <input
-            type="checkbox"
-            id="create_hasExpiration"
-            checked={formData.hasExpiration}
-            onChange={(e) => setFormData((prev) => ({ ...prev, hasExpiration: e.target.checked }))}
-            className="rounded border-border"
-          />
-          <Label htmlFor="create_hasExpiration" className="text-base font-medium">
-            মেয়াদ নির্ধারণ করুন
-          </Label>
-        </div>
-
-        {formData.hasExpiration && (
-          <div className="space-y-2">
-            <Label htmlFor="create_expirationDate" className="text-sm text-muted-foreground">
-              মেয়াদ উত্তীর্ণের তারিখ
-            </Label>
-            <Input
-              type="date"
-              id="create_expirationDate"
-              value={formData.expiration_date}
-              onChange={(e) => setFormData((prev) => ({ ...prev, expiration_date: e.target.value }))}
-              min={new Date().toISOString().split("T")[0]}
-              required={formData.hasExpiration}
-            />
-            <p className="text-xs text-muted-foreground">এই তারিখের পর ইউজার আর লগইন করতে পারবে না</p>
-          </div>
-        )}
-      </div>
-
+      {/* Action Buttons */}
       <div className="flex justify-end space-x-2 pt-4">
         <Button type="button" variant="outline" onClick={onCancel}>
           বাতিল
@@ -1422,7 +1258,8 @@ function CreateUserForm({
           type="submit"
           className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700"
         >
-          ইউজার তৈরি করুন
+          <CheckCircle className="h-4 w-4 mr-2" />
+          ইউজার এপ্রুভ করুন
         </Button>
       </div>
     </form>

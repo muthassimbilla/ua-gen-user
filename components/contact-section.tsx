@@ -76,7 +76,7 @@ export function ContactSection() {
           transition={{ duration: 0.6 }}
           className="text-center mb-16"
         >
-          <div className="inline-flex items-center gap-2 px-6 py-3 rounded-full glass shadow-glow border border-primary/20 text-sm font-bold mb-6">
+          <div className="inline-flex items-center gap-2 px-6 py-3 rounded-full glass shadow-glow border-2 border-primary/60 hover:border-primary text-sm font-bold mb-6 transition-all duration-300 hover:scale-105">
             <MessageCircle className="w-4 h-4 text-primary" />
             Contact Us
           </div>

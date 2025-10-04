@@ -36,7 +36,7 @@ export function ToolsSection() {
           animate={isVisible ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
           transition={{ duration: 0.6 }}
         >
-          <div className="inline-flex items-center gap-2 px-6 py-3 rounded-full glass shadow-glow border border-primary/20 text-sm font-bold mb-6">
+          <div className="inline-flex items-center gap-2 px-6 py-3 rounded-full glass shadow-glow border-2 border-primary/60 hover:border-primary text-sm font-bold mb-6 transition-all duration-300 hover:scale-105">
             <span className="gradient-text">Powerful Tools</span>
           </div>
           <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold leading-tight text-balance">

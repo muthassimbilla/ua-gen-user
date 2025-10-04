@@ -1,58 +1,113 @@
 "use client"
 
-import { PricingCards } from "@/components/pricing-cards"
-import { useRouter } from "next/navigation"
-import { useScrollAnimation } from "@/hooks/use-scroll-animation"
-import { motion } from "framer-motion"
+import { Check } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+
+const pricingTiers = [
+  {
+    name: "Starter",
+    price: "$9",
+    period: "/month",
+    description: "Perfect for small teams getting started",
+    features: [
+      "Up to 10 team members",
+      "Unlimited projects",
+      "Basic task management",
+      "5GB file storage",
+      "Email support",
+    ],
+    cta: "Start Free Trial",
+    popular: false,
+  },
+  {
+    name: "Professional",
+    price: "$29",
+    period: "/month",
+    description: "For growing teams that need more power",
+    features: [
+      "Up to 50 team members",
+      "Unlimited projects",
+      "Advanced task management",
+      "100GB file storage",
+      "Priority support",
+      "Custom workflows",
+      "Advanced analytics",
+    ],
+    cta: "Start Free Trial",
+    popular: true,
+  },
+  {
+    name: "Enterprise",
+    price: "Custom",
+    period: "",
+    description: "For large organizations with specific needs",
+    features: [
+      "Unlimited team members",
+      "Unlimited projects",
+      "Enterprise task management",
+      "Unlimited file storage",
+      "24/7 dedicated support",
+      "Custom integrations",
+      "Advanced security",
+      "SLA guarantee",
+    ],
+    cta: "Contact Sales",
+    popular: false,
+  },
+]
 
 export function PricingSection() {
-  const router = useRouter()
-  const { ref: sectionRef, isVisible } = useScrollAnimation({ threshold: 0.15 })
-
-  const handleSelectPlan = (planId: string) => {
-    if (typeof window !== "undefined" && (window as any).gtag) {
-      ;(window as any).gtag("event", "select_plan", {
-        event_category: "pricing",
-        event_label: planId,
-      })
-    }
-    router.push("/signup")
-  }
-
   return (
-    <section id="pricing" ref={sectionRef} className="relative py-16 md:py-20 overflow-hidden">
-      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-primary/5 to-transparent -z-10" />
-
-      <div className="container relative z-10 mx-auto px-4">
-        <motion.div
-          className="max-w-4xl mx-auto text-center mb-12"
-          initial={{ opacity: 0, y: 20 }}
-          animate={isVisible ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-          transition={{ duration: 0.6 }}
-        >
-          <div className="inline-flex items-center gap-2 px-6 py-3 rounded-full glass shadow-glow border border-primary/20 text-sm font-bold mb-6">
-            <span className="gradient-text">Pricing Plans</span>
-          </div>
-          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-6 leading-tight text-balance">
-            Simple, transparent pricing
-          </h2>
-          <p className="text-base md:text-lg text-muted-foreground leading-relaxed text-balance max-w-2xl mx-auto">
-            Choose the perfect plan for your needs. Premium tools for professional results.
+    <section className="py-20 md:py-28 bg-muted/30">
+      <div className="container mx-auto px-4">
+        <div className="text-center space-y-4 mb-16">
+          <h2 className="text-4xl md:text-5xl font-bold text-balance">Simple, transparent pricing</h2>
+          <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto text-balance">
+            Choose the perfect plan for your team. All plans include a 14-day free trial.
           </p>
-        </motion.div>
+        </div>
 
-        {/* Pricing Cards */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={isVisible ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-          transition={{ duration: 0.6, delay: 0.2 }}
-        >
-          <PricingCards onSelectPlan={handleSelectPlan} buttonText="Get Started" />
-        </motion.div>
-
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+          {pricingTiers.map((tier, index) => (
+            <Card
+              key={index}
+              className={`relative flex flex-col ${
+                tier.popular ? "border-primary border-2 shadow-xl scale-105" : "border-2"
+              }`}
+            >
+              {tier.popular && (
+                <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground px-4 py-1 rounded-full text-sm font-semibold">
+                  Most Popular
+                </div>
+              )}
+              <CardHeader className="text-center pb-8">
+                <CardTitle className="text-2xl mb-2">{tier.name}</CardTitle>
+                <CardDescription className="text-base">{tier.description}</CardDescription>
+                <div className="mt-4">
+                  <span className="text-5xl font-bold">{tier.price}</span>
+                  {tier.period && <span className="text-muted-foreground ml-1">{tier.period}</span>}
+                </div>
+              </CardHeader>
+              <CardContent className="flex-grow">
+                <ul className="space-y-3">
+                  {tier.features.map((feature, featureIndex) => (
+                    <li key={featureIndex} className="flex items-start gap-3">
+                      <Check className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+                      <span className="text-sm">{feature}</span>
+                    </li>
+                  ))}
+                </ul>
+              </CardContent>
+              <CardFooter>
+                <Button className="w-full" variant={tier.popular ? "default" : "outline"} size="lg">
+                  {tier.cta}
+                </Button>
+              </CardFooter>
+            </Card>
+          ))}
+        </div>
       </div>
     </section>
   )
 }
-
-export default PricingSection
