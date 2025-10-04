@@ -19,13 +19,16 @@ export function AdminConditionalLayout({ children }: AdminConditionalLayoutProps
   // Routes that don't need navigation (login page)
   const authRoutes = ["/adminbilla/login"]
   const isAuthRoute = authRoutes.includes(pathname)
+  
+  // Check if current route is an admin route
+  const isAdminRoute = pathname.startsWith("/adminbilla") || pathname.startsWith("/admin")
 
   useEffect(() => {
-    if (!isLoading && !admin && !isAuthRoute) {
+    if (!isLoading && !admin && !isAuthRoute && isAdminRoute) {
       console.log("[v0] Not authenticated, redirecting to login")
       router.push("/adminbilla/login")
     }
-  }, [admin, isLoading, isAuthRoute, router])
+  }, [admin, isLoading, isAuthRoute, isAdminRoute, router])
 
   if (isLoading) {
     return <LoadingOverlay message="অ্যাডমিন প্যানেল লোড হচ্ছে..." fullScreen />
@@ -36,7 +39,7 @@ export function AdminConditionalLayout({ children }: AdminConditionalLayoutProps
     return <>{children}</>
   }
 
-  if (!admin) {
+  if (!admin && isAdminRoute) {
     return <LoadingOverlay message="লগইন পেজে রিডাইরেক্ট হচ্ছে..." fullScreen />
   }
 

@@ -16,7 +16,7 @@ export function AdminNavigation() {
   const navigationItems = [
     { name: "Dashboard", href: "/adminbilla", icon: Home },
     { name: "User Management", href: "/adminbilla/users", icon: Users },
-    { name: "API Monitoring", href: "/admin/api-monitoring", icon: Activity },
+    { name: "API Monitoring", href: "/adminbilla/api-monitoring", icon: Activity },
   ]
 
   const toggleSidebar = () => {
