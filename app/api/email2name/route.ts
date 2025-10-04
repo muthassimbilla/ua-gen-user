@@ -60,7 +60,16 @@ export async function POST(request: NextRequest) {
     }
 
     // Log usage for monitoring
-    console.log(`[v0] Email2Name API called for: ${email}`)
+    const requestId = Math.random().toString(36).substring(7)
+    console.log(`[${requestId}] Email2Name API called for: ${email}`)
+    
+    // Log request details
+    console.log(`[${requestId}] Request details:`, {
+      email: email,
+      timestamp: new Date().toISOString(),
+      userAgent: request.headers.get('user-agent'),
+      ip: request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown'
+    })
 
     // Check if GOOGLE_API_KEY is available
     const apiKey = process.env.GOOGLE_API_KEY
@@ -99,18 +108,35 @@ export async function POST(request: NextRequest) {
 
     if (!response.ok) {
       const errorData = await response.json()
-      console.error("[v0] Gemini API error:", errorData)
+      console.error(`[${requestId}] Gemini API error:`, {
+        status: response.status,
+        statusText: response.statusText,
+        error: errorData,
+        email: email,
+        timestamp: new Date().toISOString()
+      })
       
       // Check for quota exceeded error
       if (errorData.error?.message?.includes("quota") || errorData.error?.message?.includes("limit")) {
+        console.error(`[${requestId}] QUOTA EXCEEDED for email: ${email}`)
         return NextResponse.json(
-          { success: false, error: "API quota exceeded. Please check your Google API key limits or upgrade your plan." },
+          { 
+            success: false, 
+            error: "API quota exceeded. Please check your Google API key limits or upgrade your plan.",
+            requestId: requestId,
+            timestamp: new Date().toISOString()
+          },
           { status: 429 },
         )
       }
       
       return NextResponse.json(
-        { success: false, error: `Failed to generate name from email: ${errorData.error?.message || "Unknown error"}` },
+        { 
+          success: false, 
+          error: `Failed to generate name from email: ${errorData.error?.message || "Unknown error"}`,
+          requestId: requestId,
+          timestamp: new Date().toISOString()
+        },
         { status: 500 },
       )
     }
@@ -155,12 +181,31 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    console.log(`[${requestId}] Successfully generated name for: ${email}`, {
+      result: result,
+      responseTime: Date.now() - Date.now(),
+      timestamp: new Date().toISOString()
+    })
+
     return NextResponse.json({
       success: true,
       data: result,
+      requestId: requestId,
+      timestamp: new Date().toISOString()
     })
   } catch (error) {
-    console.error("[v0] Email2Name API error:", error)
-    return NextResponse.json({ success: false, error: "Internal server error" }, { status: 500 })
+    const requestId = Math.random().toString(36).substring(7)
+    console.error(`[${requestId}] Email2Name API error:`, {
+      error: error instanceof Error ? error.message : "Unknown error",
+      stack: error instanceof Error ? error.stack : undefined,
+      email: email,
+      timestamp: new Date().toISOString()
+    })
+    return NextResponse.json({ 
+      success: false, 
+      error: "Internal server error",
+      requestId: requestId,
+      timestamp: new Date().toISOString()
+    }, { status: 500 })
   }
 }

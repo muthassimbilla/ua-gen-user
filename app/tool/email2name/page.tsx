@@ -1,11 +1,11 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Loader2, Mail, Copy, CheckCircle, Clipboard } from "lucide-react"
+import { Loader2, Mail, Copy, CheckCircle, Clipboard, Wifi, WifiOff, AlertCircle } from "lucide-react"
 import { toast } from "sonner"
 import { Checkbox } from "@/components/ui/checkbox"
 
@@ -24,6 +24,32 @@ export default function Email2NamePage() {
   const [isLoading, setIsLoading] = useState(false)
   const [autoGenerate, setAutoGenerate] = useState(true)
   const [copiedField, setCopiedField] = useState<string | null>(null)
+  const [apiStatus, setApiStatus] = useState<'checking' | 'healthy' | 'error' | 'unknown'>('unknown')
+  const [lastError, setLastError] = useState<string | null>(null)
+
+  // Check API health on component mount
+  useEffect(() => {
+    checkApiHealth()
+  }, [])
+
+  const checkApiHealth = async () => {
+    setApiStatus('checking')
+    try {
+      const response = await fetch('/api/health/email2name')
+      const data = await response.json()
+      
+      if (data.status === 'healthy') {
+        setApiStatus('healthy')
+        setLastError(null)
+      } else {
+        setApiStatus('error')
+        setLastError(data.message || 'API health check failed')
+      }
+    } catch (error) {
+      setApiStatus('error')
+      setLastError('Failed to connect to API')
+    }
+  }
 
   const generateName = async () => {
     if (!email.trim() || !email.includes("@")) {
@@ -44,13 +70,19 @@ export default function Email2NamePage() {
       if (result.success) {
         setNameData(result.data)
         toast.success("Name generated successfully")
+        setApiStatus('healthy')
+        setLastError(null)
       } else {
         toast.error(result.error || "Failed to generate name")
         setNameData(null)
+        setApiStatus('error')
+        setLastError(result.error || "Failed to generate name")
       }
     } catch (error) {
       toast.error("API call failed")
       setNameData(null)
+      setApiStatus('error')
+      setLastError("Network error or API unavailable")
     } finally {
       setIsLoading(false)
     }
@@ -90,11 +122,55 @@ export default function Email2NamePage() {
           {/* Left Card - Input */}
           <Card className="h-[550px] flex flex-col">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Mail className="h-5 w-5 text-blue-500" />
-                Input Email
+              <CardTitle className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Mail className="h-5 w-5 text-blue-500" />
+                  Input Email
+                </div>
+                {/* API Status Indicator */}
+                <div className="flex items-center gap-2">
+                  {apiStatus === 'checking' && (
+                    <div className="flex items-center gap-1 text-yellow-600">
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      <span className="text-xs">Checking...</span>
+                    </div>
+                  )}
+                  {apiStatus === 'healthy' && (
+                    <div className="flex items-center gap-1 text-green-600">
+                      <Wifi className="h-4 w-4" />
+                      <span className="text-xs">API Online</span>
+                    </div>
+                  )}
+                  {apiStatus === 'error' && (
+                    <div className="flex items-center gap-1 text-red-600">
+                      <WifiOff className="h-4 w-4" />
+                      <span className="text-xs">API Offline</span>
+                    </div>
+                  )}
+                  {apiStatus === 'unknown' && (
+                    <div className="flex items-center gap-1 text-gray-600">
+                      <AlertCircle className="h-4 w-4" />
+                      <span className="text-xs">Unknown</span>
+                    </div>
+                  )}
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    onClick={checkApiHealth}
+                    className="h-6 px-2 text-xs"
+                  >
+                    Refresh
+                  </Button>
+                </div>
               </CardTitle>
-              <CardDescription>Enter an email address to generate a name</CardDescription>
+              <CardDescription>
+                Enter an email address to generate a name
+                {lastError && (
+                  <div className="mt-2 p-2 bg-red-50 border border-red-200 rounded text-red-700 text-xs">
+                    <strong>Error:</strong> {lastError}
+                  </div>
+                )}
+              </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6 flex-1">
               <div className="space-y-2">
